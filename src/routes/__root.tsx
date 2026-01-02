@@ -30,6 +30,8 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+console.log('process.env.VERCEL_PROJECT_PRODUCTION_URL', process.env.VERCEL_PROJECT_PRODUCTION_URL)
+
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -37,7 +39,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <AuthProvider>
+        <AuthProvider url={process.env.VERCEL_PROJECT_PRODUCTION_URL || import.meta.env.VITE_APP_URL}>
           {children}
         </AuthProvider>
         <TanStackDevtools

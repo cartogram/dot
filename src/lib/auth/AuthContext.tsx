@@ -16,7 +16,7 @@ interface AuthContextValue {
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children, url }: { children: React.ReactNode, url: string }) {
   const [athlete, setAthlete] = React.useState<StravaAthlete | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
   const router = useRouter()
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(() => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID
-    const redirectUri = process.env.VERCEL_PROJECT_PRODUCTION_URL || import.meta.env.VITE_APP_URL // Redirect back to home page
+    const redirectUri = url // Redirect back to home page
     console.log('redirectUri', redirectUri)
     const scope = 'activity:read_all'
 
