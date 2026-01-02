@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   const tokens = await tokenResponse.json()
 
   // Redirect to frontend with tokens in URL hash (client-side only access)
-  const redirectUrl = new URL('/', import.meta.env.VITE_APP_URL)
+  const redirectUrl = new URL('/', import.meta.env.VERCEL_PROJECT_PRODUCTION_URL || import.meta.env.VITE_APP_URL)
   redirectUrl.hash = encodeURIComponent(JSON.stringify(tokens))
 
   return sendRedirect(event, redirectUrl.toString())

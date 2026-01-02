@@ -6,16 +6,14 @@ import { z } from 'zod'
  * Server function to exchange OAuth code for tokens
  * This is called from the client after OAuth redirect
  */
-export const exchangeCodeForTokens = createServerFn({ method: 'POST' })
-.inputValidator((data: { code: string }) => ({
+const ExchangeCodeForTokensSchema = z.object({
   code: z.string(),
-}))
+})
+
+export const exchangeCodeForTokens = createServerFn({ method: 'POST' })
+.inputValidator(ExchangeCodeForTokensSchema)
 .handler(
   async ({ data }) => {
-    if (!data?.code) {
-      throw new Error('Authorization code is required')
-    }
-
     const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

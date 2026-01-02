@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = React.useCallback(() => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID
-    const redirectUri = import.meta.env.VITE_APP_URL // Redirect back to home page
+    const redirectUri = import.meta.env.VERCEL_PROJECT_PRODUCTION_URL || import.meta.env.VITE_APP_URL // Redirect back to home page
     const scope = 'activity:read_all'
 
     const authUrl = new URL('https://www.strava.com/oauth/authorize')
