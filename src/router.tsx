@@ -4,7 +4,7 @@ import { createRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
 
 // Create a new router instance
-export const getRouter = () => {
+export function getRouter() {
   const router = createRouter({
     routeTree,
     scrollRestoration: true,
@@ -13,3 +13,6 @@ export const getRouter = () => {
 
   return router
 }
+
+// Also export as default for TanStack Start
+export default getRouter
