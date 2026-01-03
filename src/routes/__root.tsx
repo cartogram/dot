@@ -31,6 +31,7 @@ export const Route = createRootRoute({
 })
 
 console.log('process.env.VERCEL_PROJECT_PRODUCTION_URL', process.env.VERCEL_PROJECT_PRODUCTION_URL)
+console.log('process.env.VERCEL', process.env.VERCEL)
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
