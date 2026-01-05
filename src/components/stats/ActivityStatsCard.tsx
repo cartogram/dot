@@ -25,17 +25,23 @@ interface ActivityStatsCardProps {
     elevation?: ProgressMetric
     time?: ProgressMetric
   }
+  goalButton?: React.ReactNode
 }
 
-export function ActivityStatsCard({ type, totals, progress }: ActivityStatsCardProps) {
+export function ActivityStatsCard({ type, totals, progress, goalButton }: ActivityStatsCardProps) {
   const hasProgress = progress && Object.keys(progress).length > 0
   const primaryProgress = progress?.distance || progress?.count
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{type}</CardTitle>
-        <CardDescription>Year to date</CardDescription>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle>{type}</CardTitle>
+            <CardDescription>Year to date</CardDescription>
+          </div>
+          {goalButton && <div className="ml-2">{goalButton}</div>}
+        </div>
         {primaryProgress && (
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between text-sm">
@@ -95,16 +101,17 @@ function StatItem({ label, value, unit }: { label: string; value: string; unit?:
 }
 
 function ProgressBadge({ progress }: { progress: ProgressMetric }) {
+  const badgeText = progress.isAhead
+    ? formatProgressDifference(progress)
+    : formatProgressDifference(progress)
+
   return (
     <div className="flex items-center justify-between">
       <div className="text-sm">
         <span className="font-medium">{progress.percentage.toFixed(0)}%</span>
-        <span className="text-muted-foreground ml-2">
-          {formatProgressDifference(progress)}
-        </span>
       </div>
       <Badge variant={progress.isAhead ? 'default' : 'secondary'}>
-        {progress.isAhead ? 'On Track' : 'Behind'}
+        {badgeText}
       </Badge>
     </div>
   )

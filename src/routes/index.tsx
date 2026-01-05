@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { LoginButton } from '@/components/auth/LoginButton'
 import { UserProfile } from '@/components/auth/UserProfile'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
-import { GoalSettingDialog } from '@/components/goals/GoalSettingDialog'
+import { ActivitiesVisibilityDialog } from '@/components/goals/ActivitiesVisibilityDialog'
 
 const queryClient = new QueryClient()
 
@@ -44,7 +44,7 @@ function App() {
               <p className="text-sm text-muted-foreground">Welcome back, {athlete?.firstname}</p>
             </div>
             <div className="flex items-center gap-2">
-              <GoalSettingDialog />
+              <ActivitiesVisibilityDialog />
               <UserProfile />
             </div>
           </div>

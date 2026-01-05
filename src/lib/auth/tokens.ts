@@ -62,7 +62,15 @@ export async function getValidAccessToken(
   // Refresh token
   try {
     const newTokens = await refreshFn({ refresh_token: tokens.refresh_token })
-    saveTokens(newTokens)
+
+    // Strava's refresh token response doesn't include athlete data
+    // Preserve the existing athlete data from the current tokens
+    const tokensToSave: StravaTokenResponse = {
+      ...newTokens,
+      athlete: newTokens.athlete || tokens.athlete
+    }
+
+    saveTokens(tokensToSave)
     return newTokens.access_token
   } catch (error) {
     // Refresh failed, clear tokens

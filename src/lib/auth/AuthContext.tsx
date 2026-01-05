@@ -23,11 +23,35 @@ export function AuthProvider({ children, url }: { children: React.ReactNode, url
 
   // Initialize auth state from localStorage
   React.useEffect(() => {
-    const tokens = getStoredTokens()
-    if (tokens) {
-      setAthlete(tokens.athlete)
+    const initAuth = async () => {
+      const tokens = getStoredTokens()
+      if (!tokens) {
+        setIsLoading(false)
+        return
+      }
+
+      // Check if tokens are valid/can be refreshed
+      const validToken = await getValidAccessToken((data) => refreshStravaToken({ data }))
+
+      if (validToken) {
+        // Tokens are valid or were successfully refreshed
+        // Re-fetch tokens in case they were refreshed
+        const updatedTokens = getStoredTokens()
+        if (updatedTokens) {
+          setAthlete(updatedTokens.athlete)
+        }
+
+        console.log('updatedTokens', updatedTokens)
+      } else {
+        // Tokens expired and couldn't be refreshed - clear everything
+        setAthlete(null)
+        clearTokens()
+      }
+
+      setIsLoading(false)
     }
-    setIsLoading(false)
+
+    initAuth()
   }, [])
 
   // Handle OAuth callback (code in URL query params)
@@ -88,7 +112,16 @@ export function AuthProvider({ children, url }: { children: React.ReactNode, url
   }, [router])
 
   const getAccessToken = React.useCallback(async () => {
-    return getValidAccessToken((data) => refreshStravaToken({ data }))
+    const token = await getValidAccessToken((data) => refreshStravaToken({ data }))
+
+    // If token refresh failed, clear athlete state and redirect to login
+    if (!token) {
+      setAthlete(null)
+      clearTokens()
+      return null
+    }
+
+    return token
   }, [])
 
   const value: AuthContextValue = {

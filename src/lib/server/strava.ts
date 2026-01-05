@@ -74,6 +74,8 @@ const ActivitiesSchema = z.object({
   accessToken: z.string(),
   perPage: z.number().optional(),
   page: z.number().optional(),
+  after: z.number().optional(), // Unix timestamp - only return activities after this time
+  before: z.number().optional(), // Unix timestamp - only return activities before this time
 })
 
 /**
@@ -88,8 +90,22 @@ export const fetchAthleteActivities = createServerFn(
     const perPage = data.perPage || 7
     const page = data.page || 1
 
+    // Build query parameters
+    const params = new URLSearchParams({
+      per_page: perPage.toString(),
+      page: page.toString()
+    })
+
+    if (data.after) {
+      params.append('after', data.after.toString())
+    }
+
+    if (data.before) {
+      params.append('before', data.before.toString())
+    }
+
     const response = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?per_page=${perPage}&page=${page}`,
+      `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
       { headers: { Authorization: `Bearer ${data.accessToken}` } }
     )
 

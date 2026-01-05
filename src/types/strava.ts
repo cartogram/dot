@@ -50,12 +50,18 @@ export interface StoredTokens {
   athlete: StravaAthlete
 }
 
-// Goal tracking
+// Goal tracking - New dynamic structure
 export interface YearlyGoals {
+  activities: Record<string, ActivityGoal>  // Key is activity ID from config
+  visibility: Record<string, boolean>       // Key is activity ID from config
+}
+
+// Legacy format for backward compatibility
+export interface LegacyYearlyGoals {
   rides?: ActivityGoal
   runs?: ActivityGoal
   swims?: ActivityGoal
-  visibility?: ActivityVisibility
+  visibility?: LegacyActivityVisibility
 }
 
 export interface ActivityGoal {
@@ -65,11 +71,15 @@ export interface ActivityGoal {
   time?: number // seconds
 }
 
-export interface ActivityVisibility {
+// Legacy visibility type
+export interface LegacyActivityVisibility {
   rides: boolean
   runs: boolean
   swims: boolean
 }
+
+// Keep old name as alias for backward compatibility
+export type ActivityVisibility = LegacyActivityVisibility
 
 // Activity types
 export interface StravaActivity {

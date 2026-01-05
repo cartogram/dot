@@ -11,6 +11,7 @@ export interface ProgressMetric {
 
 /**
  * Calculate progress for a specific metric
+ * Uses pace-based calculation: compares current progress to expected progress based on days elapsed
  */
 function calculateProgress(
   current: number,
@@ -18,7 +19,19 @@ function calculateProgress(
   unit: string
 ): ProgressMetric {
   const percentage = goal > 0 ? (current / goal) * 100 : 0
-  const difference = current - goal
+
+  // Calculate expected progress based on days elapsed in the year
+  const now = new Date()
+  const yearStart = new Date(now.getFullYear(), 0, 1)
+  const yearEnd = new Date(now.getFullYear(), 11, 31)
+  const daysInYear = Math.ceil((yearEnd.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  const daysElapsed = Math.ceil((now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24))
+
+  // Expected progress = (goal / days in year) * days elapsed
+  const expectedProgress = (goal / daysInYear) * daysElapsed
+
+  // Difference = current progress - expected progress
+  const difference = current - expectedProgress
 
   return {
     current,
