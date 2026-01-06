@@ -33,7 +33,7 @@ function migrateFromLegacyFormat(legacy: LegacyYearlyGoals): YearlyGoals {
     visibility.swimming = legacy.visibility.swims
   }
 
-  return { activities, visibility }
+  return { activities, visibility, combined: {} }
 }
 
 /**
@@ -57,7 +57,7 @@ export function getStoredGoals(): YearlyGoals {
 
   // Return default empty structure if nothing stored
   if (!stored) {
-    return { activities: {}, visibility: {} }
+    return { activities: {}, visibility: {}, combined: {} }
   }
 
   try {
@@ -71,10 +71,15 @@ export function getStoredGoals(): YearlyGoals {
       return migrated
     }
 
-    // Return new format
-    return parsed as YearlyGoals
+    // Ensure combined field exists (for backward compatibility)
+    const goals = parsed as YearlyGoals
+    if (!goals.combined) {
+      goals.combined = {}
+    }
+
+    return goals
   } catch {
-    return { activities: {}, visibility: {} }
+    return { activities: {}, visibility: {}, combined: {} }
   }
 }
 

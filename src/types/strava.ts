@@ -54,6 +54,7 @@ export interface StoredTokens {
 export interface YearlyGoals {
   activities: Record<string, ActivityGoal>  // Key is activity ID from config
   visibility: Record<string, boolean>       // Key is activity ID from config
+  combined: Record<string, CombinedActivityGoal> // Key is combined activity ID
 }
 
 // Legacy format for backward compatibility
@@ -69,6 +70,14 @@ export interface ActivityGoal {
   count?: number
   elevation?: number // meters
   time?: number // seconds
+}
+
+export interface CombinedActivityGoal {
+  id: string // Unique identifier for this combined goal
+  name: string // Display name (e.g., "Cardio", "All Running")
+  activityIds: string[] // Array of activity IDs to combine (from ACTIVITY_CONFIGS)
+  goal: ActivityGoal // The goal metrics for the combined activities
+  visible: boolean // Whether to show this on the dashboard
 }
 
 // Legacy visibility type

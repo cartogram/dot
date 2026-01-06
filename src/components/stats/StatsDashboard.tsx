@@ -2,17 +2,22 @@ import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { fetchAthleteStats, fetchAthleteActivities } from '@/lib/server/strava'
-import { getStoredGoals } from '@/lib/goals/storage'
-import { ACTIVITY_CONFIGS } from '@/config/activities'
-import { ActivityCard } from './ActivityCard'
+import { getVisibleCards } from '@/lib/dashboard/storage'
+import { DashboardCard } from '@/components/dashboard/DashboardCard'
+import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 export function StatsDashboard() {
   const { athlete, getAccessToken } = useAuth()
-  const goals = getStoredGoals()
+  const [refreshKey, setRefreshKey] = React.useState(0)
+  const cards = React.useMemo(() => getVisibleCards(), [refreshKey])
   const currentYear = new Date().getFullYear()
 
-  // Tier 1: Fetch Stats API for Ride/Run/Swim (pre-aggregated data)
+  const handleRefresh = React.useCallback(() => {
+    setRefreshKey(k => k + 1)
+  }, [])
+
+  // Fetch Stats API for Ride/Run/Swim (pre-aggregated data)
   const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
     queryKey: ['athlete-stats', athlete?.id],
     queryFn: async () => {
@@ -31,7 +36,7 @@ export function StatsDashboard() {
     refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes
   })
 
-  // Tier 1: Fetch all YTD activities once (for client-side aggregation)
+  // Fetch all YTD activities once (for client-side aggregation)
   const { data: allActivities, isLoading: isLoadingActivities, error: activitiesError } = useQuery({
     queryKey: ['athlete-activities-ytd', athlete?.id, currentYear],
     queryFn: async () => {
@@ -85,54 +90,41 @@ export function StatsDashboard() {
     )
   }
 
-  // Get visibility settings (default to all false for new structure)
-  const visibility = goals.visibility || {}
-
-  // Filter for latest runs (keep existing feature)
-  const latestRuns = allActivities?.filter(activity => activity.type === 'Run').slice(0, 7) || []
-
-  // Tier 2: Render activity cards that manage their own aggregation
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {Object.values(ACTIVITY_CONFIGS).map(config => {
-          // Only render if visible
-          if (!visibility[config.id]) return null
+      {/* Dashboard Toolbar */}
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Dashboard</h2>
+        <CardConfigDialog onSave={handleRefresh} />
+      </div>
 
-          return (
-            <ActivityCard
-              key={config.id}
-              activityConfig={config}
+      {/* Dashboard Grid */}
+      {cards.length > 0 ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {cards.map(card => (
+            <DashboardCard
+              key={card.id}
+              config={card}
               allActivities={allActivities}
               stats={stats}
               isLoading={isLoading}
+              onUpdate={handleRefresh}
             />
-          )
-        })}
-      </div>
-
-      {/* Keep existing "Latest 7 Runs" section */}
-      {latestRuns.length > 0 && (
+          ))}
+        </div>
+      ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Latest 7 Runs</CardTitle>
-            <CardDescription>Your most recent running activities</CardDescription>
+            <CardTitle>Welcome to Your Dashboard</CardTitle>
+            <CardDescription>
+              Get started by adding your first activity card
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {latestRuns.map((run) => (
-                <div key={run.id} className="text-sm">
-                  <div>
-                    <strong>{run.name}</strong> - {new Date(run.start_date).toLocaleDateString()}
-                  </div>
-                  <div>
-                    Distance: {(run.distance / 1000).toFixed(2)} km |
-                    Time: {Math.floor(run.moving_time / 60)} min {run.moving_time % 60} sec |
-                    Pace: {(run.moving_time / 60 / (run.distance / 1000)).toFixed(2)} min/km
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click "Add Card" above to create a custom activity card with your preferred time frame, metrics, and goals.
+            </p>
+            <CardConfigDialog onSave={handleRefresh} />
           </CardContent>
         </Card>
       )}

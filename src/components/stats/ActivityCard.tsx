@@ -5,7 +5,7 @@ import { aggregateActivities } from '@/lib/strava/aggregation'
 import { getStoredGoals } from '@/lib/goals/storage'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from './ActivityStatsCard'
-import { ActivityGoalDialog } from '@/components/goals/ActivityGoalDialog'
+import { CombinedActivityGoalDialog } from '@/components/goals/CombinedActivityGoalDialog'
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 interface ActivityCardProps {
@@ -103,10 +103,10 @@ export function ActivityCard({
       totals={totals}
       progress={progress}
       goalButton={
-        <ActivityGoalDialog
+        <CombinedActivityGoalDialog
           activityConfig={activityConfig}
           currentGoal={goals.activities[activityConfig.id]}
-          onGoalUpdate={handleGoalUpdate}
+          onSave={handleGoalUpdate}
         />
       }
     />
