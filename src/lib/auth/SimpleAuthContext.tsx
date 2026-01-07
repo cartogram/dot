@@ -26,7 +26,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch Strava connection for a user
   const fetchStravaConnection = React.useCallback(async (userId: string) => {
-    const { data } = await supabase
+    console.log('🔍 Fetching Strava connection for user:', userId)
+
+    const { data, error } = await supabase
       .from('data_sources')
       .select('*')
       .eq('user_id', userId)
@@ -34,13 +36,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('is_active', true)
       .maybeSingle()
 
+    console.log('Strava connection query result:', { data, error })
+
+    if (error) {
+      console.error('❌ Error fetching Strava connection:', error)
+    }
+
+    if (!data) {
+      console.warn('⚠️ No active Strava connection found for user')
+    } else {
+      console.log('✅ Strava connection found:', {
+        athlete_id: data.athlete_id,
+        has_access_token: !!data.access_token
+      })
+    }
+
     return data
   }, [])
 
   // Single effect: get session and listen for auth changes
   React.useEffect(() => {
+    console.log('🚀 Auth context initializing...')
+
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id || 'No user')
       setUser(session?.user ?? null)
 
       if (session?.user) {
@@ -51,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('Auth state changed:', _event, session?.user?.id || 'No user')
       setUser(session?.user ?? null)
 
       if (session?.user) {

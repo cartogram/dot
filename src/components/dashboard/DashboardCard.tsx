@@ -41,12 +41,20 @@ export function DashboardCard({
       .map(id => ACTIVITY_CONFIGS[id]?.stravaType)
       .filter(Boolean)
 
+    console.log('Card:', config.title)
+    console.log('Activity IDs:', config.activityIds)
+    console.log('Activity Types:', activityTypes)
+    console.log('Filtered Activities:', filteredActivities.length)
+    console.log('All Activities Sample:', filteredActivities.slice(0, 3).map(a => ({ type: a.type, date: a.start_date })))
+
     if (activityTypes.length === 0) return null
 
     // Filter activities that match any of the types
     const relevantActivities = filteredActivities.filter(activity =>
       activityTypes.includes(activity.type)
     )
+
+    console.log('Relevant Activities:', relevantActivities.length)
 
     // Aggregate them together
     return relevantActivities.reduce((totals, activity) => ({
@@ -62,7 +70,7 @@ export function DashboardCard({
       elapsed_time: 0,
       elevation_gain: 0
     })
-  }, [config.activityIds, filteredActivities, isLoading])
+  }, [config.activityIds, filteredActivities, isLoading, config.title])
 
   // Calculate progress based on goals and shown metrics
   const progress = React.useMemo(() => {

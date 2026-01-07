@@ -14,9 +14,8 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Select } from '@/components/ui/select'
 import { IconPlus, IconEdit } from '@tabler/icons-react'
-import type { ActivityCardConfig, TimeFrame, CardSize, DisplayMode } from '@/types/dashboard'
+import type { ActivityCardConfig, TimeFrame, DisplayMode } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
 import { supabase } from '@/lib/supabase/client'
 import { addDashboardCard, updateDashboardCard, deleteDashboardCard } from '@/lib/supabase/dashboard'
@@ -36,7 +35,6 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
 
   // Form state
   const [title, setTitle] = React.useState(existingCard?.title || '')
-  const [size, setSize] = React.useState<CardSize>(existingCard?.size || 'medium')
   const [timeFrame, setTimeFrame] = React.useState<TimeFrame>(existingCard?.timeFrame || 'week')
   const [selectedActivities, setSelectedActivities] = React.useState<string[]>(
     existingCard?.activityIds || []
@@ -67,7 +65,6 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
   React.useEffect(() => {
     if (open && existingCard) {
       setTitle(existingCard.title)
-      setSize(existingCard.size)
       setTimeFrame(existingCard.timeFrame)
       setSelectedActivities(existingCard.activityIds)
       setDisplayMode(existingCard.displayMode)
@@ -82,7 +79,6 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
     } else if (open && !existingCard) {
       // Reset for new card
       setTitle('')
-      setSize('medium')
       setTimeFrame('week')
       setSelectedActivities([])
       setDisplayMode('card')
@@ -128,7 +124,7 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
       const cardData = {
         type: 'activity' as const,
         title,
-        size,
+        size: 'medium' as const,
         visible: true,
         timeFrame,
         activityIds: selectedActivities,
@@ -181,9 +177,9 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
+      <AlertDialogTrigger>
         {trigger || (
-          <Button variant="outline" size="sm">
+          <>
             {isEditMode ? (
               <>
                 <IconEdit className="h-4 w-4 mr-2" />
@@ -195,7 +191,7 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                 Add Card
               </>
             )}
-          </Button>
+          </>
         )}
       </AlertDialogTrigger>
       <AlertDialogContent className="max-w-2xl">
@@ -223,35 +219,21 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field>
-                <FieldLabel htmlFor="card-size">Card Size</FieldLabel>
-                <Select
-                  id="card-size"
-                  value={size}
-                  onChange={(e) => setSize(e.target.value as CardSize)}
-                >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                </Select>
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="time-frame">Time Frame</FieldLabel>
-                <Select
-                  id="time-frame"
-                  value={timeFrame}
-                  onChange={(e) => setTimeFrame(e.target.value as TimeFrame)}
-                >
-                  <option value="day">Day</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="year">Year</option>
-                  <option value="all">All Time</option>
-                </Select>
-              </Field>
-            </div>
+            <Field>
+              <FieldLabel htmlFor="time-frame">Time Frame</FieldLabel>
+              <select
+                id="time-frame"
+                value={timeFrame}
+                onChange={(e) => setTimeFrame(e.target.value as TimeFrame)}
+                className="border-input bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 rounded-4xl border px-3 py-2 text-sm transition-colors focus-visible:ring-[3px] h-9 w-full outline-none"
+              >
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+                <option value="year">Year</option>
+                <option value="all">All Time</option>
+              </select>
+            </Field>
           </div>
 
           {/* Activity Selection */}

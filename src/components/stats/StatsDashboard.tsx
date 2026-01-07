@@ -53,23 +53,48 @@ export function StatsDashboard() {
   const { data: allActivities, isLoading: isLoadingActivities, error: activitiesError } = useQuery({
     queryKey: ['athlete-activities-ytd', stravaDataSource?.athlete_id, currentYear],
     queryFn: async () => {
+      console.log('🔄 Starting to fetch activities...')
+      console.log('stravaDataSource:', stravaDataSource)
+
       const accessToken = await getStravaAccessToken()
+      console.log('Access Token:', accessToken ? 'EXISTS' : 'NULL')
+
       if (!accessToken) throw new Error('Not authenticated')
 
       const yearStart = new Date(currentYear, 0, 1)
       const unixYearStart = Math.floor(yearStart.getTime() / 1000)
 
-      return fetchAthleteActivities({
-        data: {
-          accessToken,
-          perPage: 200, // Fetch up to 200 activities
-          after: unixYearStart // Only YTD activities
-        },
-      })
+      console.log('Year Start:', yearStart)
+      console.log('Unix Timestamp:', unixYearStart)
+
+      try {
+        const activities = await fetchAthleteActivities({
+          data: {
+            accessToken,
+            perPage: 200, // Fetch up to 200 activities
+            after: unixYearStart // Only YTD activities
+          },
+        })
+
+        console.log('✅ Fetched Activities Count:', activities?.length)
+        console.log('Activities Sample:', activities?.slice(0, 3))
+
+        return activities
+      } catch (err) {
+        console.error('❌ Error fetching activities:', err)
+        throw err
+      }
     },
     enabled: !!stravaDataSource,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes
+  })
+
+  console.log('Query State:', {
+    allActivities: allActivities?.length || 0,
+    isLoadingActivities,
+    activitiesError: activitiesError?.message,
+    stravaDataSourceExists: !!stravaDataSource
   })
 
   const isLoading = isLoadingStats || isLoadingActivities
