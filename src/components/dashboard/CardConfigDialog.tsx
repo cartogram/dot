@@ -18,7 +18,9 @@ import { Select } from '@/components/ui/select'
 import { IconPlus, IconEdit } from '@tabler/icons-react'
 import type { ActivityCardConfig, TimeFrame, CardSize, DisplayMode } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
-import { addDashboardCard, updateDashboardCard, deleteDashboardCard } from '@/lib/dashboard/storage'
+import { supabase } from '@/lib/supabase/client'
+import { addDashboardCard, updateDashboardCard, deleteDashboardCard } from '@/lib/supabase/dashboard'
+import { useAuth } from '@/lib/auth/SimpleAuthContext'
 
 interface CardConfigDialogProps {
   existingCard?: ActivityCardConfig
@@ -27,7 +29,9 @@ interface CardConfigDialogProps {
 }
 
 export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDialogProps) {
+  const { user } = useAuth()
   const [open, setOpen] = React.useState(false)
+  const [isSaving, setIsSaving] = React.useState(false)
   const isEditMode = !!existingCard
 
   // Form state
@@ -116,47 +120,62 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
     return metrics
   }, [selectedActivities])
 
-  const handleSave = () => {
-    if (!title || selectedActivities.length === 0) return
+  const handleSave = async () => {
+    if (!title || selectedActivities.length === 0 || !user) return
 
-    const cardData = {
-      type: 'activity' as const,
-      title,
-      size,
-      visible: true,
-      timeFrame,
-      activityIds: selectedActivities,
-      metrics: availableMetrics,
-      showMetrics: {
-        distance: showDistance && availableMetrics.distance,
-        count: showCount && availableMetrics.count,
-        elevation: showElevation && availableMetrics.elevation,
-        time: showTime && availableMetrics.time,
-      },
-      goal: {
-        distance: showDistance && distance ? parseFloat(distance) * 1000 : undefined,
-        count: showCount && count ? parseInt(count) : undefined,
-        elevation: showElevation && elevation ? parseFloat(elevation) : undefined,
-        time: showTime && time ? parseFloat(time) * 3600 : undefined,
-      },
-      displayMode,
-    }
+    setIsSaving(true)
+    try {
+      const cardData = {
+        type: 'activity' as const,
+        title,
+        size,
+        visible: true,
+        timeFrame,
+        activityIds: selectedActivities,
+        metrics: availableMetrics,
+        showMetrics: {
+          distance: showDistance && availableMetrics.distance,
+          count: showCount && availableMetrics.count,
+          elevation: showElevation && availableMetrics.elevation,
+          time: showTime && availableMetrics.time,
+        },
+        goal: {
+          distance: showDistance && distance ? parseFloat(distance) * 1000 : undefined,
+          count: showCount && count ? parseInt(count) : undefined,
+          elevation: showElevation && elevation ? parseFloat(elevation) : undefined,
+          time: showTime && time ? parseFloat(time) * 3600 : undefined,
+        },
+        displayMode,
+      }
 
-    if (isEditMode) {
-      updateDashboardCard(existingCard.id, cardData)
-    } else {
-      addDashboardCard(cardData)
-    }
+      if (isEditMode) {
+        await updateDashboardCard(supabase, user.id, existingCard.id, cardData)
+      } else {
+        await addDashboardCard(supabase, user.id, cardData)
+      }
 
-    setOpen(false)
-    onSave?.()
-  }
-
-  const handleDelete = () => {
-    if (existingCard && window.confirm('Are you sure you want to delete this card?')) {
-      deleteDashboardCard(existingCard.id)
       setOpen(false)
       onSave?.()
+    } catch (error) {
+      console.error('Error saving card:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!existingCard || !user) return
+    if (!window.confirm('Are you sure you want to delete this card?')) return
+
+    setIsSaving(true)
+    try {
+      await deleteDashboardCard(supabase, user.id, existingCard.id)
+      setOpen(false)
+      onSave?.()
+    } catch (error) {
+      console.error('Error deleting card:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -360,12 +379,12 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
             )}
           </div>
           <div className="flex gap-2">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSaving}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleSave}
-              disabled={!title || selectedActivities.length === 0}
+              disabled={!title || selectedActivities.length === 0 || isSaving}
             >
-              {isEditMode ? 'Save Changes' : 'Add Card'}
+              {isSaving ? 'Saving...' : isEditMode ? 'Save Changes' : 'Add Card'}
             </AlertDialogAction>
           </div>
         </AlertDialogFooter>

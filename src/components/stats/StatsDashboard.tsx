@@ -1,17 +1,30 @@
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@/lib/auth/AuthContext'
+import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { fetchAthleteStats, fetchAthleteActivities } from '@/lib/server/strava'
-import { getVisibleCards } from '@/lib/dashboard/storage'
+import { supabase } from '@/lib/supabase/client'
+import { getVisibleCards } from '@/lib/supabase/dashboard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 export function StatsDashboard() {
-  const { athlete, getAccessToken } = useAuth()
+  const { user, stravaDataSource, getStravaAccessToken } = useAuth()
   const [refreshKey, setRefreshKey] = React.useState(0)
-  const cards = React.useMemo(() => getVisibleCards(), [refreshKey])
+  const [cards, setCards] = React.useState<Awaited<ReturnType<typeof getVisibleCards>>>([])
   const currentYear = new Date().getFullYear()
+
+  // Fetch cards from Supabase
+  React.useEffect(() => {
+    if (!user) return
+
+    const fetchCards = async () => {
+      const visibleCards = await getVisibleCards(supabase, user.id)
+      setCards(visibleCards)
+    }
+
+    fetchCards()
+  }, [user, refreshKey])
 
   const handleRefresh = React.useCallback(() => {
     setRefreshKey(k => k + 1)
@@ -19,28 +32,28 @@ export function StatsDashboard() {
 
   // Fetch Stats API for Ride/Run/Swim (pre-aggregated data)
   const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery({
-    queryKey: ['athlete-stats', athlete?.id],
+    queryKey: ['athlete-stats', stravaDataSource?.athlete_id],
     queryFn: async () => {
-      const accessToken = await getAccessToken()
-      if (!accessToken || !athlete) throw new Error('Not authenticated')
+      const accessToken = await getStravaAccessToken()
+      if (!accessToken || !stravaDataSource) throw new Error('Not authenticated')
 
       return fetchAthleteStats({
         data: {
-          athleteId: athlete.id,
+          athleteId: stravaDataSource.athlete_id!,
           accessToken,
         },
       })
     },
-    enabled: !!athlete,
+    enabled: !!stravaDataSource,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes
   })
 
   // Fetch all YTD activities once (for client-side aggregation)
   const { data: allActivities, isLoading: isLoadingActivities, error: activitiesError } = useQuery({
-    queryKey: ['athlete-activities-ytd', athlete?.id, currentYear],
+    queryKey: ['athlete-activities-ytd', stravaDataSource?.athlete_id, currentYear],
     queryFn: async () => {
-      const accessToken = await getAccessToken()
+      const accessToken = await getStravaAccessToken()
       if (!accessToken) throw new Error('Not authenticated')
 
       const yearStart = new Date(currentYear, 0, 1)
@@ -54,7 +67,7 @@ export function StatsDashboard() {
         },
       })
     },
-    enabled: !!athlete,
+    enabled: !!stravaDataSource,
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchInterval: 10 * 60 * 1000, // Refetch every 10 minutes
   })

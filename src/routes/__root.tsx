@@ -1,7 +1,7 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import { AuthProvider } from '@/lib/auth/AuthContext'
+import { AuthProvider } from '@/lib/auth/SimpleAuthContext'
 
 import appCss from '../styles.css?url'
 
@@ -37,7 +37,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <AuthProvider url={import.meta.env.VITE_APP_URL}>
+        <AuthProvider>
           {children}
         </AuthProvider>
         <TanStackDevtools
