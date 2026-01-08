@@ -1,0 +1,72 @@
+.Card {
+  color: var(--color-primary);
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+  border-radius: 0 0 0.5em 0.5em;
+  position: relative;
+  padding-top: 1em;
+  margin: 1em 0.75em;
+}
+
+.Card--full {
+  grid-column: span 2;
+}
+
+.Card--error {
+  color: red;
+}
+
+.Card__Header {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  position: relative;
+  top: -1.5em;
+  margin-bottom: -1.5em;
+}
+
+.Card__Header::before,
+.Card__Header::after {
+  content: '';
+  display: block;
+  border-top: 1px solid currentColor;
+  height: 2em;
+  position: relative;
+  flex: 1;
+}
+
+.Card__Header::after {
+  border-right: 1px solid currentColor;
+  border-radius: 0 0.5em 0 0;
+  right: -1px;
+}
+
+.Card__Header::before {
+  border-left: 1px solid currentColor;
+  border-radius: 0.5em 0 0 0;
+  left: -1px;
+}
+
+.Card__Content {
+  display: flex;
+  align-items: baseline;
+  gap: 1em;
+}
+
+.Card__Title {
+  transform: translate(0, -100%);
+  line-height: 1;
+}
+
+.Card__Footer,
+.Card__Content {
+  padding: 0 2em 2em;
+}
+
+.Card__Footer {
+}
+
+.Card__CardSkeleton {
+  min-height: 3em;
+}

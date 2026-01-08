@@ -1,13 +1,11 @@
 /**
  * Supabase Client Configuration
  *
- * Provides both a singleton instance and a factory function for creating Supabase clients.
- *
- * IMPORTANT: For auth operations, use the singleton to ensure auth state changes are
- * properly detected across the app via onAuthStateChange listeners.
+ * Uses @supabase/ssr for cookie-based authentication
+ * This enables proper SSR support with session persistence
  */
 
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -20,24 +18,15 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 /**
- * Creates a new Supabase client instance with typed database schema.
+ * Creates a new Supabase client instance with cookie-based auth
  *
- * Use this for:
- * - Server-side operations (SSR, API routes)
- * - Isolated database queries that don't need auth state sync
- *
- * Do NOT use for:
- * - Auth operations (login, signup, etc.) - use the singleton instead
+ * The @supabase/ssr package automatically handles:
+ * - Cookie-based session storage (instead of localStorage)
+ * - SSR compatibility
+ * - Session sharing between client and server
  */
 export function createClient() {
-  return createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: typeof window !== 'undefined', // Only persist on client-side
-      detectSessionInUrl: true,
-      storage: typeof window !== 'undefined' ? undefined : undefined, // Use default localStorage on client
-    },
-  })
+  return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey)
 }
 
 /**

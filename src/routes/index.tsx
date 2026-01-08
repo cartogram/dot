@@ -1,8 +1,10 @@
+import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { Button } from '@/components/ui/button'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
+import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 
 const queryClient = new QueryClient()
 
@@ -54,7 +56,9 @@ function App() {
         </header>
 
         <main className="container mx-auto px-4 py-8">
-          <StatsDashboard />
+          <React.Suspense fallback={<DashboardSkeleton />}>
+            <StatsDashboard />
+          </React.Suspense>
         </main>
       </div>
     </QueryClientProvider>
