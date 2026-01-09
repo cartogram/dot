@@ -13,3 +13,6 @@ count.txt
 todos.json
 .vercel
 .env*.local
+
+# Vitest browser mode screenshots
+**/__screenshots__/

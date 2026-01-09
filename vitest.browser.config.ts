@@ -20,6 +20,8 @@ export default defineConfig({
           browser: 'chromium',
         },
       ],
+      // Disable screenshots - they render as white in headless mode
+      screenshotFailures: false,
       // https://vitest.dev/guide/browser/playwright
     },
     globals: true,
