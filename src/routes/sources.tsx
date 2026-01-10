@@ -4,10 +4,10 @@ import { useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { exchangeCodeForTokens } from '@/lib/server/oauth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/shared/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shared/Card'
 
-export const Route = createFileRoute('/connect-strava')({
+export const Route = createFileRoute('/sources')({
   component: ConnectStravaPage,
 })
 
@@ -111,7 +111,6 @@ function ConnectStravaPage() {
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Connect Strava</CardTitle>
-            <CardDescription>Please log in first</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => navigate({ to: '/login' })} className="w-full">
@@ -124,17 +123,17 @@ function ConnectStravaPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Connect Strava</CardTitle>
-          <CardDescription>
+          
+        </CardHeader>
+        <CardContent className="space-y-4">
+        <p className="text-center mb-2">
             {stravaDataSource
               ? 'Your Strava account is connected'
               : 'Connect your Strava account to import activities'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
           {error && (
             <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
               {error}
@@ -156,7 +155,7 @@ function ConnectStravaPage() {
               <div className="flex gap-2">
                 <Button
                   onClick={() => navigate({ to: '/' })}
-                  variant="outline"
+                  variant="secondary"
                   className="flex-1"
                 >
                   Go to Dashboard
@@ -181,6 +180,5 @@ function ConnectStravaPage() {
           )}
         </CardContent>
       </Card>
-    </div>
   )
 }

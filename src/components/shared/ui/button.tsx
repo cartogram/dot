@@ -10,6 +10,8 @@ const buttonVariants = cva('Button', {
     variant: {
       default: '',
       primary: 'Button--primary',
+      secondary: 'Button--secondary',
+      destructive: 'Button--destructive',
       link: 'Button--link'
     },
     size: {

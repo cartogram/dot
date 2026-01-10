@@ -10,16 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpdatePasswordRouteImport } from './routes/update-password'
+import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ConnectStravaRouteImport } from './routes/connect-strava'
+import { Route as LoginRouteImport } from './routes./routes/sources.tsx
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
   id: '/update-password',
   path: '/update-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SourcesRoute = SourcesRouteImport.update({
+  id: '/sources',
+  path: '/sources',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -37,11 +42,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConnectStravaRoute = ConnectStravaRouteImport.update({
-  id: '/connect-strava',
-  path: '/connect-strava',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,29 +55,29 @@ const AuthConfirmRoute = AuthConfirmRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/connect-strava': typeof ConnectStravaRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sources': typeof SourcesRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/connect-strava': typeof ConnectStravaRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sources': typeof SourcesRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/connect-strava': typeof ConnectStravaRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/sources': typeof SourcesRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
 }
@@ -85,38 +85,38 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/connect-strava'
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/sources'
     | '/update-password'
     | '/auth/confirm'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/connect-strava'
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/sources'
     | '/update-password'
     | '/auth/confirm'
   id:
     | '__root__'
     | '/'
-    | '/connect-strava'
     | '/login'
     | '/reset-password'
     | '/signup'
+    | '/sources'
     | '/update-password'
     | '/auth/confirm'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ConnectStravaRoute: typeof ConnectStravaRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SourcesRoute: typeof SourcesRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
 }
@@ -128,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/update-password'
       fullPath: '/update-password'
       preLoaderRoute: typeof UpdatePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sources': {
+      id: '/sources'
+      path: '/sources'
+      fullPath: '/sources'
+      preLoaderRoute: typeof SourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -151,13 +158,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/connect-strava': {
-      id: '/connect-strava'
-      path: '/connect-strava'
-      fullPath: '/connect-strava'
-      preLoaderRoute: typeof ConnectStravaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -177,10 +177,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ConnectStravaRoute: ConnectStravaRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SourcesRoute: SourcesRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   AuthConfirmRoute: AuthConfirmRoute,
 }

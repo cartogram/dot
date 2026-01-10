@@ -8,6 +8,7 @@ import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/shared/Card'
+import { Button } from '@/components/shared/ui/button'
 
 export function StatsDashboard() {
   const { user, stravaDataSource, getStravaAccessToken } = useAuth()
@@ -74,6 +75,24 @@ export function StatsDashboard() {
   })
 
   const isLoading = isLoadingStats || isLoadingActivities
+
+  if (true) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>No Data Sources</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-center mb-2">
+            You need at least one data source to get started.
+          </p>
+          <a href="/sources">
+            <Button variant="primary">View sources</Button>
+          </a>
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (isLoading) {
     return <DashboardSkeleton />

@@ -1,18 +1,15 @@
 import * as React from 'react'
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/shared/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/shared/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { IconPlus, IconEdit } from '@tabler/icons-react'
 import type { ActivityCardConfig, TimeFrame, DisplayMode } from '@/types/dashboard'
@@ -199,18 +196,13 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
           <AlertDialogTitle>
             {isEditMode ? 'Edit Activity Card' : 'Add Activity Card'}
           </AlertDialogTitle>
-          <AlertDialogDescription>
-            Configure your activity card with custom time frames, metrics, and goals
-          </AlertDialogDescription>
         </AlertDialogHeader>
 
         <FieldGroup className="py-4 space-y-4 max-h-[600px] overflow-y-auto">
           {/* General Settings */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold">General Settings</h3>
-
             <Field>
-              <FieldLabel htmlFor="card-title">Card Title</FieldLabel>
+              <FieldLabel htmlFor="card-title">Title</FieldLabel>
               <Input
                 id="card-title"
                 placeholder="e.g., Weekly Running, Monthly Cardio"
@@ -352,22 +344,19 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
           )}
         </FieldGroup>
 
-        <AlertDialogFooter className="flex justify-between">
-          <div>
-            {isEditMode && (
+        <AlertDialogFooter className="flex flex-0 gap-8 justify-between">
+        {isEditMode && (<div>
+            
               <Button variant="destructive" onClick={handleDelete}>
                 Delete Card
               </Button>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <AlertDialogCancel disabled={isSaving}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleSave}
-              disabled={!title || selectedActivities.length === 0 || isSaving}
-            >
-              {isSaving ? 'Saving...' : isEditMode ? 'Save Changes' : 'Add Card'}
-            </AlertDialogAction>
+            </div>
+          )}
+          <div className="flex flex-1 gap-2">
+            <Button variant="secondary" onClick={() => setOpen(false)} disabled={isSaving}>Cancel</Button>
+            <Button variant="primary" onClick={handleSave} disabled={!title || selectedActivities.length === 0 || isSaving}>
+              {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
+            </Button>
           </div>
         </AlertDialogFooter>
       </AlertDialogContent>
