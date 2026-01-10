@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 import './button.css'
+import { Link } from "@tanstack/react-router"
 
 const buttonVariants = cva('Button', {
   variants: {
@@ -15,7 +16,7 @@ const buttonVariants = cva('Button', {
       link: 'Button--link'
     },
     size: {
-      default: 'px-4 py-2'
+      default: ''
     }
   },
   defaultVariants: {
@@ -27,7 +28,7 @@ const buttonVariants = cva('Button', {
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+  to?: string
 }
 
 
@@ -35,14 +36,27 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  children,
+  to,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
+
+  console.log('Button', { to, children })
+  if (to) {
+    return (
+      <Link to={to} className={cn(buttonVariants({ variant, size, className }))}>
+        {children}
+      </Link>
+    )
+  }
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {children}
+    </ButtonPrimitive>
   )
 }
 

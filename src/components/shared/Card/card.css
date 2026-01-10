@@ -69,6 +69,9 @@
 }
 
 .Card__Footer {
+  display: flex;
+  justify-content: center;
+  gap: 1em;
 }
 
 .Card__CardSkeleton {

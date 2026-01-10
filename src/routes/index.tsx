@@ -2,7 +2,7 @@ import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/shared/ui/button'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Profile } from '@/components/shared/Profile'
@@ -16,20 +16,25 @@ export const Route = createFileRoute('/')({
 function App() {
   const { user } = useAuth()
 
+  React.useEffect(() => {
+    console.log('[Index Route] Rendering with user state:', {
+      hasUser: !!user,
+      userId: user?.id,
+      email: user?.email
+    })
+  }, [user])
+
   // Show login prompt if not authenticated
   if (!user) {
+    console.log('[Index Route] No user - showing login prompt')
     return (
       <Card>
         <CardHeader>
           <CardTitle>Distance Over Time</CardTitle>
         </CardHeader>
         <CardFooter>
-          <a href="/login">
-            <Button variant="outline">Log in</Button>
-          </a>
-          <a href="/signup">
-            <Button>Sign up</Button>
-          </a>
+          <Button to="/login" variant="secondary">Log in</Button>
+          <Button to="/signup" variant="primary">Sign up</Button>
         </CardFooter>
       </Card>
 
@@ -37,6 +42,7 @@ function App() {
   }
 
   // User is authenticated - show dashboard
+  console.log('[Index Route] User authenticated - showing dashboard')
   return (
     <QueryClientProvider client={queryClient}>
       <React.Suspense fallback={<DashboardSkeleton />}>

@@ -43,29 +43,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Initialize session and listen for auth changes
   React.useEffect(() => {
+    console.log('[AuthContext] Initializing auth context...')
+
     // Get initial session from cookies
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('[AuthContext] Initial session:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id
+      })
       setUser(session?.user ?? null)
 
       if (session?.user) {
+        console.log('[AuthContext] Fetching Strava connection for user:', session.user.id)
         const strava = await fetchStravaConnection(session.user.id)
+        console.log('[AuthContext] Strava connection fetched:', !!strava)
         setStravaDataSource(strava)
       }
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[AuthContext] Auth state changed:', {
+        event,
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        userId: session?.user?.id
+      })
       setUser(session?.user ?? null)
 
       if (session?.user) {
+        console.log('[AuthContext] Fetching Strava connection after auth change...')
         const strava = await fetchStravaConnection(session.user.id)
+        console.log('[AuthContext] Strava connection fetched:', !!strava)
         setStravaDataSource(strava)
       } else {
+        console.log('[AuthContext] No user, clearing Strava data')
         setStravaDataSource(null)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      console.log('[AuthContext] Cleaning up auth subscription')
+      subscription.unsubscribe()
+    }
   }, [fetchStravaConnection])
 
   const logout = React.useCallback(async () => {
