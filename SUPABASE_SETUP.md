@@ -67,7 +67,7 @@ pnpm add @supabase/supabase-js
    - Profile is automatically created via database trigger
    - Redirected to Connect Strava page
 
-2. **Connect Strava** (`/connect-strava`)
+2. **Connect Strava** (`/sources`)
    - User authorizes Strava OAuth
    - Tokens stored in `data_sources` table
    - Athlete data stored as JSONB
@@ -108,7 +108,7 @@ For users who were using the app before Supabase:
 - `src/routes/login.tsx` - Login page
 - `src/routes/reset-password.tsx` - Password reset
 - `src/routes/update-password.tsx` - Password update
-- `src/routes/connect-strava.tsx` - Strava connection page
+- `src/routes/sources.tsx` - Strava connection page
 
 ### Components
 - `src/components/auth/SignupForm.tsx` - Signup form
@@ -163,7 +163,7 @@ All tables have RLS enabled with policies ensuring:
 1. Start the dev server: `pnpm dev`
 2. Navigate to `/signup` and create an account
 3. Log in at `/login`
-4. Connect Strava at `/connect-strava`
+4. Connect Strava at `/sources`
 5. View dashboard at `/`
 6. Create activity cards
 7. Log out and log back in - verify dashboard persists
@@ -209,7 +209,7 @@ Check data in Supabase Dashboard > Table Editor:
 - [x] Create auth routes (signup, login, reset-password, update-password)
 - [x] Create auth form components
 - [x] Create Supabase AuthContext
-- [x] Create connect-strava route
+- [x] Create sources route
 - [x] Update root route to use new AuthProvider
 - [x] Update StatsDashboard to use Supabase storage
 - [x] Update CardConfigDialog to use Supabase storage

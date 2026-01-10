@@ -60,7 +60,7 @@ function ConnectStravaPage() {
         await refreshStravaConnection()
 
         // Clean up URL and redirect
-        window.history.replaceState(null, '', '/connect-strava')
+        window.history.replaceState(null, '', '/sources')
         navigate({ to: '/' })
       } catch (err) {
         console.error('Failed to connect Strava:', err)
@@ -75,7 +75,7 @@ function ConnectStravaPage() {
 
   const handleConnectStrava = () => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID
-    const redirectUri = `${window.location.origin}/connect-strava`
+    const redirectUri = `${window.location.origin}/sources`
     const scope = 'activity:read_all'
 
     const authUrl = new URL('https://www.strava.com/oauth/authorize')
@@ -88,13 +88,14 @@ function ConnectStravaPage() {
   }
 
   const handleDisconnectStrava = async () => {
-    if (!stravaDataSource) return
+    if (!stravaDataSource || !user) return
 
     try {
       const { error } = await supabase
         .from('data_sources')
         .update({ is_active: false })
         .eq('id', stravaDataSource.id)
+        .eq('user_id', user?.id)
 
       if (error) throw error
 
