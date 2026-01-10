@@ -76,7 +76,7 @@ export function StatsDashboard() {
 
   const isLoading = isLoadingStats || isLoadingActivities
 
-  if (true) {
+  if (!!stravaDataSource) {
     return (
       <Card>
         <CardHeader>

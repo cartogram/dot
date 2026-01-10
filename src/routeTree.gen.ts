@@ -13,7 +13,7 @@ import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as SourcesRouteImport } from './routes/sources'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes./routes/sources.tsx
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 
