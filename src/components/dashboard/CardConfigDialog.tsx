@@ -11,7 +11,6 @@ import { Button } from '@/components/shared/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/shared/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { IconPlus, IconEdit } from '@tabler/icons-react'
 import type { ActivityCardConfig, TimeFrame, DisplayMode } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
 import { supabase } from '@/lib/supabase/client'
@@ -174,23 +173,22 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger>
+      <div className="flex justify-center"><Button variant="primary" onClick={() => setOpen(true)}>
         {trigger || (
           <>
             {isEditMode ? (
               <>
-                <IconEdit className="h-4 w-4 mr-2" />
                 Edit Card
               </>
             ) : (
               <>
-                <IconPlus className="h-4 w-4 mr-2" />
                 Add Card
               </>
             )}
           </>
         )}
-      </AlertDialogTrigger>
+      </Button>
+      </div>
       <AlertDialogContent className="max-w-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle>

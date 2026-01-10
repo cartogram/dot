@@ -76,7 +76,7 @@ export function StatsDashboard() {
 
   const isLoading = isLoadingStats || isLoadingActivities
 
-  if (!!stravaDataSource) {
+  if (!stravaDataSource) {
     return (
       <Card>
         <CardHeader>
@@ -89,7 +89,7 @@ export function StatsDashboard() {
           <a href="/sources">
             <Button variant="primary">View sources</Button>
           </a>
-        </CardContent>
+        </CardContent>x
       </Card>
     )
   }
@@ -106,13 +106,13 @@ export function StatsDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Error Loading Stats</CardTitle>
-         
+
         </CardHeader>
         <CardDescription>
-            {isAuthError
-              ? 'Your session has expired. Please log in again.'
-              : errorMessage}
-          </CardDescription>
+          {isAuthError
+            ? 'Your session has expired. Please log in again.'
+            : errorMessage}
+        </CardDescription>
         {isAuthError && (
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
@@ -128,12 +128,12 @@ export function StatsDashboard() {
     <div className="space-y-6">
       {/* Dashboard Toolbar */}
       <div className="flex justify-between items-center">
-        <CardConfigDialog onSave={handleRefresh} />
+
       </div>
 
       {/* Dashboard Grid */}
       {cards.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-6 p-4">
           {cards.map(card => (
             <DashboardCard
               key={card.id}
@@ -144,6 +144,8 @@ export function StatsDashboard() {
               onUpdate={handleRefresh}
             />
           ))}
+          <CardConfigDialog onSave={handleRefresh} />
+
         </div>
       ) : (
         <Card>

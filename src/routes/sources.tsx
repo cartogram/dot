@@ -36,24 +36,42 @@ function ConnectStravaPage() {
         // Exchange code for tokens
         const tokens = await exchangeCodeForTokens({ data: { code } })
 
-        // Store in data_sources table
-        const { error: insertError } = await supabase
-          .from('data_sources')
-          .insert({
-            user_id: user.id,
-            provider: 'strava',
-            athlete_id: tokens.athlete.id,
-            access_token: tokens.access_token,
-            refresh_token: tokens.refresh_token,
-            expires_at: new Date(tokens.expires_at * 1000).toISOString(),
-            token_type: tokens.token_type,
-            athlete_data: tokens.athlete,
-            is_active: true,
-            last_synced_at: new Date().toISOString(),
-          })
+        // Check if connection already exists
+        const { data: existing } = await (supabase
+          .from('data_sources') as any)
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('provider', 'strava')
+          .maybeSingle()
 
-        if (insertError) {
-          throw insertError
+        const connectionData = {
+          user_id: user.id,
+          provider: 'strava',
+          athlete_id: tokens.athlete.id,
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          expires_at: new Date(tokens.expires_at * 1000).toISOString(),
+          token_type: tokens.token_type,
+          athlete_data: tokens.athlete,
+          is_active: true,
+          last_synced_at: new Date().toISOString(),
+        }
+
+        if (existing) {
+          // Update existing connection (re-enable if previously disconnected)
+          const { error } = await (supabase
+            .from('data_sources') as any)
+            .update(connectionData)
+            .eq('id', existing.id)
+
+          if (error) throw error
+        } else {
+          // Insert new connection
+          const { error } = await (supabase
+            .from('data_sources') as any)
+            .insert(connectionData)
+
+          if (error) throw error
         }
 
         // Refresh the auth context
@@ -91,8 +109,8 @@ function ConnectStravaPage() {
     if (!stravaDataSource || !user) return
 
     try {
-      const { error } = await supabase
-        .from('data_sources')
+      const { error } = await (supabase
+        .from('data_sources') as any)
         .update({ is_active: false })
         .eq('id', stravaDataSource.id)
         .eq('user_id', user?.id)

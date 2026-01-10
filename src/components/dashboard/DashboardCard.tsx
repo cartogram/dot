@@ -6,7 +6,7 @@ import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dash
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
 import { CardConfigDialog } from './CardConfigDialog'
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/shared/Card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/shared/Card'
 
 interface DashboardCardProps {
   config: ActivityCardConfig
@@ -103,10 +103,13 @@ export function DashboardCard({
         </div>
         <CardHeader>
           <CardTitle>{config.title}</CardTitle>
+        
+        </CardHeader>
+        <CardContent>
           <CardDescription>
             No activities for {getTimeFrameDescription(config.timeFrame, config.customDateRange).toLowerCase()}
           </CardDescription>
-        </CardHeader>
+        </CardContent>
       </Card>
     )
   }

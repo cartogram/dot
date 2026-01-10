@@ -40,12 +40,8 @@ export function ActivityStatsCard({ type, totals, progress, goalButton }: Activi
       </CardHeader>
       <CardContent >
       <CardDescription>Year to date</CardDescription>
-      <div className="flex items-start justify-between">
-          <div className="flex-1">
-            
-          </div>
+
           {goalButton && <div className="ml-2">{goalButton}</div>}
-        </div>
         {primaryProgress && (
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between text-sm">

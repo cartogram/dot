@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/shared/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/shared/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shared/Card'
 
 export function SignupForm() {

@@ -40,4 +40,4 @@ export function createClient() {
  * This ensures all auth operations share the same client instance so that
  * auth state changes are properly detected and propagated throughout the app.
  */
-export const supabase = createClient()
+export const supabase: ReturnType<typeof createClient> = createClient()
