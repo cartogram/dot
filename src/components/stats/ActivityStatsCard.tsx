@@ -12,7 +12,7 @@ import {
   CardTitle,
   CardContent,
   CardDescription,
-} from '@/components/ui/card'
+} from '@/components/shared/Card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 
@@ -35,10 +35,14 @@ export function ActivityStatsCard({ type, totals, progress, goalButton }: Activi
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
+      <CardTitle>{type}</CardTitle>
+        
+      </CardHeader>
+      <CardContent >
+      <CardDescription>Year to date</CardDescription>
+      <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle>{type}</CardTitle>
-            <CardDescription>Year to date</CardDescription>
+            
           </div>
           {goalButton && <div className="ml-2">{goalButton}</div>}
         </div>
@@ -60,8 +64,6 @@ export function ActivityStatsCard({ type, totals, progress, goalButton }: Activi
             </div>
           </div>
         )}
-      </CardHeader>
-      <CardContent className="space-y-4">
         {/* Current Stats */}
         <div className="grid grid-cols-2 gap-4">
           <StatItem label="Distance" value={formatDistance(totals.distance)} unit="km" />

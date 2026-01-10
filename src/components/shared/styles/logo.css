@@ -1,0 +1,30 @@
+.Logo {
+  top: 0;
+  height: 6em;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+  padding-top: 2em;
+  font-family: var(--font-geist-mono);
+  gap: 0.25em;
+}
+
+.Logo__Separator {
+  height: 1px;
+  background: currentColor;
+  width: 1.75em;
+  transform-origin: center;
+  transform: rotate(45deg);
+}
+
+.Logo__Dot {
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.Logo__Dash {
+  font-weight: 400;
+  letter-spacing: 1px;
+}

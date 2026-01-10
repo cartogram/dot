@@ -1,0 +1,12 @@
+.Profile {
+  display: flex;
+  gap: 2em;
+  padding-bottom: 2em;
+  grid-column: span 2;
+}
+
+.Profile__Section {
+  display: flex;
+  flex-direction: column;
+  padding: 0 1em 1em;
+}

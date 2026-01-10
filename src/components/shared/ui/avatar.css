@@ -1,0 +1,12 @@
+.Avatar {
+  width: 3em;
+  height: 3em;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto;
+   position: relative;
+  box-shadow: 0 0 0 1px var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

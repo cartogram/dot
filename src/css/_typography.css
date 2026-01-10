@@ -1,0 +1,118 @@
+body {
+  line-height: 1.5;
+}
+
+.heading--1,
+.heading--2,
+.heading--3,
+.heading--4,
+.heading--5,
+.heading--6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+ul,
+ol,
+dd,
+dt {
+  text-wrap: pretty;
+}
+
+.heading--1,
+.heading--2,
+.heading--3,
+.heading--4,
+.heading--5,
+.heading--6,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: 1em;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.heading--1,
+h1 {
+  line-height: 1.1;
+  text-wrap: balance;
+  font-size: 3em;
+  font-weight: 100;
+  font-family: var(--font-geist-mono);
+}
+
+.heading--2,
+h2 {
+  line-height: 1.1;
+  text-wrap: balance;
+  font-size: 2em;
+  font-weight: 100;
+  font-family: var(--font-geist-mono);
+}
+
+.heading--3,
+h3 {
+}
+
+.heading--4,
+h4 {
+  text-transform: uppercase;
+  font-family: var(--font-geist-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  line-height: 2;
+  display: block;
+}
+
+.Dash {
+  position: relative;
+  padding-left: 1.1em;
+  display: block;
+}
+
+.Dash::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1em;
+  height: 1px;
+  top: 50%;
+  left: 0;
+  background: currentColor;
+}
+
+.heading--5,
+h5 {
+  font-weight: 500;
+}
+
+.heading--6,
+h6 {
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+p {
+}
+
+strong {
+  font-weight: 500;
+}
+
+h2 a,
+p a {
+  text-decoration: underline;
+}
+
+h2 a:hover,
+p a:hover {
+  text-decoration: none;
+}

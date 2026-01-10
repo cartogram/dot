@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [fetchStravaConnection])
 
   const logout = React.useCallback(async () => {
+    console.log('Logging out...')
     await supabase.auth.signOut()
     setUser(null)
     setStravaDataSource(null)

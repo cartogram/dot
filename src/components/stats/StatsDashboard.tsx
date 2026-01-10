@@ -7,7 +7,7 @@ import { getVisibleCards } from '@/lib/supabase/dashboard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/shared/Card'
 
 export function StatsDashboard() {
   const { user, stravaDataSource, getStravaAccessToken } = useAuth()
@@ -87,12 +87,13 @@ export function StatsDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Error Loading Stats</CardTitle>
-          <CardDescription>
+         
+        </CardHeader>
+        <CardDescription>
             {isAuthError
               ? 'Your session has expired. Please log in again.'
               : errorMessage}
           </CardDescription>
-        </CardHeader>
         {isAuthError && (
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
@@ -108,7 +109,6 @@ export function StatsDashboard() {
     <div className="space-y-6">
       {/* Dashboard Toolbar */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Dashboard</h2>
         <CardConfigDialog onSave={handleRefresh} />
       </div>
 
