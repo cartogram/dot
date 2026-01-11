@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
+  CardFooter,
   CardDescription,
 } from '@/components/shared/Card'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +20,8 @@ import { Separator } from '@/components/ui/separator'
 interface ActivityStatsCardProps {
   type: string
   totals: ActivityTotals
+  title: string
+  actions?: React.ReactNode
   progress?: {
     distance?: ProgressMetric
     count?: ProgressMetric
@@ -28,20 +31,20 @@ interface ActivityStatsCardProps {
   goalButton?: React.ReactNode
 }
 
-export function ActivityStatsCard({ type, totals, progress, goalButton }: ActivityStatsCardProps) {
+export function ActivityStatsCard({ type, title, actions, totals, progress, goalButton }: ActivityStatsCardProps) {
   const hasProgress = progress && Object.keys(progress).length > 0
   const primaryProgress = progress?.distance || progress?.count
 
   return (
     <Card>
       <CardHeader>
-      <CardTitle>{type}</CardTitle>
-        
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent >
-      <CardDescription>Year to date</CardDescription>
 
-          {goalButton && <div className="ml-2">{goalButton}</div>}
+        <CardDescription>type: {type}</CardDescription>
+
+        {goalButton && <div className="ml-2">{goalButton}</div>}
         {primaryProgress && (
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between text-sm">
@@ -82,6 +85,8 @@ export function ActivityStatsCard({ type, totals, progress, goalButton }: Activi
           </>
         )}
       </CardContent>
+
+      <CardFooter>{actions && actions}</CardFooter>
     </Card>
   )
 }

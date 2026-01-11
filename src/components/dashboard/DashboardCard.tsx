@@ -6,7 +6,7 @@ import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dash
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
 import { CardConfigDialog } from './CardConfigDialog'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/shared/Card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/shared/Card'
 
 interface DashboardCardProps {
   config: ActivityCardConfig
@@ -98,18 +98,17 @@ export function DashboardCard({
   if (!totals || totals.count === 0) {
     return (
       <Card className="relative group">
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <CardConfigDialog existingCard={config} onSave={onUpdate} />
-        </div>
         <CardHeader>
           <CardTitle>{config.title}</CardTitle>
-        
         </CardHeader>
         <CardContent>
           <CardDescription>
             No activities for {getTimeFrameDescription(config.timeFrame, config.customDateRange).toLowerCase()}
           </CardDescription>
         </CardContent>
+        <CardFooter>
+          <CardConfigDialog existingCard={config} onSave={onUpdate} />
+        </CardFooter>
       </Card>
     )
   }
@@ -117,11 +116,10 @@ export function DashboardCard({
   // Render with data
   return (
     <div className="relative group">
-      <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-        <CardConfigDialog existingCard={config} onSave={onUpdate} />
-      </div>
       <ActivityStatsCard
-        type={config.title}
+        actions={<CardConfigDialog existingCard={config} onSave={onUpdate} />}
+        type={ACTIVITY_CONFIGS[config.activityIds[0]].stravaType}
+        title={config.title}
         totals={totals}
         progress={progress}
       />

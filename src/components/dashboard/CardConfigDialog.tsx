@@ -1,12 +1,12 @@
 import * as React from 'react'
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Button } from '@/components/shared/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/shared/ui/input'
@@ -172,8 +172,8 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <div className="flex justify-center"><Button variant="primary" onClick={() => setOpen(true)}>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
         {trigger || (
           <>
             {isEditMode ? (
@@ -188,13 +188,12 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
           </>
         )}
       </Button>
-      </div>
-      <AlertDialogContent className="max-w-2xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle>
+      <SheetContent className="max-w-2xl">
+        <SheetHeader>
+          <SheetTitle>
             {isEditMode ? 'Edit Activity Card' : 'Add Activity Card'}
-          </AlertDialogTitle>
-        </AlertDialogHeader>
+          </SheetTitle>
+        </SheetHeader>
 
         <FieldGroup className="py-4 space-y-4 max-h-[600px] overflow-y-auto">
           {/* General Settings */}
@@ -342,13 +341,13 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
           )}
         </FieldGroup>
 
-        <AlertDialogFooter className="flex flex-0 gap-8 justify-between">
-        {isEditMode && (<div>
-            
-              <Button variant="destructive" onClick={handleDelete}>
-                Delete Card
-              </Button>
-            </div>
+        <SheetFooter className="flex flex-0 gap-8 justify-between">
+          {isEditMode && (<div>
+
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete Card
+            </Button>
+          </div>
           )}
           <div className="flex flex-1 gap-2">
             <Button variant="secondary" onClick={() => setOpen(false)} disabled={isSaving}>Cancel</Button>
@@ -356,8 +355,8 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
               {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
             </Button>
           </div>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
