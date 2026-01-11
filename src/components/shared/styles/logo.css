@@ -5,9 +5,9 @@
   align-items: center;
   width: 100%;
   justify-content: center;
-  padding-top: 2em;
   font-family: var(--font-geist-mono);
   gap: 0.25em;
+  position: absolute;
 }
 
 .Logo__Separator {

@@ -17,9 +17,6 @@ export function ThemeToggle() {
     return null
   }
 
-
-  console.log(theme)
-
   return (
     <Button
       onClick={() => {

@@ -5,9 +5,10 @@
   top: 0;
   width: calc(var(--site-width) + 10em);
   max-width: 100%;
-  padding: 1em 1em 0;
+  padding: 1em;
   pointer-events: none;
   z-index: 10;
+
 }
 
 .Header__Item {
@@ -22,6 +23,7 @@
 
 @media (min-width: 1100px) {
   .Header {
+    padding: 2em;
     position: sticky;
   }
 }

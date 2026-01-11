@@ -12,12 +12,24 @@
   text-decoration: underline;
   transition: all 0.2s;
   color: var(--color-primary);
+  text-align: center;
+  padding: 0.5em;
+  border-radius: 0.25em;
+  border: 1px solid transparent;
+  outline: none;
 }
 
+.Button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.Button:focus,
 .Button:hover,
 .Button:focus {
   color: var(--color-primary);
-  background: var(--color-primary-light);
+  background-color: var(--color-secondary);
+  border: 1px solid;
 }
 
 .Button--primary {
