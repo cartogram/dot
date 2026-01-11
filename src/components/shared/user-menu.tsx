@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/shared/ui/avat
 import type { User } from '@supabase/supabase-js'
 
 
-function getUserInitials(fullName: string | null) {
+function getUserInitials(fullName: string | undefined) {
   return fullName ? fullName.split(' ').map(name => name[0]).join('') : ''
 }
 
@@ -19,7 +19,7 @@ export function UserMenu({ user }: UserMenuProps) {
         <Avatar>
           <AvatarImage src={user.id} />
           <AvatarFallback>
-            {getUserInitials(user.id)}
+            {getUserInitials(user.user_metadata.full_name)}
           </AvatarFallback>
         </Avatar>
       </a>

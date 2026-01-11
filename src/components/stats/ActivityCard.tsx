@@ -6,7 +6,7 @@ import { getStoredGoals } from '@/lib/goals/storage'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from './ActivityStatsCard'
 import { CombinedActivityGoalDialog } from '@/components/goals/CombinedActivityGoalDialog'
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/shared/Card'
 
 interface ActivityCardProps {
   activityConfig: ActivityConfig

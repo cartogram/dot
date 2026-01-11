@@ -5,8 +5,9 @@
   overflow: hidden;
   margin: 0 auto;
    position: relative;
-  box-shadow: 0 0 0 1px var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--color-primary);
+  color: var(--color-secondary);
 }
