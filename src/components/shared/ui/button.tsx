@@ -27,7 +27,7 @@ const buttonVariants = cva('Button', {
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   to?: string
 }
 
@@ -41,7 +41,6 @@ function Button({
   ...props
 }: ButtonProps) {
 
-  console.log('Button', { to, children })
   if (to) {
     return (
       <Link to={to} className={cn(buttonVariants({ variant, size, className }))}>

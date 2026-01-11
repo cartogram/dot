@@ -77,3 +77,7 @@
 .Card__CardSkeleton {
   min-height: 3em;
 }
+
+.Card__Description {
+  padding: 0 0 1em;
+}

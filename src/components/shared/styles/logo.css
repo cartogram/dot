@@ -1,6 +1,5 @@
 .Logo {
   top: 0;
-  height: 6em;
   display: flex;
   align-items: center;
   width: 100%;
@@ -8,6 +7,14 @@
   font-family: var(--font-geist-mono);
   gap: 0.25em;
   position: absolute;
+  line-height: 2.85em;
+  padding: 1em;
+}
+
+@media (min-width: 1100px) {
+  .Logo {
+    padding: 2em;
+  }
 }
 
 .Logo__Separator {
