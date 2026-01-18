@@ -7,11 +7,13 @@ The application now uses Supabase for authentication and persistent storage. Thi
 ## Architecture Changes
 
 ### Before (Strava OAuth Auth)
+
 - Strava OAuth was the authentication layer
 - Tokens stored in localStorage
 - Dashboard config stored in localStorage
 
 ### After (Supabase Auth)
+
 - Email/password authentication via Supabase
 - Strava is a "connected data source" (like a third-party integration)
 - User profiles, data sources, and dashboard configs stored in Supabase
@@ -43,6 +45,7 @@ supabase/schema.sql
 ```
 
 This will create:
+
 - `profiles` table - User profiles
 - `data_sources` table - Connected services (Strava, etc.)
 - `dashboard_configs` table - Dashboard configurations
@@ -96,12 +99,14 @@ For users who were using the app before Supabase:
 ## Key Files
 
 ### Database & Types
+
 - `supabase/schema.sql` - Database schema
 - `src/lib/supabase/types.ts` - TypeScript types for database
 - `src/lib/supabase/client.ts` - Supabase client singleton
 - `src/lib/supabase/dashboard.ts` - Dashboard storage functions
 
 ### Authentication
+
 - `src/lib/auth/SupabaseAuthContext.tsx` - New auth context (replaces AuthContext.tsx)
 - `src/routes/__root.tsx` - Root route with AuthProvider
 - `src/routes/signup.tsx` - Signup page
@@ -111,12 +116,14 @@ For users who were using the app before Supabase:
 - `src/routes/sources.tsx` - Strava connection page
 
 ### Components
+
 - `src/components/auth/SignupForm.tsx` - Signup form
 - `src/components/auth/LoginForm.tsx` - Login form
 - `src/components/auth/ResetPasswordForm.tsx` - Password reset form
 - `src/components/auth/UpdatePasswordForm.tsx` - Password update form
 
 ### Updated Components
+
 - `src/routes/index.tsx` - Uses new auth, shows onboarding states
 - `src/components/stats/StatsDashboard.tsx` - Uses Supabase storage
 - `src/components/dashboard/CardConfigDialog.tsx` - Uses Supabase storage
@@ -127,16 +134,16 @@ For users who were using the app before Supabase:
 
 ```typescript
 const {
-  user,                      // Supabase User object
-  profile,                   // User profile from profiles table
-  session,                   // Supabase Session
-  isAuthenticated,           // Boolean
-  isLoading,                 // Boolean
-  stravaDataSource,          // Strava connection data (null if not connected)
-  logout,                    // async () => Promise<void>
-  refreshProfile,            // async () => Promise<void>
-  refreshStravaConnection,   // async () => Promise<void>
-  getStravaAccessToken,      // async () => Promise<string | null>
+  user, // Supabase User object
+  profile, // User profile from profiles table
+  session, // Supabase Session
+  isAuthenticated, // Boolean
+  isLoading, // Boolean
+  stravaDataSource, // Strava connection data (null if not connected)
+  logout, // async () => Promise<void>
+  refreshProfile, // async () => Promise<void>
+  refreshStravaConnection, // async () => Promise<void>
+  getStravaAccessToken, // async () => Promise<string | null>
 } = useAuth()
 ```
 
@@ -145,6 +152,7 @@ const {
 ### Row Level Security (RLS)
 
 All tables have RLS enabled with policies ensuring:
+
 - Users can only access their own data
 - Users can CRUD their own profiles
 - Users can CRUD their own data sources
@@ -171,6 +179,7 @@ All tables have RLS enabled with policies ensuring:
 ### Database Queries
 
 Check data in Supabase Dashboard > Table Editor:
+
 - `profiles` - User profiles
 - `data_sources` - Strava connections
 - `dashboard_configs` - Dashboard configs
@@ -187,15 +196,18 @@ Check data in Supabase Dashboard > Table Editor:
 ## Troubleshooting
 
 ### "Missing Supabase environment variables"
+
 - Check `.env` file has `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
 - Restart dev server after adding env vars
 
 ### "Failed to load dashboard configuration"
+
 - Check RLS policies are enabled
 - Verify user is authenticated
 - Check browser console for detailed errors
 
 ### Strava token refresh fails
+
 - Verify `VITE_STRAVA_CLIENT_SECRET` is set correctly
 - Check Strava OAuth app settings
 - Ensure redirect URI is whitelisted in Strava app

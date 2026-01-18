@@ -28,11 +28,17 @@ describe('SignupForm', () => {
     render(<SignupForm />)
 
     // Check that all form elements are present
-    await expect.element(screen.getByText(/create an account/i)).toBeInTheDocument()
-    await expect.element(screen.getByLabelText(/full name/i)).toBeInTheDocument()
+    await expect
+      .element(screen.getByText(/create an account/i))
+      .toBeInTheDocument()
+    await expect
+      .element(screen.getByLabelText(/full name/i))
+      .toBeInTheDocument()
     await expect.element(screen.getByLabelText(/email/i)).toBeInTheDocument()
     await expect.element(screen.getByLabelText(/password/i)).toBeInTheDocument()
-    await expect.element(screen.getByRole('button', { name: /sign up/i })).toBeInTheDocument()
+    await expect
+      .element(screen.getByRole('button', { name: /sign up/i }))
+      .toBeInTheDocument()
   })
 
   it('should have link to login page', async () => {
@@ -47,7 +53,9 @@ describe('SignupForm', () => {
   it('should show password requirements hint', async () => {
     render(<SignupForm />)
 
-    await expect.element(screen.getByText(/must be at least 6 characters/i)).toBeInTheDocument()
+    await expect
+      .element(screen.getByText(/must be at least 6 characters/i))
+      .toBeInTheDocument()
   })
 
   it('should update all fields on input', async () => {
@@ -78,7 +86,13 @@ describe('SignupForm', () => {
 
     // Mock a slow signup
     vi.mocked(supabase.auth.signUp).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ data: { user: null, session: null }, error: null }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve({ data: { user: null, session: null }, error: null }),
+            100,
+          ),
+        ),
     )
 
     render(<SignupForm />)
@@ -94,7 +108,9 @@ describe('SignupForm', () => {
     await userEvent.click(submitButton)
 
     // Check that button shows loading state
-    await expect.element(screen.getByRole('button', { name: /creating account/i })).toBeInTheDocument()
+    await expect
+      .element(screen.getByRole('button', { name: /creating account/i }))
+      .toBeInTheDocument()
 
     // Check that inputs are disabled
     expect((nameInput as HTMLInputElement).disabled).toBe(true)
@@ -122,7 +138,9 @@ describe('SignupForm', () => {
     await userEvent.fill(passwordInput, 'password123')
     await userEvent.click(submitButton)
 
-    await expect.element(screen.getByText(/email already registered/i)).toBeInTheDocument()
+    await expect
+      .element(screen.getByText(/email already registered/i))
+      .toBeInTheDocument()
   })
 
   it('should show email confirmation message when email verification is required', async () => {
@@ -145,7 +163,11 @@ describe('SignupForm', () => {
     await userEvent.fill(passwordInput, 'password123')
     await userEvent.click(submitButton)
 
-    await expect.element(screen.getByText(/please check your email to confirm your account/i)).toBeInTheDocument()
+    await expect
+      .element(
+        screen.getByText(/please check your email to confirm your account/i),
+      )
+      .toBeInTheDocument()
   })
 
   it('should call signUp with correct data', async () => {

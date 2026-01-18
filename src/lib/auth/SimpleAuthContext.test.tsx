@@ -61,11 +61,13 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     )
 
     await expect.element(screen.getByTestId('user-status')).toBeInTheDocument()
-    await expect.element(screen.getByTestId('strava-status')).toBeInTheDocument()
+    await expect
+      .element(screen.getByTestId('strava-status'))
+      .toBeInTheDocument()
   })
 
   it('should show not logged in when no session', async () => {
@@ -76,12 +78,16 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('user-status').textContent).toBe('Not logged in')
-      expect(screen.getByTestId('strava-status').textContent).toBe('No Strava connection')
+      expect(screen.getByTestId('user-status').textContent).toBe(
+        'Not logged in',
+      )
+      expect(screen.getByTestId('strava-status').textContent).toBe(
+        'No Strava connection',
+      )
     })
   })
 
@@ -119,11 +125,13 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('user-status').textContent).toBe('Logged in as test@example.com')
+      expect(screen.getByTestId('user-status').textContent).toBe(
+        'Logged in as test@example.com',
+      )
     })
   })
 
@@ -170,11 +178,13 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('strava-status').textContent).toBe('Connected to Strava')
+      expect(screen.getByTestId('strava-status').textContent).toBe(
+        'Connected to Strava',
+      )
     })
 
     // Verify the database query was made
@@ -223,7 +233,7 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <LogoutTest />
-      </AuthProvider>
+      </AuthProvider>,
     )
 
     // The logout function should exist (won't actually trigger navigation in tests)
@@ -253,11 +263,13 @@ describe('AuthProvider', () => {
     render(
       <AuthProvider>
         <TestComponent />
-      </AuthProvider>
+      </AuthProvider>,
     )
 
     await waitFor(() => {
-      expect(screen.getByTestId('user-status').textContent).toBe('Not logged in')
+      expect(screen.getByTestId('user-status').textContent).toBe(
+        'Not logged in',
+      )
     })
 
     // Verify listener was set up

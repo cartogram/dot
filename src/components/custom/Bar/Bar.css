@@ -1,5 +1,6 @@
 :root {
-  --stripes: radial-gradient(
+  --stripes:
+    radial-gradient(
         9.44px at calc(100% + 8px) 50%,
         #0000 calc(99% - 1px),
         #000 calc(101% - 1px) 99%,

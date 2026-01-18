@@ -6,7 +6,14 @@ import { Button } from '@/components/custom/Button/Button'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Profile } from '@/components/layout/Profile'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/custom/Card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+  CardFooter,
+} from '@/components/custom/Card'
 const queryClient = new QueryClient()
 
 export const Route = createFileRoute('/')({
@@ -20,7 +27,7 @@ function App() {
     console.log('[Index Route] Rendering with user state:', {
       hasUser: !!user,
       userId: user?.id,
-      email: user?.email
+      email: user?.email,
     })
   }, [user])
 
@@ -33,11 +40,14 @@ function App() {
           <CardTitle>Distance Over Time</CardTitle>
         </CardHeader>
         <CardFooter>
-          <Button to="/login" variant="secondary">Log in</Button>
-          <Button to="/signup" variant="primary">Sign up</Button>
+          <Button to="/login" variant="secondary">
+            Log in
+          </Button>
+          <Button to="/signup" variant="primary">
+            Sign up
+          </Button>
         </CardFooter>
       </Card>
-
     )
   }
 

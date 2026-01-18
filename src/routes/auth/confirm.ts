@@ -24,7 +24,10 @@ export const Route = createFileRoute('/auth/confirm')({
       throw redirect({ to: '/login' })
     }
 
-    console.log('Confirming with:', { token_hash: token_hash.substring(0, 10) + '...', type })
+    console.log('Confirming with:', {
+      token_hash: token_hash.substring(0, 10) + '...',
+      type,
+    })
 
     try {
       // Verify the OTP token

@@ -11,10 +11,10 @@ import React from 'react'
  */
 function createContext<ContextValueType extends object | null>(
   rootComponentName: string,
-  defaultContext?: ContextValueType
+  defaultContext?: ContextValueType,
 ) {
   const Context = React.createContext<ContextValueType | undefined>(
-    defaultContext
+    defaultContext,
   )
 
   function Provider(props: ContextValueType & { children: React.ReactNode }) {
@@ -23,7 +23,7 @@ function createContext<ContextValueType extends object | null>(
     const value = React.useMemo(
       () => context,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      Object.values(context)
+      Object.values(context),
     ) as ContextValueType
     return <Context.Provider value={value}>{children}</Context.Provider>
   }
@@ -34,7 +34,7 @@ function createContext<ContextValueType extends object | null>(
     if (defaultContext !== undefined) return defaultContext
     // if a defaultContext wasn't specified, it's a required context.
     throw new Error(
-      `\`${consumerName}\` must be used within \`${rootComponentName}\``
+      `\`${consumerName}\` must be used within \`${rootComponentName}\``,
     )
   }
 

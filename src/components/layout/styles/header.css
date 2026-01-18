@@ -8,15 +8,13 @@
   padding: 1em;
   pointer-events: none;
   z-index: 10;
-
 }
 
 .Header__Item {
   display: flex;
   align-items: center;
   pointer-events: auto;
-  gap: .25em;
-  
+  gap: 0.25em;
 }
 
 @media (min-width: 1100px) {

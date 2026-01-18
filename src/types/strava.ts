@@ -52,8 +52,8 @@ export interface StoredTokens {
 
 // Goal tracking - New dynamic structure
 export interface YearlyGoals {
-  activities: Record<string, ActivityGoal>  // Key is activity ID from config
-  visibility: Record<string, boolean>       // Key is activity ID from config
+  activities: Record<string, ActivityGoal> // Key is activity ID from config
+  visibility: Record<string, boolean> // Key is activity ID from config
   combined: Record<string, CombinedActivityGoal> // Key is combined activity ID
 }
 

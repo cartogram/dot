@@ -31,14 +31,18 @@ describe('LoginForm', () => {
     await expect.element(screen.getByText(/welcome back/i)).toBeInTheDocument()
     await expect.element(screen.getByLabelText(/email/i)).toBeInTheDocument()
     await expect.element(screen.getByLabelText(/password/i)).toBeInTheDocument()
-    await expect.element(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument()
+    await expect
+      .element(screen.getByRole('button', { name: /log in/i }))
+      .toBeInTheDocument()
   })
 
   it('should have links to signup and password reset', async () => {
     render(<LoginForm />)
 
     const signupLink = screen.getByRole('link', { name: /sign up/i })
-    const resetLink = screen.getByRole('link', { name: /forgot your password/i })
+    const resetLink = screen.getByRole('link', {
+      name: /forgot your password/i,
+    })
 
     await expect.element(signupLink).toBeInTheDocument()
     await expect.element(resetLink).toBeInTheDocument()
@@ -65,7 +69,13 @@ describe('LoginForm', () => {
 
     // Mock a slow login
     vi.mocked(supabase.auth.signInWithPassword).mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve({ data: { user: null, session: null }, error: null }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve({ data: { user: null, session: null }, error: null }),
+            100,
+          ),
+        ),
     )
 
     render(<LoginForm />)
@@ -79,7 +89,9 @@ describe('LoginForm', () => {
     await userEvent.click(submitButton)
 
     // Check that button shows loading state
-    await expect.element(screen.getByRole('button', { name: /logging in/i })).toBeInTheDocument()
+    await expect
+      .element(screen.getByRole('button', { name: /logging in/i }))
+      .toBeInTheDocument()
 
     // Check that inputs are disabled
     expect((emailInput as HTMLInputElement).disabled).toBe(true)
@@ -104,7 +116,9 @@ describe('LoginForm', () => {
     await userEvent.fill(passwordInput, 'wrongpassword')
     await userEvent.click(submitButton)
 
-    await expect.element(screen.getByText(/invalid credentials/i)).toBeInTheDocument()
+    await expect
+      .element(screen.getByText(/invalid credentials/i))
+      .toBeInTheDocument()
   })
 
   it('should call signInWithPassword with correct credentials', async () => {

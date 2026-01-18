@@ -7,17 +7,20 @@ This is a React application built with TanStack Start (React Router), TypeScript
 ## Tech Stack
 
 ### Core Framework
+
 - **React 19.2.0** - Latest React with concurrent features
 - **TypeScript 5.7.2** - Type-safe development
 - **Vite 7.1.7** - Fast build tool and dev server
 - **TanStack Start 1.132.0** - Full-stack React framework with file-based routing
 
 ### Routing & State
+
 - **@tanstack/react-router 1.132.0** - Type-safe routing
 - **@tanstack/react-start** - SSR and full-stack capabilities
 - **@tanstack/react-router-ssr-query** - SSR query integration
 
 ### UI & Styling
+
 - **Tailwind CSS 4.0.6** - Utility-first CSS framework
 - **shadcn/ui** - High-quality, accessible component library built on Base UI
 - **@base-ui/react 1.0.0** - Unstyled accessible components
@@ -27,6 +30,7 @@ This is a React application built with TanStack Start (React Router), TypeScript
 - **@fontsource-variable/inter** - Inter font family
 
 ### Development Tools
+
 - **Vitest 3.0.5** - Unit testing framework
 - **@testing-library/react 16.2.0** - React testing utilities
 - **ESLint** - Code linting
@@ -35,6 +39,7 @@ This is a React application built with TanStack Start (React Router), TypeScript
 - **@tanstack/react-router-devtools** - Router debugging
 
 ### Backend
+
 - **Nitro (latest)** - Universal server framework
 
 ## Project Structure
@@ -98,6 +103,7 @@ pnpm check        # Format with Prettier and fix ESLint issues
 ### Adding New Components
 
 1. **shadcn/ui components**: Use the shadcn CLI to add new components
+
    ```bash
    npx shadcn@latest add [component-name]
    ```
@@ -107,6 +113,7 @@ pnpm check        # Format with Prettier and fix ESLint issues
 ### Routing
 
 This project uses TanStack Router with file-based routing:
+
 - Routes are defined in `src/routes/`
 - Each route exports a `Route` object created with `createFileRoute()`
 - Example: `src/routes/index.tsx` is the home page at `/`
@@ -133,6 +140,7 @@ This project uses TanStack Router with file-based routing:
 ## Current State
 
 Based on git status, recent work includes:
+
 - Setting up shadcn/ui components (added multiple UI components)
 - Configuring components.json for shadcn/ui
 - Creating example components

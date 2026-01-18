@@ -6,7 +6,6 @@ import { Button } from '@/components/custom/Button/Button'
 import { IconSignOut } from '@/components/custom/Icons/Icons'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 
-
 import './styles/header.css'
 
 function User() {

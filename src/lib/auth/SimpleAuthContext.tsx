@@ -22,7 +22,8 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(null)
-  const [stravaDataSource, setStravaDataSource] = React.useState<DataSource | null>(null)
+  const [stravaDataSource, setStravaDataSource] =
+    React.useState<DataSource | null>(null)
 
   // Fetch Strava connection for a user
   const fetchStravaConnection = React.useCallback(async (userId: string) => {
@@ -50,12 +51,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('[AuthContext] Initial session:', {
         hasSession: !!session,
         hasUser: !!session?.user,
-        userId: session?.user?.id
+        userId: session?.user?.id,
       })
       setUser(session?.user ?? null)
 
       if (session?.user) {
-        console.log('[AuthContext] Fetching Strava connection for user:', session.user.id)
+        console.log(
+          '[AuthContext] Fetching Strava connection for user:',
+          session.user.id,
+        )
         const strava = await fetchStravaConnection(session.user.id)
         console.log('[AuthContext] Strava connection fetched:', !!strava)
         setStravaDataSource(strava)
@@ -63,17 +67,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('[AuthContext] Auth state changed:', {
         event,
         hasSession: !!session,
         hasUser: !!session?.user,
-        userId: session?.user?.id
+        userId: session?.user?.id,
       })
       setUser(session?.user ?? null)
 
       if (session?.user) {
-        console.log('[AuthContext] Fetching Strava connection after auth change...')
+        console.log(
+          '[AuthContext] Fetching Strava connection after auth change...',
+        )
         const strava = await fetchStravaConnection(session.user.id)
         console.log('[AuthContext] Strava connection fetched:', !!strava)
         setStravaDataSource(strava)
@@ -103,7 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStravaDataSource(strava)
   }, [user, fetchStravaConnection])
 
-  const getStravaAccessToken = React.useCallback(async (): Promise<string | null> => {
+  const getStravaAccessToken = React.useCallback(async (): Promise<
+    string | null
+  > => {
     if (!stravaDataSource || !user) return null
 
     // Check if token is expired (with 5 minute buffer)
@@ -122,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { refreshStravaToken } = await import('@/lib/server/strava')
 
       const newTokens = await refreshStravaToken({
-        data: { refresh_token: stravaDataSource.refresh_token }
+        data: { refresh_token: stravaDataSource.refresh_token },
       })
 
       // Update database with new tokens
@@ -158,13 +168,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [stravaDataSource, user])
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      stravaDataSource,
-      logout,
-      refreshStravaConnection,
-      getStravaAccessToken,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        stravaDataSource,
+        logout,
+        refreshStravaConnection,
+        getStravaAccessToken,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

@@ -13,7 +13,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'Missing Supabase environment variables. Please check your .env file for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
+    'Missing Supabase environment variables. Please check your .env file for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY',
   )
 }
 
@@ -38,10 +38,13 @@ export function createClient() {
           return []
         }
 
-        const cookies = document.cookie.split('; ').filter(Boolean).map(cookie => {
-          const [name, ...rest] = cookie.split('=')
-          return { name, value: rest.join('=') }
-        })
+        const cookies = document.cookie
+          .split('; ')
+          .filter(Boolean)
+          .map((cookie) => {
+            const [name, ...rest] = cookie.split('=')
+            return { name, value: rest.join('=') }
+          })
         console.log('[Supabase Client] getAll cookies:', cookies.length)
         return cookies
       },
@@ -51,7 +54,11 @@ export function createClient() {
           return
         }
 
-        console.log('[Supabase Client] setAll cookies:', cookiesToSet.length, cookiesToSet.map(c => c.name))
+        console.log(
+          '[Supabase Client] setAll cookies:',
+          cookiesToSet.length,
+          cookiesToSet.map((c) => c.name),
+        )
         cookiesToSet.forEach(({ name, value, options }) => {
           let cookieString = `${name}=${value}`
 
@@ -78,11 +85,16 @@ export function createClient() {
           // This is crucial for OAuth redirects and mobile browsers
           cookieString += '; SameSite=Lax'
 
-          console.log('[Supabase Client] Setting cookie:', name, 'with options:', options)
+          console.log(
+            '[Supabase Client] Setting cookie:',
+            name,
+            'with options:',
+            options,
+          )
           document.cookie = cookieString
         })
-      }
-    }
+      },
+    },
   })
 }
 

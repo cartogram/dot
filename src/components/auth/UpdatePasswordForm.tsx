@@ -4,7 +4,13 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/custom/Card'
 
 export function UpdatePasswordForm() {
   const navigate = useNavigate()
@@ -64,7 +70,9 @@ export function UpdatePasswordForm() {
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
+              <FieldLabel htmlFor="confirmPassword">
+                Confirm Password
+              </FieldLabel>
               <Input
                 id="confirmPassword"
                 type="password"

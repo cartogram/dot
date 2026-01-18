@@ -4,7 +4,13 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/custom/Card'
 
 export function SignupForm() {
   const navigate = useNavigate()
@@ -49,77 +55,81 @@ export function SignupForm() {
   }
 
   return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Create an account</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>Enter your information to get started</CardDescription>
+        <form onSubmit={handleSignup}>
+          <FieldGroup className="space-y-4">
+            <Field>
+              <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
+              <Input
+                id="fullName"
+                type="text"
+                placeholder="John Doe"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </Field>
 
-      <Card >
-        <CardHeader>
-          <CardTitle>Create an account</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CardDescription>Enter your information to get started</CardDescription>
-          <form onSubmit={handleSignup}>
-            <FieldGroup className="space-y-4">
-              <Field>
-                <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
-                <Input
-                  id="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </Field>
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </Field>
 
-              <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-              </Field>
+            <Field>
+              <FieldLabel htmlFor="password">Password</FieldLabel>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+                minLength={6}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Must be at least 6 characters
+              </p>
+            </Field>
 
-              <Field>
-                <FieldLabel htmlFor="password">Password</FieldLabel>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                  minLength={6}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Must be at least 6 characters
-                </p>
-              </Field>
+            {error && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
+                {error}
+              </div>
+            )}
 
-              {error && (
-                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-                  {error}
-                </div>
-              )}
+            <Button
+              variant="primary"
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating account...' : 'Sign up'}
+            </Button>
+          </FieldGroup>
+        </form>
 
-              <Button variant="primary" type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating account...' : 'Sign up'}
-              </Button>
-            </FieldGroup>
-          </form>
-
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
-            <a href="/login" className="text-primary hover:underline">
-              Log in
-            </a>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="mt-4 text-center text-sm">
+          Already have an account?{' '}
+          <a href="/login" className="text-primary hover:underline">
+            Log in
+          </a>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import './styles/profile.css'
 
@@ -17,7 +16,6 @@ export function Profile() {
           {new Date(user.created_at).toDateString()}
         </span>
         <span className="heading--4">{user.id}</span>
-
       </div>
     </div>
   )

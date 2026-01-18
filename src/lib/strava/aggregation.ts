@@ -10,26 +10,26 @@ import type { StravaActivity, ActivityTotals } from '@/types/strava'
  */
 export function aggregateActivities(
   activities: StravaActivity[],
-  activityType: string
+  activityType: string,
 ): ActivityTotals {
   // Fast filter + reduce in single pass
   return activities
-    .filter(activity => activity.type === activityType)
+    .filter((activity) => activity.type === activityType)
     .reduce(
       (totals, activity) => ({
         count: totals.count + 1,
         distance: totals.distance + activity.distance,
         moving_time: totals.moving_time + activity.moving_time,
         elapsed_time: totals.elapsed_time + activity.elapsed_time,
-        elevation_gain: totals.elevation_gain + activity.total_elevation_gain
+        elevation_gain: totals.elevation_gain + activity.total_elevation_gain,
       }),
       {
         count: 0,
         distance: 0,
         moving_time: 0,
         elapsed_time: 0,
-        elevation_gain: 0
-      } as ActivityTotals
+        elevation_gain: 0,
+      } as ActivityTotals,
     )
 }
 
@@ -43,7 +43,7 @@ export function aggregateActivities(
  */
 export function aggregateActivitiesByType(
   activities: StravaActivity[],
-  activityTypes: string[]
+  activityTypes: string[],
 ): Record<string, ActivityTotals> {
   const result: Record<string, ActivityTotals> = {}
 

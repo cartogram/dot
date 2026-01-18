@@ -529,5 +529,5 @@ export {
   IconUsers,
   IconExternalLink,
   IconChevronUpDown,
-  IconSignOut
+  IconSignOut,
 }

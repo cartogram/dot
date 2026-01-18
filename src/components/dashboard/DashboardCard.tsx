@@ -1,12 +1,26 @@
 import * as React from 'react'
 import type { ActivityCardConfig } from '@/types/dashboard'
-import type { StravaActivity, StravaStats, ActivityTotals } from '@/types/strava'
+import type {
+  StravaActivity,
+  StravaStats,
+  ActivityTotals,
+} from '@/types/strava'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
-import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dashboard/timeframes'
+import {
+  filterActivitiesByTimeFrame,
+  getTimeFrameDescription,
+} from '@/lib/dashboard/timeframes'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
 import { CardConfigDialog } from './CardConfigDialog'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/custom/Card'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/custom/Card'
 
 interface DashboardCardProps {
   config: ActivityCardConfig
@@ -21,14 +35,14 @@ export function DashboardCard({
   allActivities,
   stats,
   isLoading,
-  onUpdate
+  onUpdate,
 }: DashboardCardProps) {
   // Filter activities by the card's time frame
   const filteredActivities = React.useMemo(() => {
     return filterActivitiesByTimeFrame(
       allActivities,
       config.timeFrame,
-      config.customDateRange
+      config.customDateRange,
     )
   }, [allActivities, config.timeFrame, config.customDateRange])
 
@@ -38,30 +52,33 @@ export function DashboardCard({
 
     // Get all activity types to combine
     const activityTypes = config.activityIds
-      .map(id => ACTIVITY_CONFIGS[id]?.stravaType)
+      .map((id) => ACTIVITY_CONFIGS[id]?.stravaType)
       .filter(Boolean)
 
     if (activityTypes.length === 0) return null
 
     // Filter activities that match any of the types
-    const relevantActivities = filteredActivities.filter(activity =>
-      activityTypes.includes(activity.type)
+    const relevantActivities = filteredActivities.filter((activity) =>
+      activityTypes.includes(activity.type),
     )
 
     // Aggregate them together
-    return relevantActivities.reduce((totals, activity) => ({
-      count: totals.count + 1,
-      distance: totals.distance + activity.distance,
-      moving_time: totals.moving_time + activity.moving_time,
-      elapsed_time: totals.elapsed_time + activity.elapsed_time,
-      elevation_gain: totals.elevation_gain + activity.total_elevation_gain
-    }), {
-      count: 0,
-      distance: 0,
-      moving_time: 0,
-      elapsed_time: 0,
-      elevation_gain: 0
-    })
+    return relevantActivities.reduce(
+      (totals, activity) => ({
+        count: totals.count + 1,
+        distance: totals.distance + activity.distance,
+        moving_time: totals.moving_time + activity.moving_time,
+        elapsed_time: totals.elapsed_time + activity.elapsed_time,
+        elevation_gain: totals.elevation_gain + activity.total_elevation_gain,
+      }),
+      {
+        count: 0,
+        distance: 0,
+        moving_time: 0,
+        elapsed_time: 0,
+        elevation_gain: 0,
+      },
+    )
   }, [config.activityIds, filteredActivities, isLoading])
 
   // Calculate progress based on goals and shown metrics
@@ -72,11 +89,15 @@ export function DashboardCard({
     const filteredGoal = {
       distance: config.showMetrics.distance ? config.goal.distance : undefined,
       count: config.showMetrics.count ? config.goal.count : undefined,
-      elevation: config.showMetrics.elevation ? config.goal.elevation : undefined,
+      elevation: config.showMetrics.elevation
+        ? config.goal.elevation
+        : undefined,
       time: config.showMetrics.time ? config.goal.time : undefined,
     }
 
-    const hasAnyGoal = Object.values(filteredGoal).some(value => value !== undefined)
+    const hasAnyGoal = Object.values(filteredGoal).some(
+      (value) => value !== undefined,
+    )
     if (!hasAnyGoal) return undefined
 
     return calculateActivityProgress(totals, filteredGoal)
@@ -103,7 +124,11 @@ export function DashboardCard({
         </CardHeader>
         <CardContent>
           <CardDescription>
-            No activities for {getTimeFrameDescription(config.timeFrame, config.customDateRange).toLowerCase()}
+            No activities for{' '}
+            {getTimeFrameDescription(
+              config.timeFrame,
+              config.customDateRange,
+            ).toLowerCase()}
           </CardDescription>
         </CardContent>
         <CardFooter>

@@ -1,7 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
-import type { StravaTokenResponse, StravaStats, StravaActivity } from '@/types/strava'
+import type {
+  StravaTokenResponse,
+  StravaStats,
+  StravaActivity,
+} from '@/types/strava'
 import { z } from 'zod'
-
 
 const RefreshTokenSchema = z.object({
   refresh_token: z.string(),
@@ -11,11 +14,9 @@ const RefreshTokenSchema = z.object({
  * Server function to refresh Strava access token
  * Keeps client secret secure on server
  */
-export const refreshStravaToken = createServerFn(
-  { method: 'POST' },
-)
-.inputValidator(RefreshTokenSchema)
-.handler(async ({ data }) => {
+export const refreshStravaToken = createServerFn({ method: 'POST' })
+  .inputValidator(RefreshTokenSchema)
+  .handler(async ({ data }) => {
     const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,8 +33,7 @@ export const refreshStravaToken = createServerFn(
     }
 
     return response.json()
-  }
-)
+  })
 
 const AthleteSchema = z.object({
   athleteId: z.number(),
@@ -44,14 +44,12 @@ const AthleteSchema = z.object({
  * Server function to fetch athlete stats from Strava
  * Handles authentication and rate limiting
  */
-export const fetchAthleteStats = createServerFn(
-  { method: 'POST' },
-)
-.inputValidator(AthleteSchema)
-.handler(async ({ data }) => {
+export const fetchAthleteStats = createServerFn({ method: 'POST' })
+  .inputValidator(AthleteSchema)
+  .handler(async ({ data }) => {
     const response = await fetch(
       `https://www.strava.com/api/v3/athletes/${data.athleteId}/stats`,
-      { headers: { Authorization: `Bearer ${data.accessToken}` } }
+      { headers: { Authorization: `Bearer ${data.accessToken}` } },
     )
 
     if (response.status === 401) {
@@ -67,8 +65,7 @@ export const fetchAthleteStats = createServerFn(
     }
 
     return response.json()
-  }
-)
+  })
 
 const ActivitiesSchema = z.object({
   accessToken: z.string(),
@@ -82,18 +79,16 @@ const ActivitiesSchema = z.object({
  * Server function to fetch athlete activities from Strava
  * Returns list of activities sorted by date
  */
-export const fetchAthleteActivities = createServerFn(
-  { method: 'POST' },
-)
-.inputValidator(ActivitiesSchema)
-.handler(async ({ data }) => {
+export const fetchAthleteActivities = createServerFn({ method: 'POST' })
+  .inputValidator(ActivitiesSchema)
+  .handler(async ({ data }) => {
     const perPage = data.perPage || 7
     const page = data.page || 1
 
     // Build query parameters
     const params = new URLSearchParams({
       per_page: perPage.toString(),
-      page: page.toString()
+      page: page.toString(),
     })
 
     if (data.after) {
@@ -106,7 +101,7 @@ export const fetchAthleteActivities = createServerFn(
 
     const response = await fetch(
       `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
-      { headers: { Authorization: `Bearer ${data.accessToken}` } }
+      { headers: { Authorization: `Bearer ${data.accessToken}` } },
     )
 
     if (response.status === 401) {
@@ -122,5 +117,4 @@ export const fetchAthleteActivities = createServerFn(
     }
 
     return response.json() as Promise<StravaActivity[]>
-  }
-)
+  })

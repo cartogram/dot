@@ -80,5 +80,5 @@ export {
   CardTitle,
   CardDescription,
   CardContent,
-  CardSkeleton
+  CardSkeleton,
 }

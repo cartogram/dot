@@ -5,7 +5,13 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { exchangeCodeForTokens } from '@/lib/server/oauth'
 import { Button } from '@/components/custom/Button/Button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/custom/Card'
 
 export const Route = createFileRoute('/sources')({
   component: ConnectStravaPage,
@@ -37,8 +43,7 @@ function ConnectStravaPage() {
         const tokens = await exchangeCodeForTokens({ data: { code } })
 
         // Check if connection already exists
-        const { data: existing } = await (supabase
-          .from('data_sources') as any)
+        const { data: existing } = await (supabase.from('data_sources') as any)
           .select('id')
           .eq('user_id', user.id)
           .eq('provider', 'strava')
@@ -59,17 +64,16 @@ function ConnectStravaPage() {
 
         if (existing) {
           // Update existing connection (re-enable if previously disconnected)
-          const { error } = await (supabase
-            .from('data_sources') as any)
+          const { error } = await (supabase.from('data_sources') as any)
             .update(connectionData)
             .eq('id', existing.id)
 
           if (error) throw error
         } else {
           // Insert new connection
-          const { error } = await (supabase
-            .from('data_sources') as any)
-            .insert(connectionData)
+          const { error } = await (supabase.from('data_sources') as any).insert(
+            connectionData,
+          )
 
           if (error) throw error
         }
@@ -82,7 +86,9 @@ function ConnectStravaPage() {
         navigate({ to: '/' })
       } catch (err) {
         console.error('Failed to connect Strava:', err)
-        setError(err instanceof Error ? err.message : 'Failed to connect Strava')
+        setError(
+          err instanceof Error ? err.message : 'Failed to connect Strava',
+        )
       } finally {
         setIsConnecting(false)
       }
@@ -109,8 +115,7 @@ function ConnectStravaPage() {
     if (!stravaDataSource || !user) return
 
     try {
-      const { error } = await (supabase
-        .from('data_sources') as any)
+      const { error } = await (supabase.from('data_sources') as any)
         .update({ is_active: false })
         .eq('id', stravaDataSource.id)
         .eq('user_id', user?.id)
@@ -120,7 +125,9 @@ function ConnectStravaPage() {
       await refreshStravaConnection()
     } catch (err) {
       console.error('Failed to disconnect Strava:', err)
-      setError(err instanceof Error ? err.message : 'Failed to disconnect Strava')
+      setError(
+        err instanceof Error ? err.message : 'Failed to disconnect Strava',
+      )
     }
   }
 
@@ -132,7 +139,10 @@ function ConnectStravaPage() {
             <CardTitle>Connect Strava</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate({ to: '/login' })} className="w-full">
+            <Button
+              onClick={() => navigate({ to: '/login' })}
+              className="w-full"
+            >
               Go to Login
             </Button>
           </CardContent>
@@ -142,62 +152,61 @@ function ConnectStravaPage() {
   }
 
   return (
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Connect Strava</CardTitle>
-          
-        </CardHeader>
-        <CardContent className="space-y-4">
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Connect Strava</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <p className="text-center mb-2">
-            {stravaDataSource
-              ? 'Your Strava account is connected'
-              : 'Connect your Strava account to import activities'}
-          </p>
-          {error && (
-            <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-              {error}
-            </div>
-          )}
+          {stravaDataSource
+            ? 'Your Strava account is connected'
+            : 'Connect your Strava account to import activities'}
+        </p>
+        {error && (
+          <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
+            {error}
+          </div>
+        )}
 
-          {stravaDataSource ? (
-            <div className="space-y-4">
-              <div className="p-4 bg-green-50 border border-green-200 rounded">
-                <p className="font-medium text-green-900">
-                  Connected as {stravaDataSource.athlete_data?.firstname}{' '}
-                  {stravaDataSource.athlete_data?.lastname}
-                </p>
-                <p className="text-sm text-green-700 mt-1">
-                  Athlete ID: {stravaDataSource.athlete_id}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => navigate({ to: '/' })}
-                  variant="secondary"
-                  className="flex-1"
-                >
-                  Go to Dashboard
-                </Button>
-                <Button
-                  onClick={handleDisconnectStrava}
-                  variant="destructive"
-                  className="flex-1"
-                >
-                  Disconnect
-                </Button>
-              </div>
+        {stravaDataSource ? (
+          <div className="space-y-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded">
+              <p className="font-medium text-green-900">
+                Connected as {stravaDataSource.athlete_data?.firstname}{' '}
+                {stravaDataSource.athlete_data?.lastname}
+              </p>
+              <p className="text-sm text-green-700 mt-1">
+                Athlete ID: {stravaDataSource.athlete_id}
+              </p>
             </div>
-          ) : (
-            <Button
-              onClick={handleConnectStrava}
-              disabled={isConnecting}
-              className="w-full"
-            >
-              {isConnecting ? 'Connecting...' : 'Connect with Strava'}
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => navigate({ to: '/' })}
+                variant="secondary"
+                className="flex-1"
+              >
+                Go to Dashboard
+              </Button>
+              <Button
+                onClick={handleDisconnectStrava}
+                variant="destructive"
+                className="flex-1"
+              >
+                Disconnect
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button
+            onClick={handleConnectStrava}
+            disabled={isConnecting}
+            className="w-full"
+          >
+            {isConnecting ? 'Connecting...' : 'Connect with Strava'}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   )
 }

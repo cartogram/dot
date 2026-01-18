@@ -28,7 +28,10 @@ describe('cn utility', () => {
   })
 
   it('should handle mixed inputs', () => {
-    const result = cn('base-class', { active: true, disabled: false }, ['extra', undefined])
+    const result = cn('base-class', { active: true, disabled: false }, [
+      'extra',
+      undefined,
+    ])
     expect(result).toBe('base-class active extra')
   })
 })

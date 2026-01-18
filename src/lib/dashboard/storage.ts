@@ -50,14 +50,19 @@ export function getDashboardConfig(): DashboardConfig {
 /**
  * Add a new card to the dashboard
  */
-export function addDashboardCard(card: Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>): string {
+export function addDashboardCard(
+  card: Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>,
+): string {
   const config = getDashboardConfig()
 
   // Generate unique ID
   const cardId = `${card.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
   // Calculate next position
-  const maxPosition = Math.max(0, ...Object.values(config.cards).map(c => c.position))
+  const maxPosition = Math.max(
+    0,
+    ...Object.values(config.cards).map((c) => c.position),
+  )
 
   const newCard: ActivityCardConfig = {
     ...card,
@@ -76,7 +81,10 @@ export function addDashboardCard(card: Omit<ActivityCardConfig, 'id' | 'position
 /**
  * Update an existing card
  */
-export function updateDashboardCard(cardId: string, updates: Partial<ActivityCardConfig>): void {
+export function updateDashboardCard(
+  cardId: string,
+  updates: Partial<ActivityCardConfig>,
+): void {
   const config = getDashboardConfig()
 
   if (!config.cards[cardId]) {
@@ -107,7 +115,7 @@ export function deleteDashboardCard(cardId: string): void {
 export function getVisibleCards(): ActivityCardConfig[] {
   const config = getDashboardConfig()
   return Object.values(config.cards)
-    .filter(card => card.visible)
+    .filter((card) => card.visible)
     .sort((a, b) => a.position - b.position) as ActivityCardConfig[]
 }
 

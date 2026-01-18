@@ -44,7 +44,10 @@ function isLegacyFormat(goals: any): goals is LegacyYearlyGoals {
     'rides' in goals ||
     'runs' in goals ||
     'swims' in goals ||
-    (goals.visibility && ('rides' in goals.visibility || 'runs' in goals.visibility || 'swims' in goals.visibility))
+    (goals.visibility &&
+      ('rides' in goals.visibility ||
+        'runs' in goals.visibility ||
+        'swims' in goals.visibility))
   )
 }
 

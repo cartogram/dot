@@ -1,16 +1,16 @@
 export interface ActivityConfig {
-  id: string                    // e.g., 'running', 'cycling'
-  stravaType: string           // Strava API type: 'Run', 'Ride', etc.
-  displayName: string          // UI label: 'Running', 'Cycling'
-  icon?: string                // Optional icon identifier
+  id: string // e.g., 'running', 'cycling'
+  stravaType: string // Strava API type: 'Run', 'Ride', etc.
+  displayName: string // UI label: 'Running', 'Cycling'
+  icon?: string // Optional icon identifier
   metrics: {
-    distance: boolean          // Track distance goals
-    count: boolean            // Track activity count
-    elevation: boolean        // Track elevation goals
-    time: boolean            // Track time goals
+    distance: boolean // Track distance goals
+    count: boolean // Track activity count
+    elevation: boolean // Track elevation goals
+    time: boolean // Track time goals
   }
-  primaryMetric: 'distance' | 'count' | 'time' | 'elevation'  // Main progress indicator
-  useStatsApi: boolean        // true for Ride/Run/Swim, false for others
+  primaryMetric: 'distance' | 'count' | 'time' | 'elevation' // Main progress indicator
+  useStatsApi: boolean // true for Ride/Run/Swim, false for others
 }
 
 export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
@@ -20,7 +20,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Running',
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'distance',
-    useStatsApi: true
+    useStatsApi: true,
   },
   cycling: {
     id: 'cycling',
@@ -28,7 +28,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Cycling',
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'distance',
-    useStatsApi: true
+    useStatsApi: true,
   },
   swimming: {
     id: 'swimming',
@@ -36,7 +36,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Swimming',
     metrics: { distance: true, count: true, elevation: false, time: true },
     primaryMetric: 'distance',
-    useStatsApi: true
+    useStatsApi: true,
   },
   hiking: {
     id: 'hiking',
@@ -44,7 +44,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Hiking',
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'elevation',
-    useStatsApi: false
+    useStatsApi: false,
   },
   kayaking: {
     id: 'kayaking',
@@ -52,7 +52,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Kayaking',
     metrics: { distance: true, count: true, elevation: false, time: true },
     primaryMetric: 'distance',
-    useStatsApi: false
+    useStatsApi: false,
   },
   xcskiing: {
     id: 'xcskiing',
@@ -60,7 +60,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Cross Country Skiing',
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'distance',
-    useStatsApi: false
+    useStatsApi: false,
   },
   snowboarding: {
     id: 'snowboarding',
@@ -68,7 +68,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Snowboarding',
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'count',
-    useStatsApi: false
+    useStatsApi: false,
   },
   workouts: {
     id: 'workouts',
@@ -76,7 +76,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Workouts',
     metrics: { distance: false, count: true, elevation: false, time: true },
     primaryMetric: 'count',
-    useStatsApi: false
+    useStatsApi: false,
   },
   surfing: {
     id: 'surfing',
@@ -84,7 +84,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Surfing',
     metrics: { distance: false, count: true, elevation: false, time: true },
     primaryMetric: 'count',
-    useStatsApi: false
+    useStatsApi: false,
   },
   alpineskiing: {
     id: 'alpineskiing',
@@ -92,16 +92,24 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     displayName: 'Alpine Skiing',
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'count',
-    useStatsApi: false
-  }
+    useStatsApi: false,
+  },
 }
 
 // Helper to get activity config by Strava type
-export function getActivityConfigByStravaType(stravaType: string): ActivityConfig | undefined {
-  return Object.values(ACTIVITY_CONFIGS).find(config => config.stravaType === stravaType)
+export function getActivityConfigByStravaType(
+  stravaType: string,
+): ActivityConfig | undefined {
+  return Object.values(ACTIVITY_CONFIGS).find(
+    (config) => config.stravaType === stravaType,
+  )
 }
 
 // Helper to get all visible activity configs
-export function getVisibleActivityConfigs(visibility: Record<string, boolean>): ActivityConfig[] {
-  return Object.values(ACTIVITY_CONFIGS).filter(config => visibility[config.id])
+export function getVisibleActivityConfigs(
+  visibility: Record<string, boolean>,
+): ActivityConfig[] {
+  return Object.values(ACTIVITY_CONFIGS).filter(
+    (config) => visibility[config.id],
+  )
 }

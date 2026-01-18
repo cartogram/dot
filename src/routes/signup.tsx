@@ -6,7 +6,5 @@ export const Route = createFileRoute('/signup')({
 })
 
 function SignupPage() {
-  return (
-    <SignupForm />
-  )
+  return <SignupForm />
 }

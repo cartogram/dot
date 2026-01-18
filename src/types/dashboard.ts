@@ -64,4 +64,7 @@ export interface DashboardConfig {
 }
 
 // Helper type for creating new cards
-export type NewActivityCard = Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>
+export type NewActivityCard = Omit<
+  ActivityCardConfig,
+  'id' | 'position' | 'createdAt' | 'updatedAt'
+>

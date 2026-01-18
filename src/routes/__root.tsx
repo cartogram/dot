@@ -2,13 +2,11 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { AuthProvider } from '@/lib/auth/SimpleAuthContext'
-import { ThemeProvider } from "@/components/providers/ThemeProvider"
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { Header } from '@/components/layout/Header'
 import { Page } from '@/components/layout/Page'
 import { Main } from '@/components/layout/Main'
 import { Logo } from '@/components/layout/Logo'
-
-
 
 import appCss from '../styles.css?url'
 

@@ -16,7 +16,7 @@ export interface ProgressMetric {
 function calculateProgress(
   current: number,
   goal: number,
-  unit: string
+  unit: string,
 ): ProgressMetric {
   const percentage = goal > 0 ? (current / goal) * 100 : 0
 
@@ -24,8 +24,13 @@ function calculateProgress(
   const now = new Date()
   const yearStart = new Date(now.getFullYear(), 0, 1)
   const yearEnd = new Date(now.getFullYear(), 11, 31)
-  const daysInYear = Math.ceil((yearEnd.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24)) + 1
-  const daysElapsed = Math.ceil((now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24))
+  const daysInYear =
+    Math.ceil(
+      (yearEnd.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
+    ) + 1
+  const daysElapsed = Math.ceil(
+    (now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24),
+  )
 
   // Expected progress = (goal / days in year) * days elapsed
   const expectedProgress = (goal / daysInYear) * daysElapsed
@@ -48,7 +53,7 @@ function calculateProgress(
  */
 export function calculateActivityProgress(
   totals: ActivityTotals,
-  goal: ActivityGoal
+  goal: ActivityGoal,
 ): {
   distance?: ProgressMetric
   count?: ProgressMetric
@@ -58,35 +63,23 @@ export function calculateActivityProgress(
   const progress: Record<string, ProgressMetric> = {}
 
   if (goal.distance !== undefined) {
-    progress.distance = calculateProgress(
-      totals.distance,
-      goal.distance,
-      'km'
-    )
+    progress.distance = calculateProgress(totals.distance, goal.distance, 'km')
   }
 
   if (goal.count !== undefined) {
-    progress.count = calculateProgress(
-      totals.count,
-      goal.count,
-      'activities'
-    )
+    progress.count = calculateProgress(totals.count, goal.count, 'activities')
   }
 
   if (goal.elevation !== undefined) {
     progress.elevation = calculateProgress(
       totals.elevation_gain,
       goal.elevation,
-      'm'
+      'm',
     )
   }
 
   if (goal.time !== undefined) {
-    progress.time = calculateProgress(
-      totals.moving_time,
-      goal.time,
-      'hours'
-    )
+    progress.time = calculateProgress(totals.moving_time, goal.time, 'hours')
   }
 
   return progress

@@ -6,7 +6,5 @@ export const Route = createFileRoute('/reset-password')({
 })
 
 function ResetPasswordPage() {
-  return (
-    <ResetPasswordForm />
-  )
+  return <ResetPasswordForm />
 }

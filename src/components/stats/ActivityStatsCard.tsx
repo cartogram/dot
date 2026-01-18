@@ -31,7 +31,14 @@ interface ActivityStatsCardProps {
   goalButton?: React.ReactNode
 }
 
-export function ActivityStatsCard({ type, title, actions, totals, progress, goalButton }: ActivityStatsCardProps) {
+export function ActivityStatsCard({
+  type,
+  title,
+  actions,
+  totals,
+  progress,
+  goalButton,
+}: ActivityStatsCardProps) {
   const hasProgress = progress && Object.keys(progress).length > 0
   const primaryProgress = progress?.distance || progress?.count
 
@@ -40,8 +47,7 @@ export function ActivityStatsCard({ type, title, actions, totals, progress, goal
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent >
-
+      <CardContent>
         <CardDescription>type: {type}</CardDescription>
 
         {goalButton && <div className="ml-2">{goalButton}</div>}
@@ -53,21 +59,33 @@ export function ActivityStatsCard({ type, title, actions, totals, progress, goal
                   ? `${formatDistance(primaryProgress.current)} / ${formatDistance(primaryProgress.goal)} km`
                   : `${primaryProgress.current.toFixed(0)} / ${primaryProgress.goal.toFixed(0)} ${primaryProgress.unit}`}
               </span>
-              <span className="font-medium">{primaryProgress.percentage.toFixed(0)}%</span>
+              <span className="font-medium">
+                {primaryProgress.percentage.toFixed(0)}%
+              </span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
               <div
                 className="h-full bg-primary transition-all"
-                style={{ width: `${Math.min(primaryProgress.percentage, 100)}%` }}
+                style={{
+                  width: `${Math.min(primaryProgress.percentage, 100)}%`,
+                }}
               />
             </div>
           </div>
         )}
         {/* Current Stats */}
         <div className="grid grid-cols-2 gap-4">
-          <StatItem label="Distance" value={formatDistance(totals.distance)} unit="km" />
+          <StatItem
+            label="Distance"
+            value={formatDistance(totals.distance)}
+            unit="km"
+          />
           <StatItem label="Activities" value={totals.count.toString()} />
-          <StatItem label="Elevation" value={formatElevation(totals.elevation_gain)} unit="m" />
+          <StatItem
+            label="Elevation"
+            value={formatElevation(totals.elevation_gain)}
+            unit="m"
+          />
           <StatItem label="Time" value={formatTime(totals.moving_time)} />
         </div>
 
@@ -77,9 +95,13 @@ export function ActivityStatsCard({ type, title, actions, totals, progress, goal
             <Separator />
             <div className="space-y-2">
               <div className="text-sm font-medium">Goal Progress</div>
-              {progress.distance && <ProgressBadge progress={progress.distance} />}
+              {progress.distance && (
+                <ProgressBadge progress={progress.distance} />
+              )}
               {progress.count && <ProgressBadge progress={progress.count} />}
-              {progress.elevation && <ProgressBadge progress={progress.elevation} />}
+              {progress.elevation && (
+                <ProgressBadge progress={progress.elevation} />
+              )}
               {progress.time && <ProgressBadge progress={progress.time} />}
             </div>
           </>
@@ -91,12 +113,24 @@ export function ActivityStatsCard({ type, title, actions, totals, progress, goal
   )
 }
 
-function StatItem({ label, value, unit }: { label: string; value: string; unit?: string }) {
+function StatItem({
+  label,
+  value,
+  unit,
+}: {
+  label: string
+  value: string
+  unit?: string
+}) {
   return (
     <div>
       <div className="text-2xl font-bold">
         {value}
-        {unit && <span className="text-sm font-normal text-muted-foreground ml-1">{unit}</span>}
+        {unit && (
+          <span className="text-sm font-normal text-muted-foreground ml-1">
+            {unit}
+          </span>
+        )}
       </div>
       <div className="text-xs text-muted-foreground">{label}</div>
     </div>

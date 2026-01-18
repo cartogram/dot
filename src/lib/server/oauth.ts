@@ -11,9 +11,8 @@ const ExchangeCodeForTokensSchema = z.object({
 })
 
 export const exchangeCodeForTokens = createServerFn({ method: 'POST' })
-.inputValidator(ExchangeCodeForTokensSchema)
-.handler(
-  async ({ data }) => {
+  .inputValidator(ExchangeCodeForTokensSchema)
+  .handler(async ({ data }) => {
     const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -32,5 +31,4 @@ export const exchangeCodeForTokens = createServerFn({ method: 'POST' })
 
     const tokens: StravaTokenResponse = await response.json()
     return tokens
-  }
-)
+  })

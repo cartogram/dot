@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useTheme } from "@/components/providers/ThemeProvider"
+import { useTheme } from '@/components/providers/ThemeProvider'
 
 import { Button } from '@/components/custom/Button/Button'
 import { IconMoon, IconSun } from '@/components/custom/Icons/Icons'

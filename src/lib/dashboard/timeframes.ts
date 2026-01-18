@@ -6,13 +6,17 @@ import type { StravaActivity } from '@/types/strava'
  */
 export function getTimeFrameStartDate(
   timeFrame: TimeFrame,
-  customRange?: { start: string; end: string }
+  customRange?: { start: string; end: string },
 ): Date {
   const now = new Date()
 
   switch (timeFrame) {
     case 'day': {
-      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const dayStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      )
       dayStart.setHours(0, 0, 0, 0)
       return dayStart
     }
@@ -59,7 +63,7 @@ export function getTimeFrameStartDate(
  */
 export function getTimeFrameEndDate(
   timeFrame: TimeFrame,
-  customRange?: { start: string; end: string }
+  customRange?: { start: string; end: string },
 ): Date {
   if (timeFrame === 'custom' && customRange) {
     return new Date(customRange.end)
@@ -75,7 +79,7 @@ export function getTimeFrameEndDate(
 export function filterActivitiesByTimeFrame(
   activities: StravaActivity[] | undefined,
   timeFrame: TimeFrame,
-  customRange?: { start: string; end: string }
+  customRange?: { start: string; end: string },
 ): StravaActivity[] {
   if (!activities) return []
 
@@ -83,11 +87,14 @@ export function filterActivitiesByTimeFrame(
   const endDate = getTimeFrameEndDate(timeFrame, customRange)
 
   return activities
-    .filter(activity => {
+    .filter((activity) => {
       const activityDate = new Date(activity.start_date)
       return activityDate >= startDate && activityDate <= endDate
     })
-    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
+    )
 }
 
 /**
@@ -95,7 +102,7 @@ export function filterActivitiesByTimeFrame(
  */
 export function getTimeFrameDescription(
   timeFrame: TimeFrame,
-  customRange?: { start: string; end: string }
+  customRange?: { start: string; end: string },
 ): string {
   switch (timeFrame) {
     case 'day':
@@ -125,7 +132,7 @@ export function getTimeFrameDescription(
  */
 export function getTimeFrameDays(
   timeFrame: TimeFrame,
-  customRange?: { start: string; end: string }
+  customRange?: { start: string; end: string },
 ): number {
   const startDate = getTimeFrameStartDate(timeFrame, customRange)
   const endDate = getTimeFrameEndDate(timeFrame, customRange)

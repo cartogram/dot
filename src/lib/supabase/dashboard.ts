@@ -29,7 +29,7 @@ function getDefaultDashboardConfig(): DashboardConfig {
  */
 export async function getDashboardConfig(
   supabase: SupabaseClient<Database>,
-  userId: string
+  userId: string,
 ): Promise<DashboardConfig> {
   const { data, error } = await supabase
     .from('dashboard_configs')
@@ -64,7 +64,7 @@ export async function getDashboardConfig(
 export async function saveDashboardConfig(
   supabase: SupabaseClient<Database>,
   userId: string,
-  config: DashboardConfig
+  config: DashboardConfig,
 ): Promise<void> {
   // First, check if active config exists
   const { data: existing } = await supabase
@@ -87,14 +87,12 @@ export async function saveDashboardConfig(
     }
   } else {
     // Create new config
-    const { error } = await supabase
-      .from('dashboard_configs')
-      .insert({
-        user_id: userId,
-        config,
-        version: config.version,
-        is_active: true,
-      })
+    const { error } = await supabase.from('dashboard_configs').insert({
+      user_id: userId,
+      config,
+      version: config.version,
+      is_active: true,
+    })
 
     if (error) {
       console.error('Error creating dashboard config:', error)
@@ -109,7 +107,7 @@ export async function saveDashboardConfig(
 export async function addDashboardCard(
   supabase: SupabaseClient<Database>,
   userId: string,
-  card: Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>
+  card: Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>,
 ): Promise<string> {
   const config = await getDashboardConfig(supabase, userId)
 
@@ -117,7 +115,10 @@ export async function addDashboardCard(
   const cardId = `${card.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
 
   // Calculate next position
-  const maxPosition = Math.max(0, ...Object.values(config.cards).map(c => c.position))
+  const maxPosition = Math.max(
+    0,
+    ...Object.values(config.cards).map((c) => c.position),
+  )
 
   const newCard: ActivityCardConfig = {
     ...card,
@@ -140,7 +141,7 @@ export async function updateDashboardCard(
   supabase: SupabaseClient<Database>,
   userId: string,
   cardId: string,
-  updates: Partial<ActivityCardConfig>
+  updates: Partial<ActivityCardConfig>,
 ): Promise<void> {
   const config = await getDashboardConfig(supabase, userId)
 
@@ -163,7 +164,7 @@ export async function updateDashboardCard(
 export async function deleteDashboardCard(
   supabase: SupabaseClient<Database>,
   userId: string,
-  cardId: string
+  cardId: string,
 ): Promise<void> {
   const config = await getDashboardConfig(supabase, userId)
   delete config.cards[cardId]
@@ -175,11 +176,11 @@ export async function deleteDashboardCard(
  */
 export async function getVisibleCards(
   supabase: SupabaseClient<Database>,
-  userId: string
+  userId: string,
 ): Promise<ActivityCardConfig[]> {
   const config = await getDashboardConfig(supabase, userId)
   return Object.values(config.cards)
-    .filter(card => card.visible)
+    .filter((card) => card.visible)
     .sort((a, b) => a.position - b.position) as ActivityCardConfig[]
 }
 
@@ -188,7 +189,7 @@ export async function getVisibleCards(
  */
 export async function clearDashboardConfig(
   supabase: SupabaseClient<Database>,
-  userId: string
+  userId: string,
 ): Promise<void> {
   const { error } = await supabase
     .from('dashboard_configs')
@@ -207,7 +208,7 @@ export async function clearDashboardConfig(
  */
 export async function migrateLocalStorageToSupabase(
   supabase: SupabaseClient<Database>,
-  userId: string
+  userId: string,
 ): Promise<void> {
   const DASHBOARD_STORAGE_KEY = 'dashboard_config'
   const stored = localStorage.getItem(DASHBOARD_STORAGE_KEY)

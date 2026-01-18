@@ -3,7 +3,13 @@ import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/custom/Card'
 
 export function ResetPasswordForm() {
   const [email, setEmail] = React.useState('')
@@ -27,7 +33,9 @@ export function ResetPasswordForm() {
       setSuccess(true)
       setEmail('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send reset email')
+      setError(
+        err instanceof Error ? err.message : 'Failed to send reset email',
+      )
     } finally {
       setIsLoading(false)
     }
