@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { useTheme } from "@/components/shared/providers/ThemeProvider"
+import { useTheme } from "@/components/providers/ThemeProvider"
 
-import { Button } from '@/components/shared/ui/button'
-import { IconMoon, IconSun } from '@/components/shared/ui/icons'
+import { Button } from '@/components/custom/Button/Button'
+import { IconMoon, IconSun } from '@/components/custom/Icons/Icons'
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)

@@ -4,8 +4,8 @@ import { useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { exchangeCodeForTokens } from '@/lib/server/oauth'
-import { Button } from '@/components/shared/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shared/Card'
+import { Button } from '@/components/custom/Button/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export const Route = createFileRoute('/sources')({
   component: ConnectStravaPage,

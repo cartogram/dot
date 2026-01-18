@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/shared/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/custom/Input/Input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export function ResetPasswordForm() {
   const [email, setEmail] = React.useState('')

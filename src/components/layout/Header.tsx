@@ -1,9 +1,9 @@
 import * as React from 'react'
 
-import { UserMenu } from '@/components/shared/user-menu'
-import { ThemeToggle } from '@/components/shared/theme-toggle'
-import { Button } from '@/components/shared/ui/button'
-import { IconSignOut } from '@/components/shared/ui/icons'
+import { UserMenu } from '@/components/layout/UserMenu'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { Button } from '@/components/custom/Button/Button'
+import { IconSignOut } from '@/components/custom/Icons/Icons'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 
 

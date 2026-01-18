@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardContent } from '@/components/custom/Card'
 
 export function DashboardSkeleton() {
   return (

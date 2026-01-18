@@ -7,8 +7,8 @@ import { getVisibleCards } from '@/lib/supabase/dashboard'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/shared/Card'
-import { Button } from '@/components/shared/ui/button'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/custom/Card'
+import { Button } from '@/components/custom/Button/Button'
 
 export function StatsDashboard() {
   const { user, stravaDataSource, getStravaAccessToken } = useAuth()

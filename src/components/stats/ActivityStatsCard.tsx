@@ -13,9 +13,9 @@ import {
   CardContent,
   CardFooter,
   CardDescription,
-} from '@/components/shared/Card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+} from '@/components/custom/Card'
+import { Badge } from '@/components/custom/Badge/Badge'
+import { Separator } from '@/components/custom/Separator/Separator'
 
 interface ActivityStatsCardProps {
   type: string

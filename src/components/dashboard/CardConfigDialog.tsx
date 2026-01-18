@@ -7,9 +7,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
-import { Button } from '@/components/shared/ui/button'
+import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/shared/ui/input'
+import { Input } from '@/components/custom/Input/Input'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { ActivityCardConfig, TimeFrame, DisplayMode } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'

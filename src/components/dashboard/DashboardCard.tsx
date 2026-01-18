@@ -6,7 +6,7 @@ import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dash
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
 import { CardConfigDialog } from './CardConfigDialog'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/shared/Card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/custom/Card'
 
 interface DashboardCardProps {
   config: ActivityCardConfig

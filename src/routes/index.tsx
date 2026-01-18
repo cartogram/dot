@@ -2,11 +2,11 @@ import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
-import { Button } from '@/components/shared/ui/button'
+import { Button } from '@/components/custom/Button/Button'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
-import { Profile } from '@/components/shared/Profile'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/shared/Card'
+import { Profile } from '@/components/layout/Profile'
+import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/custom/Card'
 const queryClient = new QueryClient()
 
 export const Route = createFileRoute('/')({

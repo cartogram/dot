@@ -9,7 +9,6 @@
   margin: 0;
   color: inherit;
   font-family: inherit;
-  text-decoration: underline;
   transition: all 0.2s;
   color: var(--color-primary);
   text-align: center;
@@ -19,6 +18,8 @@
   outline: none;
   text-align: center;
   display: inline-block;
+  font-weight: 500;
+  text-decoration: none;
 }
 
 .Button:disabled {
@@ -32,6 +33,9 @@
   color: var(--color-primary);
   background-color: var(--color-secondary);
   border: 1px solid;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
 }
 
 .Button--primary {
@@ -48,14 +52,10 @@
 
 .Button--secondary {
   background-color: var(--color-secondary);
-  border: 1px solid var(--color-secondary);
+  border: 1px solid var(--color-primary);
   color: var(--color-primary);
   border-radius: 0.5em;
   padding: 0.5em 1.5em;
-  width: 100%;
-  max-width: 450px;
-  font-weight: 500;
-  text-decoration: none;
 }
 
 .Button--destructive {
@@ -64,8 +64,4 @@
   color: var(--color-secondary);
   border-radius: 0.5em;
   padding: 0.5em 1.5em;
-  width: 100%;
-  max-width: 450px;
-  font-weight: 500;
-  text-decoration: none;
 }

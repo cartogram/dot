@@ -10,9 +10,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/custom/Input/Input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { IconPlus, IconTarget } from '@tabler/icons-react'
 import type { CombinedActivityGoal, ActivityGoal } from '@/types/strava'

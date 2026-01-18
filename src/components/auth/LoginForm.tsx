@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabase/client'
-import { Button } from '@/components/shared/ui/button'
+import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/shared/ui/input'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/shared/Card'
+import { Input } from '@/components/custom/Input/Input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export function LoginForm() {
   const navigate = useNavigate()
@@ -39,6 +39,7 @@ export function LoginForm() {
       console.log('[LoginForm] Login successful, waiting for auth state to settle...')
       await new Promise(resolve => setTimeout(resolve, 100))
 
+      debugger
       // Navigate to home after successful login
       console.log('[LoginForm] Navigating to home...')
       navigate({ to: '/' })
