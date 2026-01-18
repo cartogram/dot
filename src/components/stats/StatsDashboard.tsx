@@ -144,7 +144,9 @@ export function StatsDashboard() {
               onUpdate={handleRefresh}
             />
           ))}
-          <CardConfigDialog onSave={handleRefresh} />
+          <div className="w-full flex justify-center">
+            <CardConfigDialog onSave={handleRefresh} />
+          </div>
 
         </div>
       ) : (
