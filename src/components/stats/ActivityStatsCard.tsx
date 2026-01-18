@@ -17,8 +17,9 @@ import {
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Separator } from '@/components/custom/Separator/Separator'
 
+
 interface ActivityStatsCardProps {
-  type: string
+  types: string[]
   totals: ActivityTotals
   title: string
   actions?: React.ReactNode
@@ -28,19 +29,17 @@ interface ActivityStatsCardProps {
     elevation?: ProgressMetric
     time?: ProgressMetric
   }
-  goalButton?: React.ReactNode
 }
 
 export function ActivityStatsCard({
-  type,
+  types,
   title,
   actions,
   totals,
   progress,
-  goalButton,
 }: ActivityStatsCardProps) {
   const hasProgress = progress && Object.keys(progress).length > 0
-  const primaryProgress = progress?.distance || progress?.count
+  const primaryProgress = progress?.distance || progress?.count || progress?.time
 
   return (
     <Card state="active">
@@ -48,16 +47,25 @@ export function ActivityStatsCard({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <CardDescription>type: {type}</CardDescription>
+        <CardDescription>
+          <div className="flex justify-between">
+            <div className="flex items-center gap-2">
+              {types.map((type) => <Badge variant="secondary">{type}</Badge>)}
+            </div>
+            
+            <Badge>{totals.count.toString()} Activities</Badge>
+          </div>
+        </CardDescription>
 
-        {goalButton && <div className="ml-2">{goalButton}</div>}
         {primaryProgress && (
           <div className="mt-3 space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
                 {primaryProgress.unit === 'km'
                   ? `${formatDistance(primaryProgress.current)} / ${formatDistance(primaryProgress.goal)} km`
-                  : `${primaryProgress.current.toFixed(0)} / ${primaryProgress.goal.toFixed(0)} ${primaryProgress.unit}`}
+                  : primaryProgress.unit === 'hours'
+                    ? `${formatTime(primaryProgress.current)} / ${formatTime(primaryProgress.goal)}`
+                    : `${primaryProgress.current.toFixed(0)} / ${primaryProgress.goal.toFixed(0)} ${primaryProgress.unit}`}
               </span>
               <span className="font-medium">
                 {primaryProgress.percentage.toFixed(0)}%
@@ -73,39 +81,8 @@ export function ActivityStatsCard({
             </div>
           </div>
         )}
-        {/* Current Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <StatItem
-            label="Distance"
-            value={formatDistance(totals.distance)}
-            unit="km"
-          />
-          <StatItem label="Activities" value={totals.count.toString()} />
-          <StatItem
-            label="Elevation"
-            value={formatElevation(totals.elevation_gain)}
-            unit="m"
-          />
-          <StatItem label="Time" value={formatTime(totals.moving_time)} />
-        </div>
 
-        {/* Goal Progress */}
-        {hasProgress && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <div className="text-sm font-medium">Goal Progress</div>
-              {progress.distance && (
-                <ProgressBadge progress={progress.distance} />
-              )}
-              {progress.count && <ProgressBadge progress={progress.count} />}
-              {progress.elevation && (
-                <ProgressBadge progress={progress.elevation} />
-              )}
-              {progress.time && <ProgressBadge progress={progress.time} />}
-            </div>
-          </>
-        )}
+        
       </CardContent>
 
       <CardFooter>{actions && actions}</CardFooter>
@@ -147,7 +124,7 @@ function ProgressBadge({ progress }: { progress: ProgressMetric }) {
       <div className="text-sm">
         <span className="font-medium">{progress.percentage.toFixed(0)}%</span>
       </div>
-      <Badge variant={progress.isAhead ? 'default' : 'secondary'}>
+      <Badge variant={progress.isAhead ? 'primary' : 'secondary'}>
         {badgeText}
       </Badge>
     </div>

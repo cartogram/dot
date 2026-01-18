@@ -38,6 +38,7 @@ function calculateProgress(
   // Difference = current progress - expected progress
   const difference = current - expectedProgress
 
+
   return {
     current,
     goal,
@@ -79,6 +80,8 @@ export function calculateActivityProgress(
   }
 
   if (goal.time !== undefined) {
+    console.log('totals.moving_time', totals.moving_time)
+    console.log('goal.time', goal.time)
     progress.time = calculateProgress(totals.moving_time, goal.time, 'hours')
   }
 
@@ -120,6 +123,7 @@ export function formatProgressDifference(metric: ProgressMetric): string {
   const absValue = Math.abs(metric.difference)
   let formattedValue: string
 
+  console.log('metric', metric)
   switch (metric.unit) {
     case 'km':
       formattedValue = formatDistance(absValue)
@@ -135,5 +139,9 @@ export function formatProgressDifference(metric: ProgressMetric): string {
   }
 
   const status = metric.isAhead ? 'ahead' : 'behind'
+  // For time, formatTime already includes units, so don't append the unit again
+  if (metric.unit === 'hours') {
+    return `${formattedValue} ${status}`
+  }
   return `${formattedValue}${metric.unit} ${status}`
 }

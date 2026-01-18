@@ -38,6 +38,7 @@ export function DashboardCard({
   isLoading,
   onUpdate,
 }: DashboardCardProps) {
+
   // Filter activities by the card's time frame
   const filteredActivities = React.useMemo(() => {
     return filterActivitiesByTimeFrame(
@@ -51,6 +52,7 @@ export function DashboardCard({
   const totals = React.useMemo<ActivityTotals | null>(() => {
     if (isLoading || !filteredActivities) return null
 
+    
     // Get all activity types to combine
     const activityTypes = config.activityIds
       .map((id) => ACTIVITY_CONFIGS[id]?.stravaType)
@@ -140,15 +142,15 @@ export function DashboardCard({
       </Card>
     )
   }
-
   // Render with data
   return (
       <ActivityStatsCard
         actions={<CardConfigDialog existingCard={config} onSave={onUpdate} />}
-        type={ACTIVITY_CONFIGS[config.activityIds[0]].stravaType}
+        types={config.activityIds.map((id) => ACTIVITY_CONFIGS[id]?.stravaType)}
         title={config.title}
         totals={totals}
         progress={progress}
       />
   )
 }
+
