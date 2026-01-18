@@ -11,6 +11,7 @@ import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardTitle, CardContent, CardHeader } from '@/components/custom/Card/Card'
 import type { ActivityCardConfig, TimeFrame, DisplayMode } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
 import { supabase } from '@/lib/supabase/client'
@@ -188,17 +189,24 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
           </>
         )}
       </Button>
-      <SheetContent className="max-w-2xl">
+      <SheetContent >
         <SheetHeader>
-          <SheetTitle>
-            {isEditMode ? 'Edit Activity Card' : 'Add Activity Card'}
-          </SheetTitle>
+          <h3>
+            {isEditMode ? 'Edit Activity' : 'Add Activity'}
+          </h3>
         </SheetHeader>
 
-        <FieldGroup className="py-4 space-y-4 max-h-[600px] overflow-y-auto">
+        <FieldGroup className="py-4 overflow-y-auto">
           {/* General Settings */}
-          <div className="space-y-3">
-            <Field>
+          <Card state="active">
+          <Field>
+            <CardHeader>
+              <CardTitle>
+                General Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+            
               <FieldLabel htmlFor="card-title">Title</FieldLabel>
               <Input
                 id="card-title"
@@ -206,9 +214,6 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
               />
-            </Field>
-
-            <Field>
               <FieldLabel htmlFor="time-frame">Time Frame</FieldLabel>
               <select
                 id="time-frame"
@@ -222,13 +227,16 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                 <option value="year">Year</option>
                 <option value="all">All Time</option>
               </select>
+           
+            </CardContent>
             </Field>
-          </div>
-
-          {/* Activity Selection */}
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold">Select Activities</h3>
-            <div className="grid grid-cols-2 gap-2">
+            </Card>
+          <Card>
+         
+            <CardHeader />
+            <CardContent>
+            <FieldLabel htmlFor="activities">Select Activities</FieldLabel>
+            <Field>
               {Object.values(ACTIVITY_CONFIGS).map(config => (
                 <Checkbox
                   key={config.id}
@@ -237,24 +245,27 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                   label={config.displayName}
                 />
               ))}
-            </div>
-          </div>
+            </Field>
+            </CardContent>
+          </Card>
 
+
+<Card>
+  <CardContent>
           {/* Metrics & Goals */}
           {selectedActivities.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold">Metrics & Goals</h3>
               <div className="space-y-3">
                 {availableMetrics.distance && (
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-start gap-3">
                     <Checkbox
                       checked={showDistance}
                       onCheckedChange={(checked) => setShowDistance(!!checked)}
                       label="Distance"
-                      className="mt-2"
                     />
                     {showDistance && (
-                      <Field className="flex-1">
+                      <Field>
                         <FieldLabel htmlFor="goal-distance">Goal (km)</FieldLabel>
                         <Input
                           id="goal-distance"
@@ -269,15 +280,14 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                 )}
 
                 {availableMetrics.count && (
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-start gap-3">
                     <Checkbox
                       checked={showCount}
                       onCheckedChange={(checked) => setShowCount(!!checked)}
                       label="Count"
-                      className="mt-2"
                     />
                     {showCount && (
-                      <Field className="flex-1">
+                      <Field>
                         <FieldLabel htmlFor="goal-count">Goal (activities)</FieldLabel>
                         <Input
                           id="goal-count"
@@ -292,12 +302,11 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                 )}
 
                 {availableMetrics.elevation && (
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-start gap-3">
                     <Checkbox
                       checked={showElevation}
                       onCheckedChange={(checked) => setShowElevation(!!checked)}
                       label="Elevation"
-                      className="mt-2"
                     />
                     {showElevation && (
                       <Field className="flex-1">
@@ -315,12 +324,11 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
                 )}
 
                 {availableMetrics.time && (
-                  <div className="flex items-start gap-3">
+                  <div className="flex flex-col items-start gap-3">
                     <Checkbox
                       checked={showTime}
                       onCheckedChange={(checked) => setShowTime(!!checked)}
                       label="Time"
-                      className="mt-2"
                     />
                     {showTime && (
                       <Field className="flex-1">
@@ -339,22 +347,24 @@ export function CardConfigDialog({ existingCard, onSave, trigger }: CardConfigDi
               </div>
             </div>
           )}
+          </CardContent>
+          </Card>
         </FieldGroup>
 
-        <SheetFooter className="flex flex-0 gap-8 justify-between">
-          {isEditMode && (<div>
-
-            <Button variant="destructive" onClick={handleDelete}>
+        <SheetFooter className="flex flex-0 flex-col  justify-between">
+         
+          <div className="flex flex-1 gap-2 justify-between">
+            <Button full variant="secondary" onClick={() => setOpen(false)} disabled={isSaving}>Cancel</Button>
+            <Button full variant="primary" onClick={handleSave} disabled={!title || selectedActivities.length === 0 || isSaving}>
+              {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
+            </Button>
+          </div>
+          {isEditMode && (<div className="w-full">
+            <Button full destructive onClick={handleDelete}>
               Delete Card
             </Button>
           </div>
           )}
-          <div className="flex flex-1 gap-2">
-            <Button variant="secondary" onClick={() => setOpen(false)} disabled={isSaving}>Cancel</Button>
-            <Button variant="primary" onClick={handleSave} disabled={!title || selectedActivities.length === 0 || isSaving}>
-              {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
-            </Button>
-          </div>
         </SheetFooter>
       </SheetContent>
     </Sheet>

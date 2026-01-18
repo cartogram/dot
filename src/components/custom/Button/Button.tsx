@@ -12,11 +12,17 @@ const buttonVariants = cva('Button', {
       default: '',
       primary: 'Button--primary',
       secondary: 'Button--secondary',
-      destructive: 'Button--destructive',
       link: 'Button--link'
     },
     size: {
       default: ''
+    },
+    full: {
+      true: 'Button--full',
+      false: ''
+    },
+    destructive: {
+      true: 'Button--destructive',
     }
   },
   defaultVariants: {
@@ -38,12 +44,14 @@ function Button({
   size = "default",
   children,
   to,
+  full = false,
+  destructive = false,
   ...props
 }: ButtonProps) {
 
   if (to) {
     return (
-      <Link to={to} className={cn(buttonVariants({ variant, size, className }))}>
+      <Link to={to} className={cn(buttonVariants({ variant, size, className, full, destructive }))}>
         {children}
       </Link>
     )
@@ -51,7 +59,7 @@ function Button({
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, className, full, destructive }))}
       {...props}
     >
       {children}

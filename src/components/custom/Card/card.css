@@ -1,8 +1,8 @@
 .Card {
   color: var(--color-primary);
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  border-left: 1px solid currentColor;
+  border-right: 1px solid transparent;
+  border-bottom: 1px solid transparent;
+  border-left: 1px solid transparent;
   border-radius: 0 0 0.5em 0.5em;
   position: relative;
   padding-top: 1em;
@@ -20,10 +20,11 @@
   color: red;
 }
 
+
+
 .Card__Header {
   display: flex;
   align-items: center;
-  gap: 1em;
   position: relative;
   top: -1.5em;
   margin-bottom: -1.5em;
@@ -33,20 +34,20 @@
 .Card__Header::after {
   content: '';
   display: block;
-  border-top: 1px solid currentColor;
+  border-top: 1px solid transparent;
   height: 2em;
   position: relative;
   flex: 1;
 }
 
 .Card__Header::after {
-  border-right: 1px solid currentColor;
+  border-right: 1px solid transparent;
   border-radius: 0 0.5em 0 0;
   right: -1px;
 }
 
 .Card__Header::before {
-  border-left: 1px solid currentColor;
+  border-left: 1px solid transparent;
   border-radius: 0.5em 0 0 0;
   left: -1px;
 }
@@ -60,8 +61,9 @@
 }
 
 .Card__Title {
-  transform: translate(0, -100%);
+  transform: translate(0, -120%);
   line-height: 1;
+  padding: 0 1rem;
 }
 
 .Card__Footer,
@@ -81,4 +83,9 @@
 
 .Card__Description {
   padding: 0 0 1em;
+}
+.Card--active,
+.Card--active .Card__Header::before,
+.Card--active .Card__Header::after {
+  border-color: currentColor;
 }

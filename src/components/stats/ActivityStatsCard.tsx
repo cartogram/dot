@@ -36,7 +36,7 @@ export function ActivityStatsCard({ type, title, actions, totals, progress, goal
   const primaryProgress = progress?.distance || progress?.count
 
   return (
-    <Card>
+    <Card state="active">
       <CardHeader>
         <CardTitle>{title}</CardTitle>
       </CardHeader>

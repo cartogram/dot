@@ -43,7 +43,7 @@ function createContext<ContextValueType extends object | null>(
 }
 
 export type CardContextValue = {
-  state?: 'idle' | 'loading' | 'error' | 'success'
+  state?: 'idle' | 'loading' | 'error' | 'success' | 'active'
   loader?: <T = null>() => Promise<T | null>
 }
 
