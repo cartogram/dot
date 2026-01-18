@@ -11,6 +11,7 @@ import {
   getTimeFrameDescription,
 } from '@/lib/dashboard/timeframes'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
+import { Spinner } from '@/components/ui/spinner'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
 import { CardConfigDialog } from './CardConfigDialog'
 import {
@@ -106,11 +107,13 @@ export function DashboardCard({
   // Loading state
   if (isLoading) {
     return (
-      <Card>
+      <Card state="loading">
         <CardHeader>
           <CardTitle>{config.title}</CardTitle>
-          <CardDescription>Loading...</CardDescription>
         </CardHeader>
+        <CardContent>
+          <Spinner className="size-4 mx-auto" />
+        </CardContent>
       </Card>
     )
   }
@@ -118,7 +121,7 @@ export function DashboardCard({
   // No data state
   if (!totals || totals.count === 0) {
     return (
-      <Card className="relative group">
+      <Card state="active">
         <CardHeader>
           <CardTitle>{config.title}</CardTitle>
         </CardHeader>
@@ -140,7 +143,6 @@ export function DashboardCard({
 
   // Render with data
   return (
-    <div className="relative group">
       <ActivityStatsCard
         actions={<CardConfigDialog existingCard={config} onSave={onUpdate} />}
         type={ACTIVITY_CONFIGS[config.activityIds[0]].stravaType}
@@ -148,6 +150,5 @@ export function DashboardCard({
         totals={totals}
         progress={progress}
       />
-    </div>
   )
 }

@@ -5,7 +5,7 @@
  * This enables proper SSR support with session persistence
  */
 
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
 import type { Database } from './types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -33,20 +33,10 @@ export function createClient() {
   return createBrowserClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
-        // SSR guard: return empty array if not in browser
-        if (typeof document === 'undefined') {
-          return []
+        if (typeof document === 'undefined' || typeof window === 'undefined') {
+          return
         }
-
-        const cookies = document.cookie
-          .split('; ')
-          .filter(Boolean)
-          .map((cookie) => {
-            const [name, ...rest] = cookie.split('=')
-            return { name, value: rest.join('=') }
-          })
-        console.log('[Supabase Client] getAll cookies:', cookies.length)
-        return cookies
+        return parseCookieHeader(document.cookie ?? '').map(({ name, value }) => ({ name, value: value ?? '' }))
       },
       setAll(cookiesToSet) {
         // SSR guard: do nothing if not in browser
@@ -60,38 +50,42 @@ export function createClient() {
           cookiesToSet.map((c) => c.name),
         )
         cookiesToSet.forEach(({ name, value, options }) => {
-          let cookieString = `${name}=${value}`
+          // let cookieString = `${name}=${value}`
 
-          // Set explicit cookie options
-          if (options?.maxAge) {
-            cookieString += `; Max-Age=${options.maxAge}`
-          }
-          if (options?.path) {
-            cookieString += `; Path=${options.path}`
-          } else {
-            cookieString += '; Path=/'
-          }
-          if (options?.domain) {
-            cookieString += `; Domain=${options.domain}`
-          }
+          // // Set explicit cookie options
+          // if (options?.maxAge) {
+          //   cookieString += `; Max-Age=${options.maxAge}`
+          // }
+          // if (options?.path) {
+          //   cookieString += `; Path=${options.path}`
+          // } else {
+          //   cookieString += '; Path=/'
+          // }
+          // if (options?.domain) {
+          //   cookieString += `; Domain=${options.domain}`
+          // }
 
-          // Critical for production mobile: Require secure context
-          // Note: Secure flag only works over HTTPS
-          if (window.location.protocol === 'https:') {
-            cookieString += '; Secure'
-          }
+          // // Critical for production mobile: Require secure context
+          // // Note: Secure flag only works over HTTPS
+          // if (window.location.protocol === 'https:') {
+          //   cookieString += '; Secure'
+          // }
 
-          // SameSite=Lax allows cookies to be sent on top-level navigation
-          // This is crucial for OAuth redirects and mobile browsers
-          cookieString += '; SameSite=Lax'
+          // // SameSite=Lax allows cookies to be sent on top-level navigation
+          // // This is crucial for OAuth redirects and mobile browsers
+          // cookieString += '; SameSite=Lax'
 
-          console.log(
-            '[Supabase Client] Setting cookie:',
-            name,
-            'with options:',
-            options,
+          // console.log(
+          //   '[Supabase Client] Setting cookie:',
+          //   name,
+          //   'with options:',
+          //   options,
+          // )
+          // document.cookie = cookieString
+
+          cookiesToSet.forEach(({ name, value, options }) =>
+            document.cookie = serializeCookieHeader(name, value, options)
           )
-          document.cookie = cookieString
         })
       },
     },

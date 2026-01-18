@@ -3,13 +3,14 @@
   border-right: 1px solid transparent;
   border-bottom: 1px solid transparent;
   border-left: 1px solid transparent;
-  border-radius: 0 0 0.5em 0.5em;
+  border-radius: 0.5em;
   position: relative;
-  padding-top: 1em;
   margin: auto;
   max-width: 500px;
   width: 100%;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .Card--full {
@@ -20,12 +21,15 @@
   color: red;
 }
 
+.Card--loading {
+  min-height: 150px;
+  background: var(--color-primary-light);
+}
+
 .Card__Header {
   display: flex;
   align-items: center;
   position: relative;
-  top: -1.5em;
-  margin-bottom: -1.5em;
 }
 
 .Card__Header::before,
@@ -55,12 +59,18 @@
   display: flex;
   flex-direction: column;
   gap: 1em;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .Card__Title {
-  transform: translate(0, -120%);
+  transform: translate(0, -100%);
   line-height: 1;
-  padding: 0 1rem;
+  padding: 2px 1rem;
+  background: var(--color-background);
+  border-radius: 0.35em;
 }
 
 .Card__Footer,

@@ -223,7 +223,7 @@ export function CardConfigDialog({
       <Button variant="secondary" onClick={() => setOpen(true)}>
         {trigger || <>{isEditMode ? <>Edit Card</> : <>Add Card</>}</>}
       </Button>
-      <SheetContent>
+      <SheetContent className="data-[side=right]:w-full  data-[side=right]:max-w-full  data-[side=right]:md:max-w-1/2  ">
         <SheetHeader>
           <h3>{isEditMode ? 'Edit Activity' : 'Add Activity'}</h3>
         </SheetHeader>
@@ -389,8 +389,8 @@ export function CardConfigDialog({
           </Card>
         </FieldGroup>
 
-        <SheetFooter className="flex flex-0 flex-col  justify-between">
-          <div className="flex flex-1 gap-2 justify-between">
+        <SheetFooter className="flex flex-0 flex-col justify-center text-center">
+          <div className="flex flex-1 gap-2 justify-between ">
             <Button
               full
               variant="secondary"
