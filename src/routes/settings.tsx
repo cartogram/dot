@@ -22,6 +22,22 @@ function SettingsPage() {
   const { user, stravaDataSource, refreshStravaConnection } = useAuth()
   const [isConnecting, setIsConnecting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [copied, setCopied] = React.useState(false)
+
+  const profileUrl = user
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/profile/${user.id}`
+    : ''
+
+  const handleCopyProfileLink = async () => {
+    if (!profileUrl) return
+    try {
+      await navigator.clipboard.writeText(profileUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
 
   // Handle OAuth callback
   React.useEffect(() => {
@@ -183,6 +199,33 @@ function SettingsPage() {
           <p className="heading--4">
             {user.updated_at}
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Share Profile Section */}
+      <Card state="active">
+        <CardHeader>
+          <CardTitle>Share Profile</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <CardDescription>
+            Share your dashboard with other logged-in users. They'll be able to
+            view your activity stats (read-only).
+          </CardDescription>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={profileUrl}
+              className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
+            />
+            <Button
+              onClick={handleCopyProfileLink}
+              variant="secondary"
+            >
+              {copied ? 'Copied!' : 'Copy Link'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     <Card state="active">

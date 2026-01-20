@@ -22,8 +22,7 @@
 }
 
 .Card--loading {
-  min-height: 150px;
-  background: var(--color-primary-light);
+  min-height: 200px;
 }
 
 .Card__Header {
@@ -106,6 +105,19 @@
   padding: 0 0 1em;
 }
 
+
+.Card--idle,
+.Card--idle .Card__Header::before,
+.Card--idle .Card__Header::after {
+  border-color: var(--color-primary-light);
+}
+
+.Card--loading,
+.Card--loading .Card__Header::before,
+.Card--loading .Card__Header::after {
+  border-color: var(--color-primary-light);
+
+}
 
 .Card--error,
 .Card--error .Card__Header::before,

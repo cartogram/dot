@@ -116,7 +116,7 @@ export function DashboardCard({
           <CardTitle>{config.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <Spinner className="size-4 mx-auto" />
+          <Spinner className="mx-auto" />
         </CardContent>
       </Card>
     )
