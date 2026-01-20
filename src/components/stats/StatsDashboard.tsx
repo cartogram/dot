@@ -104,14 +104,11 @@ export function StatsDashboard() {
           <CardTitle>No Data Sources</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center mb-2">
+          <CardDescription>
             You need at least one data source to get started.
-          </p>
-          <a href="/sources">
-            <Button variant="primary">View sources</Button>
-          </a>
+          </CardDescription>
+          <Button variant="primary">View sources</Button>
         </CardContent>
-        x
       </Card>
     )
   }
@@ -160,7 +157,7 @@ export function StatsDashboard() {
 
       {/* Dashboard Grid */}
       {cards.length > 0 ? (
-        <div className="flex flex-col gap-6 p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {cards.map((card) => (
             <DashboardCard
               key={card.id}
@@ -171,9 +168,6 @@ export function StatsDashboard() {
               onUpdate={handleRefresh}
             />
           ))}
-          <div className="w-full flex justify-center">
-            <CardConfigDialog onSave={handleRefresh} />
-          </div>
         </div>
       ) : (
         <Card>
@@ -192,6 +186,9 @@ export function StatsDashboard() {
           </CardContent>
         </Card>
       )}
+      <div className="col-span-3 flex justify-center">
+       <CardConfigDialog onSave={handleRefresh} />
+      </div>
     </div>
   )
 }

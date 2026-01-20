@@ -55,7 +55,7 @@ export function SignupForm() {
   }
 
   return (
-    <Card>
+    <Card state="active">
       <CardHeader>
         <CardTitle>Create an account</CardTitle>
       </CardHeader>

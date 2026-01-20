@@ -5,7 +5,11 @@
  * This enables proper SSR support with session persistence
  */
 
-import { createBrowserClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr'
+import {
+  createBrowserClient,
+  parseCookieHeader,
+  serializeCookieHeader,
+} from '@supabase/ssr'
 import type { Database } from './types'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -36,7 +40,9 @@ export function createClient() {
         if (typeof document === 'undefined' || typeof window === 'undefined') {
           return
         }
-        return parseCookieHeader(document.cookie ?? '').map(({ name, value }) => ({ name, value: value ?? '' }))
+        return parseCookieHeader(document.cookie ?? '').map(
+          ({ name, value }) => ({ name, value: value ?? '' }),
+        )
       },
       setAll(cookiesToSet) {
         // SSR guard: do nothing if not in browser
@@ -83,8 +89,9 @@ export function createClient() {
           // )
           // document.cookie = cookieString
 
-          cookiesToSet.forEach(({ name, value, options }) =>
-            document.cookie = serializeCookieHeader(name, value, options)
+          cookiesToSet.forEach(
+            ({ name, value, options }) =>
+              (document.cookie = serializeCookieHeader(name, value, options)),
           )
         })
       },

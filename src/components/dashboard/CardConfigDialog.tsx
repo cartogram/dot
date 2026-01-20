@@ -220,7 +220,7 @@ export function CardConfigDialog({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button size={isEditMode ? "small" : "default"} variant={ isEditMode ? "secondary" : "primary"} onClick={() => setOpen(true)}>
         {trigger || <>{isEditMode ? <>Edit Card</> : <>Add Card</>}</>}
       </Button>
       <SheetContent className="data-[side=right]:w-full  data-[side=right]:max-w-full  data-[side=right]:md:max-w-1/2  ">
@@ -391,14 +391,14 @@ export function CardConfigDialog({
 
         <SheetFooter className="flex flex-0 flex-col justify-center text-center">
           <div className="flex flex-1 gap-2 justify-between ">
-            <Button
-              full
-              variant="secondary"
-              onClick={() => setOpen(false)}
-              disabled={isSaving}
-            >
-              Cancel
-            </Button>
+            
+            {isEditMode && (
+            <div className="w-full">
+              <Button variant="secondary" full destructive onClick={handleDelete}>
+                Delete Card
+              </Button>
+            </div>
+          )}
             <Button
               full
               variant="primary"
@@ -408,13 +408,7 @@ export function CardConfigDialog({
               {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
             </Button>
           </div>
-          {isEditMode && (
-            <div className="w-full">
-              <Button full destructive onClick={handleDelete}>
-                Delete Card
-              </Button>
-            </div>
-          )}
+          
         </SheetFooter>
       </SheetContent>
     </Sheet>

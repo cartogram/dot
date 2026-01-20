@@ -47,7 +47,6 @@ export function LoginForm() {
       )
       await new Promise((resolve) => setTimeout(resolve, 100))
 
-      debugger
       // Navigate to home after successful login
       console.log('[LoginForm] Navigating to home...')
       navigate({ to: '/' })
@@ -60,7 +59,7 @@ export function LoginForm() {
   }
 
   return (
-    <Card>
+    <Card state="active">
       <CardHeader>
         <CardTitle>Welcome back</CardTitle>
       </CardHeader>

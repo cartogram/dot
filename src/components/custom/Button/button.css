@@ -64,3 +64,8 @@
 .Button--full {
   width: 100%;
 }
+
+.Button--small {
+  padding: 0.25em 1em;
+  font-size: 12px;
+}

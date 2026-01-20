@@ -1,17 +1,7 @@
-.Progress__Bar {
-  border: 1px solid var(--color-primary);
-  overflow: hidden;
-  height: 1em;
-  position: relative;
-  border-radius: 0.25em;
-}
-
 .Progress {
-  padding: 2em 0 0;
-}
-
-.Progress__Label {
-  padding-bottom: 0.5em;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
 }
 
 .Progress__Indicator {
@@ -19,4 +9,19 @@
   height: 100%;
   width: 100%;
   transition: width 0.5s;
+} 
+
+.Progress__Track {
+  border: 1px solid var(--color-primary);
+  grid-column: 1 / 3;
+  overflow: hidden;
+  height: 0.25rem;
+  border-radius: 0.25rem;
+  background: none;
+  height: 1em;
+}
+
+.Progress__Indicator {
+  display: block;
+  transition: width 500ms;
 }

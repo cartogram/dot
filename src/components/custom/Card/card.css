@@ -75,13 +75,26 @@
 
 .Card__Footer,
 .Card__Content {
-  padding: 1em 2em 2em;
+  padding: 0em 2em 2em;
 }
 
 .Card__Footer {
   display: flex;
   justify-content: center;
   gap: 1em;
+  position: relative;
+  padding: 1em 2em;
+}
+
+.Card__Footer::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--color-primary-light);
 }
 
 .Card__CardSkeleton {

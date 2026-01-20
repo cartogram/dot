@@ -42,14 +42,14 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card state="active">
       <CardHeader>
         <CardTitle>Reset your password</CardTitle>
+      </CardHeader>
+      <CardContent>
         <CardDescription>
           Enter your email and we'll send you a reset link
         </CardDescription>
-      </CardHeader>
-      <CardContent>
         <form onSubmit={handleResetPassword}>
           <FieldGroup className="space-y-4">
             <Field>

@@ -1,11 +1,17 @@
 import type { ActivityTotals } from '@/types/strava'
+import type { TimeFrame } from '@/types/dashboard'
 import type { ProgressMetric } from '@/lib/goals/calculations'
 import {
-  formatDistance,
-  formatElevation,
-  formatTime,
-  formatProgressDifference,
+  formatDailyPace,
+  formatRemainder,
+  formatCurrent,
+  formatGoal,
+  formatProgressSummary,
+  formatBehindPlan,
 } from '@/lib/goals/calculations'
+import {
+  getTimeFrameDescription,
+} from '@/lib/dashboard/timeframes'
 import {
   Card,
   CardHeader,
@@ -15,13 +21,14 @@ import {
   CardDescription,
 } from '@/components/custom/Card'
 import { Badge } from '@/components/custom/Badge/Badge'
-import { Separator } from '@/components/custom/Separator/Separator'
-
+import { Progress } from '@/components/custom/Progress/Progress'
 
 interface ActivityStatsCardProps {
   types: string[]
   totals: ActivityTotals
   title: string
+  timeFrame: TimeFrame
+  customDateRange?: { start: string; end: string }
   actions?: React.ReactNode
   progress?: {
     distance?: ProgressMetric
@@ -36,10 +43,15 @@ export function ActivityStatsCard({
   title,
   actions,
   totals,
+  timeFrame,
+  customDateRange,
   progress,
 }: ActivityStatsCardProps) {
-  const hasProgress = progress && Object.keys(progress).length > 0
-  const primaryProgress = progress?.distance || progress?.count || progress?.time
+  // Determine primary progress metric (prefer distance > time > count)
+  const primaryProgress =
+    progress?.distance || progress?.time || progress?.count || progress?.elevation
+
+  const timeFrameDescription = getTimeFrameDescription(timeFrame, customDateRange)
 
   return (
     <Card state="active">
@@ -48,85 +60,60 @@ export function ActivityStatsCard({
       </CardHeader>
       <CardContent>
         <CardDescription>
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              {types.map((type) => <Badge variant="secondary">{type}</Badge>)}
+              {types.map((type) => (
+                <Badge key={type} variant="secondary">
+                  {type}
+                </Badge>
+              ))}
             </div>
-            
-            <Badge>{totals.count.toString()} Activities</Badge>
+            <Badge>{totals.count} Activities</Badge>
           </div>
         </CardDescription>
 
         {primaryProgress && (
-          <div className="mt-3 space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {primaryProgress.unit === 'km'
-                  ? `${formatDistance(primaryProgress.current)} / ${formatDistance(primaryProgress.goal)} km`
-                  : primaryProgress.unit === 'hours'
-                    ? `${formatTime(primaryProgress.current)} / ${formatTime(primaryProgress.goal)}`
-                    : `${primaryProgress.current.toFixed(0)} / ${primaryProgress.goal.toFixed(0)} ${primaryProgress.unit}`}
-              </span>
-              <span className="font-medium">
-                {primaryProgress.percentage.toFixed(0)}%
-              </span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-              <div
-                className="h-full bg-primary transition-all"
-                style={{
-                  width: `${Math.min(primaryProgress.percentage, 100)}%`,
-                }}
-              />
+          <div className="space-y-8">
+            {/* Progress Bar */}
+            <Progress
+              value={primaryProgress.percentage}
+              label={formatProgressSummary(primaryProgress)}
+            />
+
+            {/* Goal Details */}
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              {/* <div>
+                <div className="text-muted-foreground text-xs mb-1">Goal Total</div>
+                <div className="font-medium">{formatGoal(primaryProgress)} {primaryProgress.unit !== 'hours' && primaryProgress.unit}</div>
+              </div> */}
+              <div>
+                <div className="text-muted-foreground text-xs mb-1">Time Frame</div>
+                <div className="font-medium">{timeFrameDescription}</div>
+              </div>
+              {/* <div>
+                <div className="text-muted-foreground text-xs mb-1">Elapsed Progress</div>
+                <div className="font-medium">{formatCurrent(primaryProgress)} {primaryProgress.unit !== 'hours' && primaryProgress.unit}</div>
+              </div> */}
+              <div>
+                <div className="text-muted-foreground text-xs mb-1">Remainder</div>
+                <div className="font-medium">{formatRemainder(primaryProgress)} {primaryProgress.unit !== 'hours' && primaryProgress.unit}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground text-xs mb-1">Under/Over</div>
+                <div className={`font-medium ${primaryProgress.behindPlan < 0 ? 'text-red-600' : primaryProgress.behindPlan > 0 ? 'text-green-600' : ''}`}>
+                  {formatBehindPlan(primaryProgress)}
+                </div>
+              </div>
+              <div >
+                <div className="text-muted-foreground text-xs mb-1">Daily Pace</div>
+                <div className="font-medium">{formatDailyPace(primaryProgress)}</div>
+              </div>
             </div>
           </div>
         )}
-
-        
       </CardContent>
 
       <CardFooter>{actions && actions}</CardFooter>
     </Card>
-  )
-}
-
-function StatItem({
-  label,
-  value,
-  unit,
-}: {
-  label: string
-  value: string
-  unit?: string
-}) {
-  return (
-    <div>
-      <div className="text-2xl font-bold">
-        {value}
-        {unit && (
-          <span className="text-sm font-normal text-muted-foreground ml-1">
-            {unit}
-          </span>
-        )}
-      </div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-    </div>
-  )
-}
-
-function ProgressBadge({ progress }: { progress: ProgressMetric }) {
-  const badgeText = progress.isAhead
-    ? formatProgressDifference(progress)
-    : formatProgressDifference(progress)
-
-  return (
-    <div className="flex items-center justify-between">
-      <div className="text-sm">
-        <span className="font-medium">{progress.percentage.toFixed(0)}%</span>
-      </div>
-      <Badge variant={progress.isAhead ? 'primary' : 'secondary'}>
-        {badgeText}
-      </Badge>
-    </div>
   )
 }

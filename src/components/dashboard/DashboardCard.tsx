@@ -26,7 +26,7 @@ import {
 interface DashboardCardProps {
   config: ActivityCardConfig
   allActivities: StravaActivity[] | undefined
-  stats: StravaStats | undefined
+  stats?: StravaStats | undefined
   isLoading: boolean
   onUpdate: () => void
 }
@@ -34,11 +34,9 @@ interface DashboardCardProps {
 export function DashboardCard({
   config,
   allActivities,
-  stats,
   isLoading,
   onUpdate,
 }: DashboardCardProps) {
-
   // Filter activities by the card's time frame
   const filteredActivities = React.useMemo(() => {
     return filterActivitiesByTimeFrame(
@@ -52,7 +50,6 @@ export function DashboardCard({
   const totals = React.useMemo<ActivityTotals | null>(() => {
     if (isLoading || !filteredActivities) return null
 
-    
     // Get all activity types to combine
     const activityTypes = config.activityIds
       .map((id) => ACTIVITY_CONFIGS[id]?.stravaType)
@@ -103,8 +100,13 @@ export function DashboardCard({
     )
     if (!hasAnyGoal) return undefined
 
-    return calculateActivityProgress(totals, filteredGoal)
-  }, [totals, config.goal, config.showMetrics])
+    return calculateActivityProgress(
+      totals,
+      filteredGoal,
+      config.timeFrame,
+      config.customDateRange,
+    )
+  }, [totals, config.goal, config.showMetrics, config.timeFrame, config.customDateRange])
 
   // Loading state
   if (isLoading) {
@@ -144,13 +146,14 @@ export function DashboardCard({
   }
   // Render with data
   return (
-      <ActivityStatsCard
-        actions={<CardConfigDialog existingCard={config} onSave={onUpdate} />}
-        types={config.activityIds.map((id) => ACTIVITY_CONFIGS[id]?.stravaType)}
-        title={config.title}
-        totals={totals}
-        progress={progress}
-      />
+    <ActivityStatsCard
+      actions={<CardConfigDialog existingCard={config} onSave={onUpdate} />}
+      types={config.activityIds.map((id) => ACTIVITY_CONFIGS[id]?.stravaType)}
+      title={config.title}
+      totals={totals}
+      timeFrame={config.timeFrame}
+      customDateRange={config.customDateRange}
+      progress={progress}
+    />
   )
 }
-

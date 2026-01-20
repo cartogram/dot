@@ -47,7 +47,7 @@ export function UpdatePasswordForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card state="active">
       <CardHeader>
         <CardTitle>Update your password</CardTitle>
         <CardDescription>Enter your new password</CardDescription>

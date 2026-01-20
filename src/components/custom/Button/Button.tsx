@@ -16,6 +16,7 @@ const buttonVariants = cva('Button', {
     },
     size: {
       default: '',
+      small: 'Button--small',
     },
     full: {
       true: 'Button--full',

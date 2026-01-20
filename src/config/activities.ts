@@ -93,7 +93,7 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     metrics: { distance: true, count: true, elevation: true, time: true },
     primaryMetric: 'count',
     useStatsApi: false,
-  }
+  },
 }
 
 // Helper to get activity config by Strava type

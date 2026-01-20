@@ -14,7 +14,7 @@
     --color-secondary: var(--dot-color-light);
     --color-primary-light: color(from var(--color-primary) xyz x y z / 0.05);
     --color-primary: #c60e83;
-    --site-width: 1000px;
+    --site-width: 1400px;
     --background-texture: url('/noise.png');
   }
 
