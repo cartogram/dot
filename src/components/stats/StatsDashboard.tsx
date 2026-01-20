@@ -107,7 +107,7 @@ export function StatsDashboard() {
           <CardDescription>
             You need at least one data source to get started.
           </CardDescription>
-          <Button variant="primary">View sources</Button>
+          <Button to="/sources" variant="primary">View sources</Button>
         </CardContent>
       </Card>
     )

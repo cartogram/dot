@@ -94,6 +94,14 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
     primaryMetric: 'count',
     useStatsApi: false,
   },
+  weighttraining: {
+    id: 'weighttraining',
+    stravaType: 'WeightTraining',
+    displayName: 'Weight Training',
+    metrics: { distance: false, count: true, elevation: false, time: true },
+    primaryMetric: 'count',
+    useStatsApi: false,
+  },
 }
 
 // Helper to get activity config by Strava type
