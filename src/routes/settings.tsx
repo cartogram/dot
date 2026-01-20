@@ -1,10 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, Link } from '@tanstack/react-router'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { exchangeCodeForTokens } from '@/lib/server/oauth'
+import { getUserGroups } from '@/lib/server/groups'
 import { Button } from '@/components/custom/Button/Button'
+import { Badge } from '@/components/custom/Badge/Badge'
 import {
   Card,
   CardContent,
@@ -17,12 +20,42 @@ export const Route = createFileRoute('/settings')({
   component: SettingsPage,
 })
 
+const queryClient = new QueryClient()
+
 function SettingsPage() {
-  const navigate = useNavigate()
   const { user, stravaDataSource, refreshStravaConnection } = useAuth()
+
+  if (!user) {
+    return <SettingsPageContent user={null} stravaDataSource={null} refreshStravaConnection={refreshStravaConnection} />
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <SettingsPageContent user={user} stravaDataSource={stravaDataSource} refreshStravaConnection={refreshStravaConnection} />
+    </QueryClientProvider>
+  )
+}
+
+function SettingsPageContent({
+  user,
+  stravaDataSource,
+  refreshStravaConnection
+}: {
+  user: ReturnType<typeof useAuth>['user']
+  stravaDataSource: ReturnType<typeof useAuth>['stravaDataSource']
+  refreshStravaConnection: ReturnType<typeof useAuth>['refreshStravaConnection']
+}) {
+  const navigate = useNavigate()
   const [isConnecting, setIsConnecting] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [copied, setCopied] = React.useState(false)
+
+  // Fetch user's groups
+  const { data: groups, isLoading: groupsLoading } = useQuery({
+    queryKey: ['user-groups', user?.id],
+    queryFn: () => getUserGroups({ data: { userId: user!.id } }),
+    enabled: !!user,
+  })
 
   const profileUrl = user
     ? `${typeof window !== 'undefined' ? window.location.origin : ''}/profile/${user.id}`
@@ -228,6 +261,56 @@ function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Groups Section */}
+      <Card state="active">
+        <CardHeader>
+          <CardTitle>Groups</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <CardDescription>
+            Join or create groups to share activity stats with friends.
+          </CardDescription>
+
+          {groupsLoading ? (
+            <p className="text-sm text-muted-foreground">Loading groups...</p>
+          ) : groups && groups.length > 0 ? (
+            <div className="space-y-2">
+              {groups.map((group) => (
+                <Link
+                  key={group.id}
+                  to="/group/$groupId"
+                  params={{ groupId: group.id }}
+                  className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-muted transition-colors"
+                >
+                  <div>
+                    <p className="font-medium">{group.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                    </p>
+                  </div>
+                  <Badge variant={group.current_user_role === 'owner' ? 'primary' : 'secondary'}>
+                    {group.current_user_role === 'owner' ? 'Owner' :
+                     group.current_user_role === 'admin' ? 'Admin' : 'Member'}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">You're not a member of any groups yet.</p>
+          )}
+
+          <div className="flex gap-2">
+            <Button to="/groups" variant="secondary">
+              View All Groups
+            </Button>
+            <Button to="/groups/new" variant="primary">
+              Create Group
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
     <Card state="active">
       <CardHeader>
         <CardTitle>Strava</CardTitle>

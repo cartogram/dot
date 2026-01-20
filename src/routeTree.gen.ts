@@ -15,7 +15,10 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GroupsIndexRouteImport } from './routes/groups/index'
 import { Route as ProfileUserIdRouteImport } from './routes/profile/$userId'
+import { Route as GroupsNewRouteImport } from './routes/groups/new'
+import { Route as GroupGroupIdRouteImport } from './routes/group/$groupId'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
@@ -48,9 +51,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GroupsIndexRoute = GroupsIndexRouteImport.update({
+  id: '/groups/',
+  path: '/groups/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
   id: '/profile/$userId',
   path: '/profile/$userId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupsNewRoute = GroupsNewRouteImport.update({
+  id: '/groups/new',
+  path: '/groups/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupGroupIdRoute = GroupGroupIdRouteImport.update({
+  id: '/group/$groupId',
+  path: '/group/$groupId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthConfirmRoute = AuthConfirmRouteImport.update({
@@ -67,7 +85,10 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
+  '/group/$groupId': typeof GroupGroupIdRoute
+  '/groups/new': typeof GroupsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
+  '/groups': typeof GroupsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -77,7 +98,10 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
+  '/group/$groupId': typeof GroupGroupIdRoute
+  '/groups/new': typeof GroupsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
+  '/groups': typeof GroupsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -88,7 +112,10 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
+  '/group/$groupId': typeof GroupGroupIdRoute
+  '/groups/new': typeof GroupsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
+  '/groups/': typeof GroupsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -100,7 +127,10 @@ export interface FileRouteTypes {
     | '/signup'
     | '/update-password'
     | '/auth/confirm'
+    | '/group/$groupId'
+    | '/groups/new'
     | '/profile/$userId'
+    | '/groups'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -110,7 +140,10 @@ export interface FileRouteTypes {
     | '/signup'
     | '/update-password'
     | '/auth/confirm'
+    | '/group/$groupId'
+    | '/groups/new'
     | '/profile/$userId'
+    | '/groups'
   id:
     | '__root__'
     | '/'
@@ -120,7 +153,10 @@ export interface FileRouteTypes {
     | '/signup'
     | '/update-password'
     | '/auth/confirm'
+    | '/group/$groupId'
+    | '/groups/new'
     | '/profile/$userId'
+    | '/groups/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -131,7 +167,10 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
+  GroupGroupIdRoute: typeof GroupGroupIdRoute
+  GroupsNewRoute: typeof GroupsNewRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
+  GroupsIndexRoute: typeof GroupsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -178,11 +217,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/groups/': {
+      id: '/groups/'
+      path: '/groups'
+      fullPath: '/groups'
+      preLoaderRoute: typeof GroupsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile/$userId': {
       id: '/profile/$userId'
       path: '/profile/$userId'
       fullPath: '/profile/$userId'
       preLoaderRoute: typeof ProfileUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/groups/new': {
+      id: '/groups/new'
+      path: '/groups/new'
+      fullPath: '/groups/new'
+      preLoaderRoute: typeof GroupsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/group/$groupId': {
+      id: '/group/$groupId'
+      path: '/group/$groupId'
+      fullPath: '/group/$groupId'
+      preLoaderRoute: typeof GroupGroupIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/confirm': {
@@ -203,7 +263,10 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   AuthConfirmRoute: AuthConfirmRoute,
+  GroupGroupIdRoute: GroupGroupIdRoute,
+  GroupsNewRoute: GroupsNewRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,
+  GroupsIndexRoute: GroupsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

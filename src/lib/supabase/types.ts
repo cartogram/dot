@@ -117,6 +117,76 @@ export interface DashboardConfigUpdate {
 }
 
 // =====================================================
+// GROUPS
+// =====================================================
+export type GroupRole = 'owner' | 'admin' | 'member'
+
+export interface Group {
+  id: string
+  name: string
+  description: string | null
+  owner_id: string
+  invite_code: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface GroupInsert {
+  name: string
+  description?: string | null
+  owner_id: string
+}
+
+export interface GroupUpdate {
+  name?: string
+  description?: string | null
+  invite_code?: string | null
+}
+
+// =====================================================
+// GROUP MEMBERS
+// =====================================================
+export interface GroupMember {
+  id: string
+  group_id: string
+  user_id: string
+  role: GroupRole
+  joined_at: string
+}
+
+export interface GroupMemberInsert {
+  group_id: string
+  user_id: string
+  role?: GroupRole
+}
+
+// =====================================================
+// GROUP DASHBOARD CONFIGS
+// =====================================================
+export interface GroupDashboardConfigRow {
+  id: string
+  group_id: string
+  version: number
+  config: DashboardConfig
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface GroupDashboardConfigInsert {
+  group_id: string
+  version?: number
+  config: DashboardConfig
+  is_active?: boolean
+}
+
+export interface GroupDashboardConfigUpdate {
+  version?: number
+  config?: DashboardConfig
+  is_active?: boolean
+}
+
+// =====================================================
 // DATABASE SCHEMA
 // Combines all tables for type-safe queries
 // =====================================================
@@ -137,6 +207,21 @@ export interface Database {
         Row: DashboardConfigRow
         Insert: DashboardConfigInsert
         Update: DashboardConfigUpdate
+      }
+      groups: {
+        Row: Group
+        Insert: GroupInsert
+        Update: GroupUpdate
+      }
+      group_members: {
+        Row: GroupMember
+        Insert: GroupMemberInsert
+        Update: { role?: GroupRole }
+      }
+      group_dashboard_configs: {
+        Row: GroupDashboardConfigRow
+        Insert: GroupDashboardConfigInsert
+        Update: GroupDashboardConfigUpdate
       }
     }
   }
