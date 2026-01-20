@@ -78,6 +78,16 @@ function SettingsPage() {
           if (error) throw error
         }
 
+        // Update user metadata with Strava avatar and name
+        if (tokens.athlete.profile) {
+          await supabase.auth.updateUser({
+            data: {
+              avatar_url: tokens.athlete.profile,
+              full_name: `${tokens.athlete.firstname} ${tokens.athlete.lastname}`,
+            },
+          })
+        }
+
         // Refresh the auth context
         await refreshStravaConnection()
 
@@ -212,6 +222,7 @@ function SettingsPage() {
             onClick={handleConnectStrava}
             disabled={isConnecting}
             className="w-full"
+            variant="primary"
           >
             {isConnecting ? 'Connecting...' : 'Connect with Strava'}
           </Button>

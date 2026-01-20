@@ -336,8 +336,8 @@ export function formatProgressSummary(metric: ProgressMetric): string {
   
   // For time, formatTime already includes units
   if (metric.unit === 'hours') {
-    return `${currentFormatted} / ${goalFormatted} (${metric.percentage.toFixed(0)}%)`
+    return `${currentFormatted} / ${goalFormatted}`
   }
   
-  return `${currentFormatted} ${metric.unit} of ${goalFormatted} ${metric.unit}`
+  return `${currentFormatted}${metric.unit} of ${goalFormatted}${metric.unit}`
 }

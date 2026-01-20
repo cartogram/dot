@@ -1,9 +1,16 @@
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/custom/Card/Card'
+import { Button } from '@base-ui/react/button'
+
 export function NotFound({ children }: { children?: any }) {
   return (
-    <div className="space-y-2 p-2">
-      <div className="text-gray-600 dark:text-gray-400">
-        {children || <p>The page you are looking for does not exist.</p>}
-      </div>
-    </div>
+    <Card state="error">
+      <CardHeader>
+        <CardTitle>Page Not Found</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>The page you are looking for does not exist.</CardDescription>
+        <Button to="/" variant="primary" className="w-full">Go to Dashboard</Button>
+      </CardContent>
+    </Card>
   )
 }

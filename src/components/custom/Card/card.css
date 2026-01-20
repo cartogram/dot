@@ -69,7 +69,6 @@
   transform: translate(0, -100%);
   line-height: 1;
   padding: 2px 1rem;
-  background: var(--color-background);
   border-radius: 0.35em;
 }
 
@@ -104,6 +103,11 @@
 .Card__Description {
   padding: 0 0 1em;
 }
+
+
+.Card--error,
+.Card--error .Card__Header::before,
+.Card--error .Card__Header::after,
 .Card--active,
 .Card--active .Card__Header::before,
 .Card--active .Card__Header::after {

@@ -35,18 +35,18 @@ function App() {
   if (!user) {
     console.log('[Index Route] No user - showing login prompt')
     return (
-      <Card>
+      <Card state="active">
         <CardHeader>
-          <CardTitle>Distance Over Time</CardTitle>
+          <CardTitle>Welcome to the Dashboard</CardTitle>
         </CardHeader>
-        <CardFooter>
+        <CardContent>
           <Button to="/login" variant="secondary">
             Log in
           </Button>
           <Button to="/signup" variant="primary">
             Sign up
           </Button>
-        </CardFooter>
+        </CardContent>
       </Card>
     )
   }
@@ -56,8 +56,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <React.Suspense fallback={<DashboardSkeleton />}>
-        <Profile />
-        <StatsDashboard />
+        <div className="flex flex-col gap-4">
+          <Profile />
+          <StatsDashboard />
+        </div>
       </React.Suspense>
     </QueryClientProvider>
   )

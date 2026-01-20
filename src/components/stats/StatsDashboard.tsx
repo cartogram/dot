@@ -99,7 +99,7 @@ export function StatsDashboard() {
 
   if (!stravaDataSource) {
     return (
-      <Card>
+      <Card state="error">
         <CardHeader>
           <CardTitle>No Data Sources</CardTitle>
         </CardHeader>
@@ -107,7 +107,7 @@ export function StatsDashboard() {
           <CardDescription>
             You need at least one data source to get started.
           </CardDescription>
-          <Button to="/settings" variant="primary">View sources</Button>
+          <Button to="/settings" variant="secondary">View sources</Button>
         </CardContent>
       </Card>
     )
@@ -129,7 +129,7 @@ export function StatsDashboard() {
       errorMessage.includes('Not authenticated')
 
     return (
-      <Card>
+      <Card state="error">
         <CardHeader>
           <CardTitle>Error Loading Stats</CardTitle>
         </CardHeader>
@@ -152,9 +152,6 @@ export function StatsDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Toolbar */}
-      <div className="flex justify-between items-center"></div>
-
       {/* Dashboard Grid */}
       {cards.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
