@@ -96,17 +96,17 @@ export function ActivityStatsCard({
               </div> */}
               <div>
                 <div className="text-muted-foreground text-xs mb-1">Remainder</div>
-                <div className="font-medium">{formatRemainder(primaryProgress)} {primaryProgress.unit !== 'hours' && primaryProgress.unit}</div>
+                <div className="heading--4">{formatRemainder(primaryProgress)} {primaryProgress.unit !== 'hours' && primaryProgress.unit}</div>
               </div>
               <div>
                 <div className="text-muted-foreground text-xs mb-1">Under/Over</div>
-                <div className={`font-medium ${primaryProgress.behindPlan < 0 ? 'text-red-600' : primaryProgress.behindPlan > 0 ? 'text-green-600' : ''}`}>
+                <div className="heading--4">
                   {formatBehindPlan(primaryProgress)}
                 </div>
               </div>
               <div >
                 <div className="text-muted-foreground text-xs mb-1">Daily Pace</div>
-                <div className="font-medium">{formatDailyPace(primaryProgress)}</div>
+                <div className="heading--4">{formatDailyPace(primaryProgress)}</div>
               </div>
             </div>
           </div>
