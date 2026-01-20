@@ -13,11 +13,11 @@ import {
   CardTitle,
 } from '@/components/custom/Card'
 
-export const Route = createFileRoute('/sources')({
-  component: ConnectStravaPage,
+export const Route = createFileRoute('/settings')({
+  component: SettingsPage,
 })
 
-function ConnectStravaPage() {
+function SettingsPage() {
   const navigate = useNavigate()
   const { user, stravaDataSource, refreshStravaConnection } = useAuth()
   const [isConnecting, setIsConnecting] = React.useState(false)
@@ -82,7 +82,7 @@ function ConnectStravaPage() {
         await refreshStravaConnection()
 
         // Clean up URL and redirect
-        window.history.replaceState(null, '', '/sources')
+        window.history.replaceState(null, '', '/settings')
         navigate({ to: '/' })
       } catch (err) {
         console.error('Failed to connect Strava:', err)
@@ -99,7 +99,7 @@ function ConnectStravaPage() {
 
   const handleConnectStrava = () => {
     const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID
-    const redirectUri = `${window.location.origin}/sources`
+    const redirectUri = `${window.location.origin}/settings`
     const scope = 'activity:read_all'
 
     const authUrl = new URL('https://www.strava.com/oauth/authorize')
@@ -152,51 +152,61 @@ function ConnectStravaPage() {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <div className="flex flex-col gap-4 justify-center items-center">
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="heading--3">
+            {user.email}
+          </p>
+          <p className="heading--4">
+            {user.user_metadata.full_name}
+          </p>
+          <p className="heading--4">
+            {user.id}
+          </p>
+          <p className="heading--4">
+            {user.created_at}
+          </p>
+          <p className="heading--4">
+            {user.updated_at}
+          </p>
+        </CardContent>
+      </Card>
+    <Card state="active">
       <CardHeader>
-        <CardTitle>Connect Strava</CardTitle>
+        <CardTitle>Strava</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-center mb-2">
-          {stravaDataSource
-            ? 'Your Strava account is connected'
-            : 'Connect your Strava account to import activities'}
-        </p>
+         
         {error && (
-          <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
+          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded">
             {error}
           </div>
         )}
 
         {stravaDataSource ? (
-          <div className="space-y-4">
-            <div className="p-4 bg-green-50 border border-green-200 rounded">
-              <p className="font-medium text-green-900">
+          <>
+              <p className="heading--3">
                 Connected as {stravaDataSource.athlete_data?.firstname}{' '}
                 {stravaDataSource.athlete_data?.lastname}
               </p>
-              <p className="text-sm text-green-700 mt-1">
+              <p className="heading--4">
                 Athlete ID: {stravaDataSource.athlete_id}
               </p>
-            </div>
 
-            <div className="flex gap-2">
-              <Button
-                onClick={() => navigate({ to: '/' })}
-                variant="secondary"
-                className="flex-1"
-              >
-                Go to Dashboard
-              </Button>
+            
               <Button
                 onClick={handleDisconnectStrava}
-                variant="destructive"
+                variant="primary"
+                destructive
                 className="flex-1"
               >
                 Disconnect
               </Button>
-            </div>
-          </div>
+          </>
         ) : (
           <Button
             onClick={handleConnectStrava}
@@ -208,5 +218,13 @@ function ConnectStravaPage() {
         )}
       </CardContent>
     </Card>
+     <Button to="/" variant="primary" >
+     Back to Dashboard
+    </Button>
+    {/* <div>
+      <pre>{JSON.stringify(user, null, 2)}</pre>
+      <pre>{JSON.stringify(stravaDataSource, null, 2)}</pre>
+    </div> */}
+    </div>
   )
 }

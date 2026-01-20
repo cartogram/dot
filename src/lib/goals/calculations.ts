@@ -85,25 +85,26 @@ function calculateTimeFrameDays(
   const periodEnd = getTimeFramePeriodEnd(timeFrame, customRange)
   const now = new Date()
 
-  // Calculate total days in timeframe
+  // Calculate total days in timeframe (ceil gives us the correct count for periods like Mon-Sun = 7 days)
   const totalDays = Math.ceil(
     (periodEnd.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  ) + 1
+  )
 
   // Calculate days elapsed (from start to now, clamped to timeframe)
+  // Any partial day counts as a day in progress
   const elapsedMs = Math.max(0, now.getTime() - startDate.getTime())
   const daysElapsed = Math.min(
     Math.ceil(elapsedMs / (1000 * 60 * 60 * 24)),
     totalDays,
   )
 
-  // Calculate days remaining (from now to end of period)
-  const remainingMs = Math.max(0, periodEnd.getTime() - now.getTime())
-  const daysRemaining = Math.ceil(remainingMs / (1000 * 60 * 60 * 24))
+  // Days remaining = total days minus elapsed days
+  // This ensures daysElapsed + daysRemaining = totalDays
+  const daysRemaining = Math.max(0, totalDays - daysElapsed)
 
   return {
     daysElapsed: Math.max(0, daysElapsed),
-    daysRemaining: Math.max(0, daysRemaining),
+    daysRemaining,
     totalDays,
   }
 }
