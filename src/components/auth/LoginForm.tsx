@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase/client'
+import { signIn } from '@/lib/server/auth'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -21,37 +21,20 @@ export function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('[LoginForm] Login form submitted', { email })
     setIsLoading(true)
     setError(null)
 
     try {
-      console.log('[LoginForm] Calling signInWithPassword...')
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const result = await signIn({ data: { email, password } })
 
-      console.log('[LoginForm] signInWithPassword response:', {
-        hasSession: !!data.session,
-        hasUser: !!data.user,
-        error: error?.message,
-      })
-
-      if (error) throw error
-
-      // Wait a bit for onAuthStateChange to fire before navigating
-      // This prevents race condition where navigation happens before auth state updates
-      console.log(
-        '[LoginForm] Login successful, waiting for auth state to settle...',
-      )
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      if (result.error) {
+        setError(result.error)
+        return
+      }
 
       // Navigate to home after successful login
-      console.log('[LoginForm] Navigating to home...')
       navigate({ to: '/' })
     } catch (err) {
-      console.error('[LoginForm] Login error:', err)
       setError(err instanceof Error ? err.message : 'Failed to log in')
     } finally {
       setIsLoading(false)

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase/client'
+import { updatePassword } from '@/lib/server/auth'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -31,11 +31,12 @@ export function UpdatePasswordForm() {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password,
-      })
+      const result = await updatePassword({ data: { password } })
 
-      if (error) throw error
+      if (result.error) {
+        setError(result.error)
+        return
+      }
 
       // Redirect to dashboard on success
       navigate({ to: '/' })
@@ -65,8 +66,11 @@ export function UpdatePasswordForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                minLength={6}
+                minLength={8}
               />
+              <p className="text-xs text-muted-foreground mt-1">
+                Must be at least 8 characters
+              </p>
             </Field>
 
             <Field>
@@ -81,7 +85,7 @@ export function UpdatePasswordForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                minLength={6}
+                minLength={8}
               />
             </Field>
 

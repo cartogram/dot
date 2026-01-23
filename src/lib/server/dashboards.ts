@@ -1,19 +1,96 @@
 /**
  * Server functions for dashboard CRUD operations
  *
- * These functions use the service role key to bypass RLS
- * where necessary (e.g., when looking up dashboards by invite code)
+ * These functions use Prisma for database operations
  */
 
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
-import type { Dashboard, DashboardInvite } from '@/lib/supabase/types'
+import { prisma } from '@/lib/db/client'
 import type {
+  Dashboard,
+  DashboardInvite,
   DashboardWithProfiles,
   DashboardProfileWithUser,
   InviteLinkData,
 } from '@/types/dashboards'
+
+// =====================================================
+// HELPER: Generate slug from name
+// =====================================================
+
+function generateSlug(name: string): string {
+  const base = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 50)
+  const random = Math.random().toString(36).substring(2, 8)
+  return `${base}-${random}`
+}
+
+// =====================================================
+// HELPER: Generate invite code
+// =====================================================
+
+function generateInviteCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let code = ''
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
+
+// =====================================================
+// HELPER: Build profile with user info
+// =====================================================
+
+async function buildProfilesWithUser(
+  profileIds: string[]
+): Promise<Map<string, { profile: any; athlete: any }>> {
+  const users = await prisma.user.findMany({
+    where: { id: { in: profileIds } },
+    select: { id: true, fullName: true, email: true },
+  })
+
+  const dataSources = await prisma.dataSource.findMany({
+    where: {
+      userId: { in: profileIds },
+      provider: 'strava',
+      isActive: true,
+    },
+    select: { userId: true, athleteData: true },
+  })
+
+  const userMap = new Map(users.map((u) => [u.id, u]))
+  const athleteMap = new Map(
+    dataSources.map((ds) => [ds.userId, ds.athleteData])
+  )
+
+  const result = new Map<string, { profile: any; athlete: any }>()
+  for (const id of profileIds) {
+    const user = userMap.get(id)
+    const athleteData = athleteMap.get(id) as any
+    result.set(id, {
+      profile: {
+        id,
+        fullName: user?.fullName || null,
+        email: user?.email || '',
+      },
+      athlete: athleteData
+        ? {
+            id: athleteData.id,
+            firstname: athleteData.firstname,
+            lastname: athleteData.lastname,
+            profile: athleteData.profile,
+          }
+        : null,
+    })
+  }
+
+  return result
+}
 
 // =====================================================
 // SCHEMAS
@@ -39,7 +116,7 @@ const LeaveDashboardSchema = z.object({
 
 const GetDashboardSchema = z.object({
   dashboardId: z.string().uuid(),
-  userId: z.string().uuid().optional(), // Optional for public dashboards
+  userId: z.string().uuid().optional(),
 })
 
 const GetDashboardBySlugSchema = z.object({
@@ -92,85 +169,31 @@ const UpdateProfileRoleSchema = z.object({
 })
 
 // =====================================================
-// HELPER: Build profile with user info
-// =====================================================
-
-async function buildProfilesWithUser(
-  supabase: any,
-  profileIds: string[]
-): Promise<Map<string, { profile: any; athlete: any }>> {
-  const { data: profiles } = await supabase
-    .from('profiles')
-    .select('id, full_name, email')
-    .in('id', profileIds)
-
-  const { data: dataSources } = await supabase
-    .from('data_sources')
-    .select('user_id, athlete_data')
-    .eq('provider', 'strava')
-    .eq('is_active', true)
-    .in('user_id', profileIds)
-
-  const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]))
-  const athleteMap = new Map(
-    (dataSources || []).map((ds: any) => [ds.user_id, ds.athlete_data])
-  )
-
-  const result = new Map<string, { profile: any; athlete: any }>()
-  for (const id of profileIds) {
-    const profile = profileMap.get(id)
-    const athleteData = athleteMap.get(id)
-    result.set(id, {
-      profile: {
-        id,
-        full_name: profile?.full_name || null,
-        email: profile?.email || '',
-      },
-      athlete: athleteData
-        ? {
-            id: athleteData.id,
-            firstname: athleteData.firstname,
-            lastname: athleteData.lastname,
-            profile: athleteData.profile,
-          }
-        : null,
-    })
-  }
-
-  return result
-}
-
-// =====================================================
 // CREATE DASHBOARD
 // =====================================================
 
 export const createDashboard = createServerFn({ method: 'POST' })
   .inputValidator(CreateDashboardSchema)
   .handler(async ({ data }): Promise<Dashboard> => {
-    const supabase = createServerClient() as any
+    const slug = generateSlug(data.name)
 
-    // Generate a slug from the name
-    const { data: slug } = await supabase.rpc('generate_dashboard_slug', {
-      dashboard_name: data.name,
-    })
-
-    const { data: dashboard, error } = await supabase
-      .from('dashboards')
-      .insert({
+    const dashboard = await prisma.dashboard.create({
+      data: {
         name: data.name,
         description: data.description || null,
-        owner_id: data.userId,
-        is_public: data.isPublic,
-        is_default: data.isDefault,
-        slug: slug,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error creating dashboard:', error)
-      throw new Error('Failed to create dashboard')
-    }
+        ownerId: data.userId,
+        isPublic: data.isPublic,
+        isDefault: data.isDefault,
+        slug,
+        profiles: {
+          create: {
+            profileId: data.userId,
+            role: 'owner',
+            inviteAccepted: true,
+          },
+        },
+      },
+    })
 
     return dashboard as Dashboard
   })
@@ -182,52 +205,46 @@ export const createDashboard = createServerFn({ method: 'POST' })
 export const joinDashboard = createServerFn({ method: 'POST' })
   .inputValidator(JoinDashboardSchema)
   .handler(async ({ data }): Promise<Dashboard> => {
-    const supabase = createServerClient() as any
-
     // Find the invite by code
-    const { data: invite, error: inviteError } = await supabase
-      .from('dashboard_invites')
-      .select('*, dashboards(*)')
-      .eq('invite_code', data.inviteCode.toUpperCase())
-      .single()
+    const invite = await prisma.dashboardInvite.findUnique({
+      where: { inviteCode: data.inviteCode.toUpperCase() },
+      include: { dashboard: true },
+    })
 
-    if (inviteError || !invite) {
+    if (!invite) {
       throw new Error('Invalid invite code')
     }
 
     // Check if invite has expired
-    if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+    if (invite.expiresAt && invite.expiresAt < new Date()) {
       throw new Error('This invite has expired')
     }
 
     // Check if already a member
-    const { data: existingProfile } = await supabase
-      .from('dashboard_profiles')
-      .select('id')
-      .eq('dashboard_id', invite.dashboard_id)
-      .eq('profile_id', data.userId)
-      .maybeSingle()
+    const existingProfile = await prisma.dashboardProfile.findUnique({
+      where: {
+        dashboardId_profileId: {
+          dashboardId: invite.dashboardId,
+          profileId: data.userId,
+        },
+      },
+    })
 
     if (existingProfile) {
       throw new Error('You are already a member of this dashboard')
     }
 
     // Add user as profile with the invite's role
-    const { error: profileError } = await supabase
-      .from('dashboard_profiles')
-      .insert({
-        dashboard_id: invite.dashboard_id,
-        profile_id: data.userId,
+    await prisma.dashboardProfile.create({
+      data: {
+        dashboardId: invite.dashboardId,
+        profileId: data.userId,
         role: invite.role,
-        invite_accepted: true,
-      })
+        inviteAccepted: true,
+      },
+    })
 
-    if (profileError) {
-      console.error('Error joining dashboard:', profileError)
-      throw new Error('Failed to join dashboard')
-    }
-
-    return invite.dashboards as Dashboard
+    return invite.dashboard as Dashboard
   })
 
 // =====================================================
@@ -237,32 +254,27 @@ export const joinDashboard = createServerFn({ method: 'POST' })
 export const leaveDashboard = createServerFn({ method: 'POST' })
   .inputValidator(LeaveDashboardSchema)
   .handler(async ({ data }): Promise<{ success: boolean }> => {
-    const supabase = createServerClient() as any
-
     // Check if user is the owner
-    const { data: dashboard } = await supabase
-      .from('dashboards')
-      .select('owner_id')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      select: { ownerId: true },
+    })
 
-    if (dashboard?.owner_id === data.userId) {
+    if (dashboard?.ownerId === data.userId) {
       throw new Error(
         'Dashboard owners cannot leave. Transfer ownership or delete the dashboard.'
       )
     }
 
     // Remove user from dashboard
-    const { error } = await supabase
-      .from('dashboard_profiles')
-      .delete()
-      .eq('dashboard_id', data.dashboardId)
-      .eq('profile_id', data.userId)
-
-    if (error) {
-      console.error('Error leaving dashboard:', error)
-      throw new Error('Failed to leave dashboard')
-    }
+    await prisma.dashboardProfile.delete({
+      where: {
+        dashboardId_profileId: {
+          dashboardId: data.dashboardId,
+          profileId: data.userId,
+        },
+      },
+    })
 
     return { success: true }
   })
@@ -274,65 +286,44 @@ export const leaveDashboard = createServerFn({ method: 'POST' })
 export const getUserDashboards = createServerFn({ method: 'GET' })
   .inputValidator(GetUserDashboardsSchema)
   .handler(async ({ data }): Promise<DashboardWithProfiles[]> => {
-    const supabase = createServerClient() as any
-
     // Get all dashboards the user is a member of
-    const { data: memberships, error: membershipError } = await supabase
-      .from('dashboard_profiles')
-      .select('dashboard_id, role')
-      .eq('profile_id', data.userId)
+    const memberships = await prisma.dashboardProfile.findMany({
+      where: { profileId: data.userId },
+      select: { dashboardId: true, role: true },
+    })
 
-    if (membershipError) {
-      console.error('Error fetching memberships:', membershipError)
-      throw new Error('Failed to fetch dashboards')
-    }
-
-    if (!memberships || memberships.length === 0) {
+    if (memberships.length === 0) {
       return []
     }
 
-    const dashboardIds = memberships.map((m: any) => m.dashboard_id)
+    const dashboardIds = memberships.map((m) => m.dashboardId)
 
     // Get dashboard details
-    const { data: dashboards, error: dashboardsError } = await supabase
-      .from('dashboards')
-      .select('*')
-      .in('id', dashboardIds)
-      .order('is_default', { ascending: false })
-      .order('created_at', { ascending: false })
-
-    if (dashboardsError || !dashboards) {
-      console.error('Error fetching dashboards:', dashboardsError)
-      throw new Error('Failed to fetch dashboards')
-    }
+    const dashboards = await prisma.dashboard.findMany({
+      where: { id: { in: dashboardIds } },
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+    })
 
     // Get all profiles for all dashboards
-    const { data: allProfiles, error: profilesError } = await supabase
-      .from('dashboard_profiles')
-      .select('*')
-      .in('dashboard_id', dashboardIds)
-
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError)
-    }
+    const allProfiles = await prisma.dashboardProfile.findMany({
+      where: { dashboardId: { in: dashboardIds } },
+    })
 
     // Get user info for all profiles
-    const profileUserIds = [
-      ...new Set((allProfiles || []).map((p: any) => p.profile_id)),
-    ]
-    const userMap = await buildProfilesWithUser(supabase, profileUserIds)
+    const profileUserIds = [...new Set(allProfiles.map((p) => p.profileId))]
+    const userMap = await buildProfilesWithUser(profileUserIds)
 
     // Build DashboardWithProfiles for each dashboard
-    return dashboards.map((dashboard: any) => {
-      const dashboardProfiles = (allProfiles || [])
-        .filter((p: any) => p.dashboard_id === dashboard.id)
-        .map((p: any): DashboardProfileWithUser => {
-          const userData = userMap.get(p.profile_id)
+    return dashboards.map((dashboard) => {
+      const dashboardProfiles = allProfiles
+        .filter((p) => p.dashboardId === dashboard.id)
+        .map((p): DashboardProfileWithUser => {
+          const userData = userMap.get(p.profileId)
           return {
             ...p,
             profile: userData?.profile || {
-              id: p.profile_id,
-              full_name: null,
+              id: p.profileId,
+              fullName: null,
               email: '',
             },
             athlete: userData?.athlete || null,
@@ -340,14 +331,14 @@ export const getUserDashboards = createServerFn({ method: 'GET' })
         })
 
       const userMembership = memberships.find(
-        (m: any) => m.dashboard_id === dashboard.id
+        (m) => m.dashboardId === dashboard.id
       )
 
       return {
         ...dashboard,
         profiles: dashboardProfiles,
-        profile_count: dashboardProfiles.length,
-        current_user_role: userMembership?.role || 'viewer',
+        profileCount: dashboardProfiles.length,
+        currentUserRole: userMembership?.role || 'viewer',
       }
     })
   })
@@ -359,70 +350,62 @@ export const getUserDashboards = createServerFn({ method: 'GET' })
 export const getDashboard = createServerFn({ method: 'GET' })
   .inputValidator(GetDashboardSchema)
   .handler(async ({ data }): Promise<DashboardWithProfiles> => {
-    const supabase = createServerClient() as any
-
     // Get dashboard details
-    const { data: dashboard, error: dashboardError } = await supabase
-      .from('dashboards')
-      .select('*')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+    })
 
-    if (dashboardError || !dashboard) {
+    if (!dashboard) {
       throw new Error('Dashboard not found')
     }
 
     // Check access: either public or user is a member
     let userRole: string | null = null
     if (data.userId) {
-      const { data: membership } = await supabase
-        .from('dashboard_profiles')
-        .select('role')
-        .eq('dashboard_id', data.dashboardId)
-        .eq('profile_id', data.userId)
-        .single()
+      const membership = await prisma.dashboardProfile.findUnique({
+        where: {
+          dashboardId_profileId: {
+            dashboardId: data.dashboardId,
+            profileId: data.userId,
+          },
+        },
+        select: { role: true },
+      })
 
       userRole = membership?.role || null
     }
 
-    if (!dashboard.is_public && !userRole) {
+    if (!dashboard.isPublic && !userRole) {
       throw new Error('You do not have access to this dashboard')
     }
 
     // Get all profiles
-    const { data: profiles, error: profilesError } = await supabase
-      .from('dashboard_profiles')
-      .select('*')
-      .eq('dashboard_id', data.dashboardId)
-
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError)
-    }
+    const profiles = await prisma.dashboardProfile.findMany({
+      where: { dashboardId: data.dashboardId },
+    })
 
     // Get user info for all profiles
-    const profileUserIds = (profiles || []).map((p: any) => p.profile_id)
-    const userMap = await buildProfilesWithUser(supabase, profileUserIds)
+    const profileUserIds = profiles.map((p) => p.profileId)
+    const userMap = await buildProfilesWithUser(profileUserIds)
 
-    const dashboardProfiles = (profiles || []).map(
-      (p: any): DashboardProfileWithUser => {
-        const userData = userMap.get(p.profile_id)
-        return {
-          ...p,
-          profile: userData?.profile || {
-            id: p.profile_id,
-            full_name: null,
-            email: '',
-          },
-          athlete: userData?.athlete || null,
-        }
+    const dashboardProfiles = profiles.map((p): DashboardProfileWithUser => {
+      const userData = userMap.get(p.profileId)
+      return {
+        ...p,
+        profile: userData?.profile || {
+          id: p.profileId,
+          fullName: null,
+          email: '',
+        },
+        athlete: userData?.athlete || null,
       }
-    )
+    })
 
     return {
       ...dashboard,
       profiles: dashboardProfiles,
-      profile_count: dashboardProfiles.length,
-      current_user_role: userRole || 'viewer',
+      profileCount: dashboardProfiles.length,
+      currentUserRole: (userRole as any) || 'viewer',
     }
   })
 
@@ -433,66 +416,62 @@ export const getDashboard = createServerFn({ method: 'GET' })
 export const getDashboardBySlug = createServerFn({ method: 'GET' })
   .inputValidator(GetDashboardBySlugSchema)
   .handler(async ({ data }): Promise<DashboardWithProfiles> => {
-    const supabase = createServerClient() as any
-
     // Get dashboard by slug
-    const { data: dashboard, error: dashboardError } = await supabase
-      .from('dashboards')
-      .select('*')
-      .eq('slug', data.slug)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { slug: data.slug },
+    })
 
-    if (dashboardError || !dashboard) {
+    if (!dashboard) {
       throw new Error('Dashboard not found')
     }
 
     // Check access
     let userRole: string | null = null
     if (data.userId) {
-      const { data: membership } = await supabase
-        .from('dashboard_profiles')
-        .select('role')
-        .eq('dashboard_id', dashboard.id)
-        .eq('profile_id', data.userId)
-        .single()
+      const membership = await prisma.dashboardProfile.findUnique({
+        where: {
+          dashboardId_profileId: {
+            dashboardId: dashboard.id,
+            profileId: data.userId,
+          },
+        },
+        select: { role: true },
+      })
 
       userRole = membership?.role || null
     }
 
-    if (!dashboard.is_public && !userRole) {
+    if (!dashboard.isPublic && !userRole) {
       throw new Error('This dashboard is private')
     }
 
     // Get all profiles
-    const { data: profiles } = await supabase
-      .from('dashboard_profiles')
-      .select('*')
-      .eq('dashboard_id', dashboard.id)
+    const profiles = await prisma.dashboardProfile.findMany({
+      where: { dashboardId: dashboard.id },
+    })
 
     // Get user info for all profiles
-    const profileUserIds = (profiles || []).map((p: any) => p.profile_id)
-    const userMap = await buildProfilesWithUser(supabase, profileUserIds)
+    const profileUserIds = profiles.map((p) => p.profileId)
+    const userMap = await buildProfilesWithUser(profileUserIds)
 
-    const dashboardProfiles = (profiles || []).map(
-      (p: any): DashboardProfileWithUser => {
-        const userData = userMap.get(p.profile_id)
-        return {
-          ...p,
-          profile: userData?.profile || {
-            id: p.profile_id,
-            full_name: null,
-            email: '',
-          },
-          athlete: userData?.athlete || null,
-        }
+    const dashboardProfiles = profiles.map((p): DashboardProfileWithUser => {
+      const userData = userMap.get(p.profileId)
+      return {
+        ...p,
+        profile: userData?.profile || {
+          id: p.profileId,
+          fullName: null,
+          email: '',
+        },
+        athlete: userData?.athlete || null,
       }
-    )
+    })
 
     return {
       ...dashboard,
       profiles: dashboardProfiles,
-      profile_count: dashboardProfiles.length,
-      current_user_role: userRole || 'viewer',
+      profileCount: dashboardProfiles.length,
+      currentUserRole: (userRole as any) || 'viewer',
     }
   })
 
@@ -503,46 +482,38 @@ export const getDashboardBySlug = createServerFn({ method: 'GET' })
 export const updateDashboard = createServerFn({ method: 'POST' })
   .inputValidator(UpdateDashboardSchema)
   .handler(async ({ data }): Promise<Dashboard> => {
-    const supabase = createServerClient() as any
-
     // Verify user is owner
-    const { data: dashboard, error: dashboardError } = await supabase
-      .from('dashboards')
-      .select('owner_id')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      select: { ownerId: true },
+    })
 
-    if (dashboardError || !dashboard || dashboard.owner_id !== data.userId) {
+    if (!dashboard || dashboard.ownerId !== data.userId) {
       throw new Error('Only the dashboard owner can update the dashboard')
     }
 
     // If setting this dashboard as default, unset other defaults for this user
     if (data.isDefault === true) {
-      await supabase
-        .from('dashboards')
-        .update({ is_default: false })
-        .eq('owner_id', data.userId)
-        .neq('id', data.dashboardId)
+      await prisma.dashboard.updateMany({
+        where: {
+          ownerId: data.userId,
+          id: { not: data.dashboardId },
+        },
+        data: { isDefault: false },
+      })
     }
 
     const updates: Record<string, any> = {}
     if (data.name !== undefined) updates.name = data.name
     if (data.description !== undefined) updates.description = data.description
-    if (data.isPublic !== undefined) updates.is_public = data.isPublic
-    if (data.isDefault !== undefined) updates.is_default = data.isDefault
+    if (data.isPublic !== undefined) updates.isPublic = data.isPublic
+    if (data.isDefault !== undefined) updates.isDefault = data.isDefault
     if (data.slug !== undefined) updates.slug = data.slug
 
-    const { data: updatedDashboard, error } = await supabase
-      .from('dashboards')
-      .update(updates)
-      .eq('id', data.dashboardId)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error updating dashboard:', error)
-      throw new Error('Failed to update dashboard')
-    }
+    const updatedDashboard = await prisma.dashboard.update({
+      where: { id: data.dashboardId },
+      data: updates,
+    })
 
     return updatedDashboard as Dashboard
   })
@@ -554,61 +525,50 @@ export const updateDashboard = createServerFn({ method: 'POST' })
 export const createInvite = createServerFn({ method: 'POST' })
   .inputValidator(CreateInviteSchema)
   .handler(async ({ data }): Promise<InviteLinkData> => {
-    const supabase = createServerClient() as any
-
     // Verify user can edit dashboard
-    const { data: membership } = await supabase
-      .from('dashboard_profiles')
-      .select('role')
-      .eq('dashboard_id', data.dashboardId)
-      .eq('profile_id', data.userId)
-      .single()
+    const membership = await prisma.dashboardProfile.findUnique({
+      where: {
+        dashboardId_profileId: {
+          dashboardId: data.dashboardId,
+          profileId: data.userId,
+        },
+      },
+      select: { role: true },
+    })
 
     if (!membership || !['owner', 'editor'].includes(membership.role)) {
       throw new Error('Only owners and editors can create invites')
     }
 
-    // Generate invite code
-    const { data: inviteCode } = await supabase.rpc(
-      'generate_dashboard_invite_code'
-    )
+    const inviteCode = generateInviteCode()
 
     // Calculate expiration
-    let expiresAt: string | null = null
+    let expiresAt: Date | null = null
     if (data.expiresInDays) {
-      const expDate = new Date()
-      expDate.setDate(expDate.getDate() + data.expiresInDays)
-      expiresAt = expDate.toISOString()
+      expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + data.expiresInDays)
     }
 
     // Get dashboard name for response
-    const { data: dashboard } = await supabase
-      .from('dashboards')
-      .select('name')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      select: { name: true },
+    })
 
     // Create invite
-    const { data: invite, error } = await supabase
-      .from('dashboard_invites')
-      .insert({
-        dashboard_id: data.dashboardId,
-        invite_code: inviteCode,
+    const invite = await prisma.dashboardInvite.create({
+      data: {
+        dashboardId: data.dashboardId,
+        inviteCode,
         role: data.role,
-        expires_at: expiresAt,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error creating invite:', error)
-      throw new Error('Failed to create invite')
-    }
+        expiresAt,
+      },
+    })
 
     return {
-      code: invite.invite_code,
+      code: invite.inviteCode,
       role: invite.role,
-      expiresAt: invite.expires_at,
+      expiresAt: invite.expiresAt,
       dashboardName: dashboard?.name || '',
       dashboardId: data.dashboardId,
     }
@@ -626,30 +586,25 @@ export const getDashboardInvites = createServerFn({ method: 'GET' })
     })
   )
   .handler(async ({ data }): Promise<DashboardInvite[]> => {
-    const supabase = createServerClient() as any
-
     // Verify user can edit dashboard
-    const { data: membership } = await supabase
-      .from('dashboard_profiles')
-      .select('role')
-      .eq('dashboard_id', data.dashboardId)
-      .eq('profile_id', data.userId)
-      .single()
+    const membership = await prisma.dashboardProfile.findUnique({
+      where: {
+        dashboardId_profileId: {
+          dashboardId: data.dashboardId,
+          profileId: data.userId,
+        },
+      },
+      select: { role: true },
+    })
 
     if (!membership || !['owner', 'editor'].includes(membership.role)) {
       throw new Error('Only owners and editors can view invites')
     }
 
-    const { data: invites, error } = await supabase
-      .from('dashboard_invites')
-      .select('*')
-      .eq('dashboard_id', data.dashboardId)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching invites:', error)
-      throw new Error('Failed to fetch invites')
-    }
+    const invites = await prisma.dashboardInvite.findMany({
+      where: { dashboardId: data.dashboardId },
+      orderBy: { createdAt: 'desc' },
+    })
 
     return invites as DashboardInvite[]
   })
@@ -661,39 +616,29 @@ export const getDashboardInvites = createServerFn({ method: 'GET' })
 export const deleteInvite = createServerFn({ method: 'POST' })
   .inputValidator(DeleteInviteSchema)
   .handler(async ({ data }): Promise<{ success: boolean }> => {
-    const supabase = createServerClient() as any
-
     // Get the invite to find the dashboard
-    const { data: invite } = await supabase
-      .from('dashboard_invites')
-      .select('dashboard_id')
-      .eq('id', data.inviteId)
-      .single()
+    const invite = await prisma.dashboardInvite.findUnique({
+      where: { id: data.inviteId },
+      select: { dashboardId: true },
+    })
 
     if (!invite) {
       throw new Error('Invite not found')
     }
 
     // Verify user is owner
-    const { data: dashboard } = await supabase
-      .from('dashboards')
-      .select('owner_id')
-      .eq('id', invite.dashboard_id)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: invite.dashboardId },
+      select: { ownerId: true },
+    })
 
-    if (!dashboard || dashboard.owner_id !== data.userId) {
+    if (!dashboard || dashboard.ownerId !== data.userId) {
       throw new Error('Only the dashboard owner can delete invites')
     }
 
-    const { error } = await supabase
-      .from('dashboard_invites')
-      .delete()
-      .eq('id', data.inviteId)
-
-    if (error) {
-      console.error('Error deleting invite:', error)
-      throw new Error('Failed to delete invite')
-    }
+    await prisma.dashboardInvite.delete({
+      where: { id: data.inviteId },
+    })
 
     return { success: true }
   })
@@ -705,29 +650,20 @@ export const deleteInvite = createServerFn({ method: 'POST' })
 export const deleteDashboard = createServerFn({ method: 'POST' })
   .inputValidator(DeleteDashboardSchema)
   .handler(async ({ data }): Promise<{ success: boolean }> => {
-    const supabase = createServerClient() as any
-
     // Verify user is owner
-    const { data: dashboard, error: dashboardError } = await supabase
-      .from('dashboards')
-      .select('owner_id')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      select: { ownerId: true },
+    })
 
-    if (dashboardError || !dashboard || dashboard.owner_id !== data.userId) {
+    if (!dashboard || dashboard.ownerId !== data.userId) {
       throw new Error('Only the dashboard owner can delete the dashboard')
     }
 
-    // Delete the dashboard (cascade will handle profiles, invites, and configs)
-    const { error } = await supabase
-      .from('dashboards')
-      .delete()
-      .eq('id', data.dashboardId)
-
-    if (error) {
-      console.error('Error deleting dashboard:', error)
-      throw new Error('Failed to delete dashboard')
-    }
+    // Delete the dashboard (cascade will handle profiles, invites)
+    await prisma.dashboard.delete({
+      where: { id: data.dashboardId },
+    })
 
     return { success: true }
   })
@@ -739,34 +675,29 @@ export const deleteDashboard = createServerFn({ method: 'POST' })
 export const removeProfile = createServerFn({ method: 'POST' })
   .inputValidator(RemoveProfileSchema)
   .handler(async ({ data }): Promise<{ success: boolean }> => {
-    const supabase = createServerClient() as any
-
     // Verify user is owner
-    const { data: dashboard } = await supabase
-      .from('dashboards')
-      .select('owner_id')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      select: { ownerId: true },
+    })
 
-    if (!dashboard || dashboard.owner_id !== data.userId) {
+    if (!dashboard || dashboard.ownerId !== data.userId) {
       throw new Error('Only the dashboard owner can remove profiles')
     }
 
     // Prevent removing the owner
-    if (data.profileId === dashboard.owner_id) {
+    if (data.profileId === dashboard.ownerId) {
       throw new Error('Cannot remove the dashboard owner')
     }
 
-    const { error } = await supabase
-      .from('dashboard_profiles')
-      .delete()
-      .eq('dashboard_id', data.dashboardId)
-      .eq('profile_id', data.profileId)
-
-    if (error) {
-      console.error('Error removing profile:', error)
-      throw new Error('Failed to remove profile')
-    }
+    await prisma.dashboardProfile.delete({
+      where: {
+        dashboardId_profileId: {
+          dashboardId: data.dashboardId,
+          profileId: data.profileId,
+        },
+      },
+    })
 
     return { success: true }
   })
@@ -778,34 +709,30 @@ export const removeProfile = createServerFn({ method: 'POST' })
 export const updateProfileRole = createServerFn({ method: 'POST' })
   .inputValidator(UpdateProfileRoleSchema)
   .handler(async ({ data }): Promise<{ success: boolean }> => {
-    const supabase = createServerClient() as any
-
     // Verify user is owner
-    const { data: dashboard } = await supabase
-      .from('dashboards')
-      .select('owner_id')
-      .eq('id', data.dashboardId)
-      .single()
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      select: { ownerId: true },
+    })
 
-    if (!dashboard || dashboard.owner_id !== data.userId) {
+    if (!dashboard || dashboard.ownerId !== data.userId) {
       throw new Error('Only the dashboard owner can change roles')
     }
 
     // Prevent changing owner's role
-    if (data.profileId === dashboard.owner_id) {
+    if (data.profileId === dashboard.ownerId) {
       throw new Error("Cannot change the owner's role")
     }
 
-    const { error } = await supabase
-      .from('dashboard_profiles')
-      .update({ role: data.role })
-      .eq('dashboard_id', data.dashboardId)
-      .eq('profile_id', data.profileId)
-
-    if (error) {
-      console.error('Error updating role:', error)
-      throw new Error('Failed to update role')
-    }
+    await prisma.dashboardProfile.update({
+      where: {
+        dashboardId_profileId: {
+          dashboardId: data.dashboardId,
+          profileId: data.profileId,
+        },
+      },
+      data: { role: data.role },
+    })
 
     return { success: true }
   })
@@ -817,35 +744,29 @@ export const updateProfileRole = createServerFn({ method: 'POST' })
 export const getDefaultDashboard = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ userId: z.string().uuid() }))
   .handler(async ({ data }): Promise<Dashboard | null> => {
-    const supabase = createServerClient() as any
-
     // First try to find a default dashboard
-    const { data: defaultDashboard } = await supabase
-      .from('dashboards')
-      .select('*')
-      .eq('owner_id', data.userId)
-      .eq('is_default', true)
-      .single()
+    const defaultDashboard = await prisma.dashboard.findFirst({
+      where: {
+        ownerId: data.userId,
+        isDefault: true,
+      },
+    })
 
     if (defaultDashboard) {
       return defaultDashboard as Dashboard
     }
 
     // If no default, get first dashboard user is a member of
-    const { data: membership } = await supabase
-      .from('dashboard_profiles')
-      .select('dashboard_id')
-      .eq('profile_id', data.userId)
-      .order('joined_at', { ascending: true })
-      .limit(1)
-      .single()
+    const membership = await prisma.dashboardProfile.findFirst({
+      where: { profileId: data.userId },
+      orderBy: { joinedAt: 'asc' },
+      select: { dashboardId: true },
+    })
 
     if (membership) {
-      const { data: dashboard } = await supabase
-        .from('dashboards')
-        .select('*')
-        .eq('id', membership.dashboard_id)
-        .single()
+      const dashboard = await prisma.dashboard.findUnique({
+        where: { id: membership.dashboardId },
+      })
 
       return dashboard as Dashboard | null
     }

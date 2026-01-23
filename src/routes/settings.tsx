@@ -2,9 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
-import { exchangeCodeForTokens } from '@/lib/server/oauth'
+import { useAuth } from '@/lib/auth/AuthContext'
+import { exchangeCodeForTokens, saveStravaConnection, disconnectStrava } from '@/lib/server/oauth'
 import { getUserDashboards, updateDashboard } from '@/lib/server/dashboards'
 import { Button } from '@/components/custom/Button/Button'
 import { Badge } from '@/components/custom/Badge/Badge'
@@ -117,51 +116,8 @@ function SettingsPageContent({
         // Exchange code for tokens
         const tokens = await exchangeCodeForTokens({ data: { code } })
 
-        // Check if connection already exists
-        const { data: existing } = await (supabase.from('data_sources') as any)
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('provider', 'strava')
-          .maybeSingle()
-
-        const connectionData = {
-          user_id: user.id,
-          provider: 'strava',
-          athlete_id: tokens.athlete.id,
-          access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token,
-          expires_at: new Date(tokens.expires_at * 1000).toISOString(),
-          token_type: tokens.token_type,
-          athlete_data: tokens.athlete,
-          is_active: true,
-          last_synced_at: new Date().toISOString(),
-        }
-
-        if (existing) {
-          // Update existing connection (re-enable if previously disconnected)
-          const { error } = await (supabase.from('data_sources') as any)
-            .update(connectionData)
-            .eq('id', existing.id)
-
-          if (error) throw error
-        } else {
-          // Insert new connection
-          const { error } = await (supabase.from('data_sources') as any).insert(
-            connectionData,
-          )
-
-          if (error) throw error
-        }
-
-        // Update user metadata with Strava avatar and name
-        if (tokens.athlete.profile) {
-          await supabase.auth.updateUser({
-            data: {
-              avatar_url: tokens.athlete.profile,
-              full_name: `${tokens.athlete.firstname} ${tokens.athlete.lastname}`,
-            },
-          })
-        }
+        // Save connection via server function
+        await saveStravaConnection({ data: { tokens } })
 
         // Refresh the auth context
         await refreshStravaConnection()
@@ -200,13 +156,7 @@ function SettingsPageContent({
     if (!stravaDataSource || !user) return
 
     try {
-      const { error } = await (supabase.from('data_sources') as any)
-        .update({ is_active: false })
-        .eq('id', stravaDataSource.id)
-        .eq('user_id', user?.id)
-
-      if (error) throw error
-
+      await disconnectStrava({ data: { dataSourceId: stravaDataSource.id } })
       await refreshStravaConnection()
     } catch (err) {
       console.error('Failed to disconnect Strava:', err)
@@ -247,16 +197,16 @@ function SettingsPageContent({
             {user.email}
           </p>
           <p className="heading--4">
-            {user.user_metadata.full_name}
+            {user.fullName}
           </p>
           <p className="heading--4">
             {user.id}
           </p>
           <p className="heading--4">
-            {user.created_at}
+            {user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt}
           </p>
           <p className="heading--4">
-            {user.updated_at}
+            {user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt}
           </p>
         </CardContent>
       </Card>
@@ -395,11 +345,11 @@ function SettingsPageContent({
         {stravaDataSource ? (
           <>
               <p className="heading--3">
-                Connected as {stravaDataSource.athlete_data?.firstname}{' '}
-                {stravaDataSource.athlete_data?.lastname}
+                Connected as {(stravaDataSource.athleteData as any)?.firstname}{' '}
+                {(stravaDataSource.athleteData as any)?.lastname}
               </p>
               <p className="heading--4">
-                Athlete ID: {stravaDataSource.athlete_id}
+                Athlete ID: {stravaDataSource.athleteId?.toString()}
               </p>
 
             

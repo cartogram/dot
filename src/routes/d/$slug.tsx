@@ -12,7 +12,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from '@tanstack/react-query'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { getDashboardDataBySlug } from '@/lib/server/getDashboardData'
 import { DashboardView } from '@/components/dashboard/DashboardView'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'

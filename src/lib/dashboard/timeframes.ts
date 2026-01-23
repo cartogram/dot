@@ -11,16 +11,6 @@ export function getTimeFrameStartDate(
   const now = new Date()
 
   switch (timeFrame) {
-    case 'day': {
-      const dayStart = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-      )
-      dayStart.setHours(0, 0, 0, 0)
-      return dayStart
-    }
-
     case 'week': {
       const dayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
       const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) // Adjust when day is Sunday
@@ -41,16 +31,11 @@ export function getTimeFrameStartDate(
       return yearStart
     }
 
-    case 'custom': {
-      if (!customRange) {
-        throw new Error('Custom time frame requires customRange parameter')
-      }
-      return new Date(customRange.start)
-    }
-
-    case 'all': {
-      // Return a very old date for "all time"
-      return new Date(2000, 0, 1)
+    case 'ytd': {
+      // Year to date - same as Year
+      const yearStart = new Date(now.getFullYear(), 0, 1)
+      yearStart.setHours(0, 0, 0, 0)
+      return yearStart
     }
 
     default:
@@ -65,11 +50,7 @@ export function getTimeFrameEndDate(
   timeFrame: TimeFrame,
   customRange?: { start: string; end: string },
 ): Date {
-  if (timeFrame === 'custom' && customRange) {
-    return new Date(customRange.end)
-  }
-
-  // For all other time frames, end date is now
+  // For all time frames, end date is now
   return new Date()
 }
 
@@ -105,23 +86,14 @@ export function getTimeFrameDescription(
   customRange?: { start: string; end: string },
 ): string {
   switch (timeFrame) {
-    case 'day':
-      return 'Today'
     case 'week':
       return 'This Week'
     case 'month':
       return 'This Month'
     case 'year':
       return 'This Year'
-    case 'all':
-      return 'All Time'
-    case 'custom':
-      if (customRange) {
-        const start = new Date(customRange.start).toLocaleDateString()
-        const end = new Date(customRange.end).toLocaleDateString()
-        return `${start} - ${end}`
-      }
-      return 'Custom Range'
+    case 'ytd':
+      return 'Year to Date'
     default:
       return 'Unknown'
   }

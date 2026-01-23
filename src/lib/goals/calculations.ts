@@ -22,24 +22,9 @@ function getTimeFramePeriodEnd(
   timeFrame: TimeFrame,
   customRange?: { start: string; end: string },
 ): Date {
-  if (timeFrame === 'custom' && customRange) {
-    return new Date(customRange.end)
-  }
-
   const now = new Date()
 
   switch (timeFrame) {
-    case 'day': {
-      // End of today
-      const dayEnd = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-      )
-      dayEnd.setHours(23, 59, 59, 999)
-      return dayEnd
-    }
-
     case 'week': {
       // End of week (Sunday 23:59:59)
       const dayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
@@ -57,16 +42,12 @@ function getTimeFramePeriodEnd(
       return monthEnd
     }
 
-    case 'year': {
+    case 'year':
+    case 'ytd': {
       // End of current year
       const yearEnd = new Date(now.getFullYear(), 11, 31)
       yearEnd.setHours(23, 59, 59, 999)
       return yearEnd
-    }
-
-    case 'all': {
-      // Far future date
-      return new Date(2100, 0, 1)
     }
 
     default:
@@ -276,7 +257,7 @@ function formatValue(value: number, unit: string): string {
  */
 export function formatDailyPace(metric: ProgressMetric): string {
   const formattedValue = formatValue(metric.dailyPace, metric.unit)
-  
+
   // For time, formatTime already includes units, so don't append the unit again
   if (metric.unit === 'hours') {
     return `${formattedValue}/day`
@@ -333,11 +314,11 @@ export function formatBehindPlan(metric: ProgressMetric): string {
 export function formatProgressSummary(metric: ProgressMetric): string {
   const currentFormatted = formatCurrent(metric)
   const goalFormatted = formatGoal(metric)
-  
+
   // For time, formatTime already includes units
   if (metric.unit === 'hours') {
     return `${currentFormatted} / ${goalFormatted}`
   }
-  
+
   return `${currentFormatted}${metric.unit} of ${goalFormatted}${metric.unit}`
 }

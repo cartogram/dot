@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { fetchAthleteStats, fetchAthleteActivities } from '@/lib/server/strava'
-import { supabase } from '@/lib/supabase/client'
-import { getVisibleCards } from '@/lib/supabase/dashboard'
+import { getVisibleCardsForUser } from '@/lib/server/dashboardConfig'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
@@ -15,22 +14,23 @@ import {
   CardContent,
 } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
+import type { DashboardCard as DashboardCardType } from '@/types/dashboard'
 
 export function StatsDashboard() {
   const { user, stravaDataSource, getStravaAccessToken } = useAuth()
   const [refreshKey, setRefreshKey] = React.useState(0)
-  const [cards, setCards] = React.useState<
-    Awaited<ReturnType<typeof getVisibleCards>>
-  >([])
+  const [dashboardId, setDashboardId] = React.useState<string | null>(null)
+  const [cards, setCards] = React.useState<DashboardCardType[]>([])
   const currentYear = new Date().getFullYear()
 
-  // Fetch cards from Supabase
+  // Fetch cards from server
   React.useEffect(() => {
     if (!user) return
 
     const fetchCards = async () => {
-      const visibleCards = await getVisibleCards(supabase, user.id)
-      setCards(visibleCards)
+      const result = await getVisibleCardsForUser({ data: { userId: user.id } })
+      setDashboardId(result.dashboardId)
+      setCards(result.cards)
     }
 
     fetchCards()
@@ -46,7 +46,7 @@ export function StatsDashboard() {
     isLoading: isLoadingStats,
     error: statsError,
   } = useQuery({
-    queryKey: ['athlete-stats', stravaDataSource?.athlete_id],
+    queryKey: ['athlete-stats', stravaDataSource?.athleteId?.toString()],
     queryFn: async () => {
       const accessToken = await getStravaAccessToken()
       if (!accessToken || !stravaDataSource)
@@ -54,7 +54,7 @@ export function StatsDashboard() {
 
       return fetchAthleteStats({
         data: {
-          athleteId: stravaDataSource.athlete_id!,
+          athleteId: Number(stravaDataSource.athleteId!),
           accessToken,
         },
       })
@@ -72,7 +72,7 @@ export function StatsDashboard() {
   } = useQuery({
     queryKey: [
       'athlete-activities-ytd',
-      stravaDataSource?.athlete_id,
+      stravaDataSource?.athleteId?.toString(),
       currentYear,
     ],
     queryFn: async () => {
@@ -107,7 +107,9 @@ export function StatsDashboard() {
           <CardDescription>
             You need at least one data source to get started.
           </CardDescription>
-          <Button to="/settings" variant="secondary">View sources</Button>
+          <Button to="/settings" variant="secondary">
+            View sources
+          </Button>
         </CardContent>
       </Card>
     )
@@ -159,8 +161,8 @@ export function StatsDashboard() {
             <DashboardCard
               key={card.id}
               config={card}
+              dashboardId={dashboardId!}
               allActivities={allActivities}
-              stats={stats}
               isLoading={isLoading}
               onUpdate={handleRefresh}
             />
@@ -179,13 +181,17 @@ export function StatsDashboard() {
               Click "Add Card" above to create a custom activity card with your
               preferred time frame, metrics, and goals.
             </p>
-            <CardConfigDialog onSave={handleRefresh} />
+            {dashboardId && (
+              <CardConfigDialog dashboardId={dashboardId} onSave={handleRefresh} />
+            )}
           </CardContent>
         </Card>
       )}
-      <div className="col-span-3 flex justify-center">
-       <CardConfigDialog onSave={handleRefresh} />
-      </div>
+      {dashboardId && (
+        <div className="col-span-3 flex justify-center">
+          <CardConfigDialog dashboardId={dashboardId} onSave={handleRefresh} />
+        </div>
+      )}
     </div>
   )
 }

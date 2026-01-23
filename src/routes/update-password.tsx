@@ -1,9 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { UpdatePasswordForm } from '@/components/auth/UpdatePasswordForm'
 
-// Note: This page is accessed via password reset email links
-// The Supabase client will automatically detect the session from the URL hash
-// when using the default Supabase password recovery flow
+// Note: This page is for updating password after logging in
 export const Route = createFileRoute('/update-password')({
   component: UpdatePasswordPage,
 })

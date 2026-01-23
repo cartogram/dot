@@ -1,55 +1,26 @@
 import * as React from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
-import { Button } from '@/components/custom/Button/Button'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Profile } from '@/components/layout/Profile'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-  CardFooter,
-} from '@/components/custom/Card'
+
 const queryClient = new QueryClient()
+import { getCurrentUser } from '@/lib/server/auth'
 
 export const Route = createFileRoute('/')({
   component: App,
+  beforeLoad: async () => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw redirect({ to: '/login' })
+    }
+    return { user }
+  },
 })
 
 function App() {
-  const { user } = useAuth()
 
-  React.useEffect(() => {
-    console.log('[Index Route] Rendering with user state:', {
-      hasUser: !!user,
-      userId: user?.id,
-      email: user?.email,
-    })
-  }, [user])
-
-  // Show login prompt if not authenticated
-  if (!user) {
-    console.log('[Index Route] No user - showing login prompt')
-    return (
-      <Card state="active">
-        <CardHeader>
-          <CardTitle>Welcome to the Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Button to="/login" variant="secondary">
-            Log in
-          </Button>
-          <Button to="/signup" variant="primary">
-            Sign up
-          </Button>
-        </CardContent>
-      </Card>
-    )
-  }
 
   // User is authenticated - show dashboard
   console.log('[Index Route] User authenticated - showing dashboard')

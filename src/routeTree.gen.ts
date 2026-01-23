@@ -13,6 +13,7 @@ import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardsIndexRouteImport } from './routes/dashboards/index'
@@ -20,7 +21,6 @@ import { Route as ProfileUserIdRouteImport } from './routes/profile/$userId'
 import { Route as DashboardsNewRouteImport } from './routes/dashboards/new'
 import { Route as DashboardsDashboardIdRouteImport } from './routes/dashboards/$dashboardId'
 import { Route as DSlugRouteImport } from './routes/d/$slug'
-import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
   id: '/update-password',
@@ -40,6 +40,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoutRoute = LogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -77,20 +82,15 @@ const DSlugRoute = DSlugRouteImport.update({
   path: '/d/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthConfirmRoute = AuthConfirmRouteImport.update({
-  id: '/auth/confirm',
-  path: '/auth/confirm',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
-  '/auth/confirm': typeof AuthConfirmRoute
   '/d/$slug': typeof DSlugRoute
   '/dashboards/$dashboardId': typeof DashboardsDashboardIdRoute
   '/dashboards/new': typeof DashboardsNewRoute
@@ -100,11 +100,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
-  '/auth/confirm': typeof AuthConfirmRoute
   '/d/$slug': typeof DSlugRoute
   '/dashboards/$dashboardId': typeof DashboardsDashboardIdRoute
   '/dashboards/new': typeof DashboardsNewRoute
@@ -115,11 +115,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
-  '/auth/confirm': typeof AuthConfirmRoute
   '/d/$slug': typeof DSlugRoute
   '/dashboards/$dashboardId': typeof DashboardsDashboardIdRoute
   '/dashboards/new': typeof DashboardsNewRoute
@@ -131,11 +131,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/logout'
     | '/reset-password'
     | '/settings'
     | '/signup'
     | '/update-password'
-    | '/auth/confirm'
     | '/d/$slug'
     | '/dashboards/$dashboardId'
     | '/dashboards/new'
@@ -145,11 +145,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/logout'
     | '/reset-password'
     | '/settings'
     | '/signup'
     | '/update-password'
-    | '/auth/confirm'
     | '/d/$slug'
     | '/dashboards/$dashboardId'
     | '/dashboards/new'
@@ -159,11 +159,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/login'
+    | '/logout'
     | '/reset-password'
     | '/settings'
     | '/signup'
     | '/update-password'
-    | '/auth/confirm'
     | '/d/$slug'
     | '/dashboards/$dashboardId'
     | '/dashboards/new'
@@ -174,11 +174,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  LogoutRoute: typeof LogoutRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
-  AuthConfirmRoute: typeof AuthConfirmRoute
   DSlugRoute: typeof DSlugRoute
   DashboardsDashboardIdRoute: typeof DashboardsDashboardIdRoute
   DashboardsNewRoute: typeof DashboardsNewRoute
@@ -214,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -265,24 +272,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/confirm': {
-      id: '/auth/confirm'
-      path: '/auth/confirm'
-      fullPath: '/auth/confirm'
-      preLoaderRoute: typeof AuthConfirmRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  LogoutRoute: LogoutRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
-  AuthConfirmRoute: AuthConfirmRoute,
   DSlugRoute: DSlugRoute,
   DashboardsDashboardIdRoute: DashboardsDashboardIdRoute,
   DashboardsNewRoute: DashboardsNewRoute,

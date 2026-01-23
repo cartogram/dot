@@ -1,5 +1,5 @@
 import type { ActivityTotals } from '@/types/strava'
-import type { TimeFrame } from '@/types/dashboard'
+import { type TimeFrame } from '@/types/dashboard'
 import type { ProgressMetric } from '@/lib/goals/calculations'
 import {
   formatDailyPace,

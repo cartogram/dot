@@ -1,16 +1,15 @@
 /**
  * Server function to fetch another user's Strava stats
  *
- * This function uses the service role key to access the target user's
- * Strava tokens and fetch their data on their behalf.
+ * This function fetches the target user's Strava tokens and fetches their data.
  */
 
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/db/client'
 import type { StravaStats, StravaActivity } from '@/types/strava'
-import type { DataSource } from '@/lib/supabase/types'
-import type { ActivityCardConfig } from '@/types/dashboard'
+import type { DataSource } from '@prisma/client'
+import type { DashboardCard } from '@/types/dashboard'
 
 const UserIdSchema = z.object({
   userId: z.string(),
@@ -20,7 +19,7 @@ interface PublicProfileData {
   profile: {
     id: string
     fullName: string | null
-    createdAt: string
+    createdAt: Date
   }
   athlete: {
     id: number
@@ -31,7 +30,7 @@ interface PublicProfileData {
     country: string | null
     profile: string | null
   } | null
-  cards: ActivityCardConfig[]
+  cards: DashboardCard[]
   stats: StravaStats | null
   activities: StravaActivity[]
   error?: string
@@ -43,13 +42,13 @@ interface PublicProfileData {
 async function refreshTokenIfNeeded(
   dataSource: DataSource,
 ): Promise<{ accessToken: string; updated: boolean; newTokens?: any }> {
-  const expiresAt = new Date(dataSource.expires_at!)
+  const expiresAt = dataSource.expiresAt ? new Date(dataSource.expiresAt) : null
   const now = new Date()
   const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
 
   // Token still valid
-  if (expiresAt > fiveMinutesFromNow) {
-    return { accessToken: dataSource.access_token, updated: false }
+  if (expiresAt && expiresAt > fiveMinutesFromNow) {
+    return { accessToken: dataSource.accessToken, updated: false }
   }
 
   // Refresh token
@@ -59,7 +58,7 @@ async function refreshTokenIfNeeded(
     body: JSON.stringify({
       client_id: import.meta.env.VITE_STRAVA_CLIENT_ID,
       client_secret: process.env.STRAVA_CLIENT_SECRET,
-      refresh_token: dataSource.refresh_token,
+      refresh_token: dataSource.refreshToken,
       grant_type: 'refresh_token',
     }),
   })
@@ -80,11 +79,11 @@ async function refreshTokenIfNeeded(
  * Fetch athlete stats from Strava API
  */
 async function fetchStats(
-  athleteId: number,
+  athleteId: bigint,
   accessToken: string,
 ): Promise<StravaStats> {
   const response = await fetch(
-    `https://www.strava.com/api/v3/athletes/${athleteId}/stats`,
+    `https://www.strava.com/api/v3/athletes/${athleteId.toString()}/stats`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
   )
 
@@ -152,50 +151,49 @@ async function fetchActivities(
 export const getPublicProfileData = createServerFn({ method: 'GET' })
   .inputValidator(UserIdSchema)
   .handler(async ({ data }): Promise<PublicProfileData> => {
-    const supabase = createServerClient()
-
     // 1. Fetch the target user's profile
-    const { data: profile, error: profileError } = await (supabase as any)
-      .from('profiles')
-      .select('id, full_name, created_at')
-      .eq('id', data.userId)
-      .single()
+    const user = await prisma.user.findUnique({
+      where: { id: data.userId },
+      select: { id: true, fullName: true, createdAt: true },
+    })
 
-    if (profileError || !profile) {
+    if (!user) {
       throw new Error('User not found')
     }
 
-    // 2. Fetch their active Strava data source (using service role to bypass RLS)
-    const { data: dataSource, error: dsError } = await (supabase as any)
-      .from('data_sources')
-      .select('*')
-      .eq('user_id', data.userId)
-      .eq('provider', 'strava')
-      .eq('is_active', true)
-      .maybeSingle() as { data: DataSource | null; error: any }
+    // 2. Fetch their active Strava data source
+    const dataSource = await prisma.dataSource.findFirst({
+      where: {
+        userId: data.userId,
+        provider: 'strava',
+        isActive: true,
+      },
+    })
 
-    // 3. Fetch their default dashboard config
-    const { data: defaultDashboard } = await (supabase as any)
-      .from('dashboards')
-      .select('config')
-      .eq('owner_id', data.userId)
-      .eq('is_default', true)
-      .maybeSingle()
+    // 3. Fetch their default dashboard with cards
+    const defaultDashboard = await prisma.dashboard.findFirst({
+      where: {
+        ownerId: data.userId,
+        isDefault: true,
+      },
+      include: {
+        cards: {
+          where: { visible: true },
+          orderBy: { position: 'asc' },
+        },
+      },
+    })
 
     // Extract visible cards
-    const cards: ActivityCardConfig[] = defaultDashboard?.config?.cards
-      ? (Object.values(defaultDashboard.config.cards) as ActivityCardConfig[])
-          .filter((card) => card.visible)
-          .sort((a, b) => a.position - b.position)
-      : []
+    const cards: DashboardCard[] = defaultDashboard?.cards ?? []
 
     // If no Strava connection, return what we have
-    if (!dataSource || dsError) {
+    if (!dataSource) {
       return {
         profile: {
-          id: profile.id,
-          fullName: profile.full_name,
-          createdAt: profile.created_at,
+          id: user.id,
+          fullName: user.fullName,
+          createdAt: user.createdAt,
         },
         athlete: null,
         cards,
@@ -205,6 +203,8 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
       }
     }
 
+    const athleteData = dataSource.athleteData as any
+
     try {
       // 4. Refresh token if needed
       const { accessToken, updated, newTokens } =
@@ -212,18 +212,18 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
 
       // Update tokens in database if refreshed
       if (updated && newTokens) {
-        await (supabase as any)
-          .from('data_sources')
-          .update({
-            access_token: newTokens.access_token,
-            refresh_token: newTokens.refresh_token,
-            expires_at: new Date(newTokens.expires_at * 1000).toISOString(),
-          })
-          .eq('id', dataSource.id)
+        await prisma.dataSource.update({
+          where: { id: dataSource.id },
+          data: {
+            accessToken: newTokens.access_token,
+            refreshToken: newTokens.refresh_token,
+            expiresAt: new Date(newTokens.expires_at * 1000),
+          },
+        })
       }
 
       // 5. Fetch Strava stats
-      const stats = await fetchStats(dataSource.athlete_id!, accessToken)
+      const stats = await fetchStats(dataSource.athleteId!, accessToken)
 
       // 6. Fetch YTD activities
       const yearStart = new Date(new Date().getFullYear(), 0, 1)
@@ -232,19 +232,19 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
 
       return {
         profile: {
-          id: profile.id,
-          fullName: profile.full_name,
-          createdAt: profile.created_at,
+          id: user.id,
+          fullName: user.fullName,
+          createdAt: user.createdAt,
         },
-        athlete: dataSource.athlete_data
+        athlete: athleteData
           ? {
-              id: dataSource.athlete_data.id,
-              firstname: dataSource.athlete_data.firstname,
-              lastname: dataSource.athlete_data.lastname,
-              city: dataSource.athlete_data.city,
-              state: dataSource.athlete_data.state,
-              country: dataSource.athlete_data.country,
-              profile: dataSource.athlete_data.profile,
+              id: athleteData.id,
+              firstname: athleteData.firstname,
+              lastname: athleteData.lastname,
+              city: athleteData.city,
+              state: athleteData.state,
+              country: athleteData.country,
+              profile: athleteData.profile,
             }
           : null,
         cards,
@@ -255,19 +255,19 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
       console.error('Error fetching Strava data:', error)
       return {
         profile: {
-          id: profile.id,
-          fullName: profile.full_name,
-          createdAt: profile.created_at,
+          id: user.id,
+          fullName: user.fullName,
+          createdAt: user.createdAt,
         },
-        athlete: dataSource.athlete_data
+        athlete: athleteData
           ? {
-              id: dataSource.athlete_data.id,
-              firstname: dataSource.athlete_data.firstname,
-              lastname: dataSource.athlete_data.lastname,
-              city: dataSource.athlete_data.city,
-              state: dataSource.athlete_data.state,
-              country: dataSource.athlete_data.country,
-              profile: dataSource.athlete_data.profile,
+              id: athleteData.id,
+              firstname: athleteData.firstname,
+              lastname: athleteData.lastname,
+              city: athleteData.city,
+              state: athleteData.state,
+              country: athleteData.country,
+              profile: athleteData.profile,
             }
           : null,
         cards,

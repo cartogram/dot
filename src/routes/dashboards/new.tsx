@@ -7,7 +7,7 @@
 import * as React from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { CreateDashboardForm } from '@/components/dashboard/CreateDashboardForm'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 

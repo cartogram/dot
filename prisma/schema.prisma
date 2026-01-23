@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum DashboardRole {
+  owner
+  editor
+  viewer
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  email               String    @unique
+  password            String?
+  salt                String?
+  fullName            String?   @map("full_name")
+  resetPasswordToken  String?   @map("reset_password_token")
+  role                UserRole  @default(USER)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  dataSources         DataSource[]
+  ownedDashboards     Dashboard[]        @relation("DashboardOwner")
+  dashboardProfiles   DashboardProfile[]
+
+  @@map("users")
+}
+
+model DataSource {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  provider     String
+  athleteId    BigInt?   @map("athlete_id")
+  accessToken  String    @map("access_token")
+  refreshToken String?   @map("refresh_token")
+  expiresAt    DateTime? @map("expires_at")
+  tokenType    String    @default("Bearer") @map("token_type")
+  scope        String?
+  athleteData  Json?     @map("athlete_data")
+  isActive     Boolean   @default(true) @map("is_active")
+  connectedAt  DateTime  @default(now()) @map("connected_at")
+  lastSyncedAt DateTime? @map("last_synced_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, isActive])
+  @@map("data_sources")
+}
+
+model Dashboard {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  slug        String?   @unique
+  ownerId     String    @map("owner_id")
+  isPublic    Boolean   @default(false) @map("is_public")
+  isDefault   Boolean   @default(false) @map("is_default")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  owner    User                @relation("DashboardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  profiles DashboardProfile[]
+  invites  DashboardInvite[]
+  cards    DashboardCard[]
+
+  @@map("dashboards")
+}
+
+model DashboardCard {
+  id            String    @id @default(uuid())
+  dashboardId   String    @map("dashboard_id")
+  dashboard     Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  type          String
+  title         String
+  activityTypes String[]  @map("activity_types")
+  metric        String
+  timeFrame     String    @map("time_frame")
+  position      Int
+  visible       Boolean   @default(true)
+  size          String    @default("medium")
+  goal          Float?
+
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("dashboard_cards")
+}
+
+model DashboardProfile {
+  id             String        @id @default(uuid())
+  dashboardId    String        @map("dashboard_id")
+  profileId      String        @map("profile_id")
+  role           DashboardRole @default(viewer)
+  inviteAccepted Boolean       @default(false) @map("invite_accepted")
+  joinedAt       DateTime      @default(now()) @map("joined_at")
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+  profile   User      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([dashboardId, profileId])
+  @@map("dashboard_profiles")
+}
+
+model DashboardInvite {
+  id          String        @id @default(uuid())
+  dashboardId String        @map("dashboard_id")
+  inviteCode  String        @unique @map("invite_code")
+  role        DashboardRole @default(viewer)
+  expiresAt   DateTime?     @map("expires_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  @@map("dashboard_invites")
+}

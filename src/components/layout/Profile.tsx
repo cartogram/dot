@@ -1,4 +1,4 @@
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { Badge } from '@/components/custom/Badge/Badge'
 import './styles/profile.css'
 
@@ -14,7 +14,7 @@ export function Profile() {
       <div className="Profile__Section">
         {/* <span className="heading--3 Dash">{user.email}</span> */}
         <Badge variant="secondary">
-          {new Date(user.created_at).toDateString()}
+          {user.createdAt instanceof Date ? user.createdAt.toDateString() : new Date(user.createdAt).toDateString()}
         </Badge>
         {/* <span className="heading--4">{user.id}</span> */}
       </div>

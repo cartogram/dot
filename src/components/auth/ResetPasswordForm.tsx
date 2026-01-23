@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { requestPasswordReset } from '@/lib/server/auth'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -24,12 +24,7 @@ export function ResetPasswordForm() {
     setSuccess(false)
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/update-password`,
-      })
-
-      if (error) throw error
-
+      await requestPasswordReset({ data: { email } })
       setSuccess(true)
       setEmail('')
     } catch (err) {
@@ -73,7 +68,7 @@ export function ResetPasswordForm() {
 
             {success && (
               <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded">
-                Check your email for a password reset link
+                If an account exists with that email, you'll receive a password reset link.
               </div>
             )}
 

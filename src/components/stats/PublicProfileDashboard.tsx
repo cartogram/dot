@@ -6,9 +6,9 @@
  */
 
 import * as React from 'react'
-import type { ActivityCardConfig } from '@/types/dashboard'
-import type { StravaStats, StravaActivity } from '@/types/strava'
-import { ACTIVITY_CONFIGS } from '@/config/activities'
+import type { DashboardCard, Metric } from '@/types/dashboard'
+import type { StravaStats, StravaActivity, ActivityTotals } from '@/types/strava'
+import { activityTypesToStravaTypes } from '@/config/activities'
 import {
   filterActivitiesByTimeFrame,
   getTimeFrameDescription,
@@ -39,7 +39,7 @@ interface PublicProfileData {
     country: string | null
     profile: string | null
   } | null
-  cards: ActivityCardConfig[]
+  cards: DashboardCard[]
   stats: StravaStats | null
   activities: StravaActivity[]
   error?: string
@@ -139,7 +139,7 @@ export function PublicProfileDashboard({
  * No edit controls - just displays the data.
  */
 interface ReadOnlyDashboardCardProps {
-  config: ActivityCardConfig
+  config: DashboardCard
   allActivities: StravaActivity[]
   stats?: StravaStats | null
 }
@@ -148,29 +148,26 @@ function ReadOnlyDashboardCard({
   config,
   allActivities,
 }: ReadOnlyDashboardCardProps) {
+  // Convert ActivityType enums to Strava type strings
+  const stravaTypes = React.useMemo(
+    () => activityTypesToStravaTypes(config.activityTypes),
+    [config.activityTypes],
+  )
+
   // Filter activities by the card's time frame
   const filteredActivities = React.useMemo(() => {
-    return filterActivitiesByTimeFrame(
-      allActivities,
-      config.timeFrame,
-      config.customDateRange,
-    )
-  }, [allActivities, config.timeFrame, config.customDateRange])
+    return filterActivitiesByTimeFrame(allActivities, config.timeFrame)
+  }, [allActivities, config.timeFrame])
 
   // Aggregate activities based on selected activity types
-  const totals = React.useMemo(() => {
+  const totals = React.useMemo<ActivityTotals | null>(() => {
     if (!filteredActivities) return null
 
-    // Get all activity types to combine
-    const activityTypes = config.activityIds
-      .map((id) => ACTIVITY_CONFIGS[id]?.stravaType)
-      .filter(Boolean)
-
-    if (activityTypes.length === 0) return null
+    if (stravaTypes.length === 0) return null
 
     // Filter activities that match any of the types
     const relevantActivities = filteredActivities.filter((activity) =>
-      activityTypes.includes(activity.type),
+      stravaTypes.includes(activity.type),
     )
 
     // Aggregate them together
@@ -190,40 +187,17 @@ function ReadOnlyDashboardCard({
         elevation_gain: 0,
       },
     )
-  }, [config.activityIds, filteredActivities])
+  }, [stravaTypes, filteredActivities])
 
-  // Calculate progress based on goals and shown metrics
+  // Calculate progress based on the single metric and goal
   const progress = React.useMemo(() => {
     if (!config.goal || !totals) return undefined
 
-    // Only calculate progress for metrics that are shown
-    const filteredGoal = {
-      distance: config.showMetrics.distance ? config.goal.distance : undefined,
-      count: config.showMetrics.count ? config.goal.count : undefined,
-      elevation: config.showMetrics.elevation
-        ? config.goal.elevation
-        : undefined,
-      time: config.showMetrics.time ? config.goal.time : undefined,
-    }
+    // Build goal object with just the single metric
+    const goal = buildGoalFromMetric(config.metric, config.goal)
 
-    const hasAnyGoal = Object.values(filteredGoal).some(
-      (value) => value !== undefined,
-    )
-    if (!hasAnyGoal) return undefined
-
-    return calculateActivityProgress(
-      totals,
-      filteredGoal,
-      config.timeFrame,
-      config.customDateRange,
-    )
-  }, [
-    totals,
-    config.goal,
-    config.showMetrics,
-    config.timeFrame,
-    config.customDateRange,
-  ])
+    return calculateActivityProgress(totals, goal, config.timeFrame)
+  }, [totals, config.goal, config.metric, config.timeFrame])
 
   // No data state
   if (!totals || totals.count === 0) {
@@ -234,11 +208,7 @@ function ReadOnlyDashboardCard({
         </CardHeader>
         <CardContent>
           <CardDescription>
-            No activities for{' '}
-            {getTimeFrameDescription(
-              config.timeFrame,
-              config.customDateRange,
-            ).toLowerCase()}
+            No activities for {getTimeFrameDescription(config.timeFrame).toLowerCase()}
           </CardDescription>
         </CardContent>
       </Card>
@@ -248,12 +218,37 @@ function ReadOnlyDashboardCard({
   // Render with data
   return (
     <ActivityStatsCard
-      types={config.activityIds.map((id) => ACTIVITY_CONFIGS[id]?.stravaType)}
+      types={stravaTypes}
       title={config.title}
       totals={totals}
       timeFrame={config.timeFrame}
-      customDateRange={config.customDateRange}
       progress={progress}
     />
   )
+}
+
+/**
+ * Build an ActivityGoal object from a single metric and goal value
+ */
+function buildGoalFromMetric(
+  metric: Metric,
+  goalValue: number,
+): {
+  distance?: number
+  count?: number
+  elevation?: number
+  time?: number
+} {
+  switch (metric) {
+    case 'distance':
+      return { distance: goalValue }
+    case 'count':
+      return { count: goalValue }
+    case 'elevation':
+      return { elevation: goalValue }
+    case 'time':
+      return { time: goalValue }
+    default:
+      return {}
+  }
 }

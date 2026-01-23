@@ -11,7 +11,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from '@tanstack/react-query'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { getUserDashboards } from '@/lib/server/dashboards'
 import { DashboardListCard } from '@/components/dashboard/DashboardListCard'
 import { JoinDashboardForm } from '@/components/dashboard/JoinDashboardForm'

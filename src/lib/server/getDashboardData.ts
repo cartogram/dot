@@ -7,10 +7,10 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
+import { prisma } from '@/lib/db/client'
 import type { StravaActivity } from '@/types/strava'
-import type { DataSource } from '@/lib/supabase/types'
-import type { ActivityCardConfig } from '@/types/dashboard'
+import type { DataSource } from '@prisma/client'
+import type { DashboardCard } from '@/types/dashboard'
 import type {
   DashboardData,
   DashboardProfileWithUser,
@@ -33,13 +33,13 @@ const DashboardSlugSchema = z.object({
 async function refreshTokenIfNeeded(
   dataSource: DataSource
 ): Promise<{ accessToken: string; updated: boolean; newTokens?: any }> {
-  const expiresAt = new Date(dataSource.expires_at!)
+  const expiresAt = dataSource.expiresAt ? new Date(dataSource.expiresAt) : null
   const now = new Date()
   const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
 
   // Token still valid
-  if (expiresAt > fiveMinutesFromNow) {
-    return { accessToken: dataSource.access_token, updated: false }
+  if (expiresAt && expiresAt > fiveMinutesFromNow) {
+    return { accessToken: dataSource.accessToken, updated: false }
   }
 
   // Refresh token
@@ -49,7 +49,7 @@ async function refreshTokenIfNeeded(
     body: JSON.stringify({
       client_id: import.meta.env.VITE_STRAVA_CLIENT_ID,
       client_secret: process.env.STRAVA_CLIENT_SECRET,
-      refresh_token: dataSource.refresh_token,
+      refresh_token: dataSource.refreshToken,
       grant_type: 'refresh_token',
     }),
   })
@@ -106,52 +106,52 @@ async function fetchActivities(
  * Fetch activities for a single profile
  */
 async function fetchProfileActivities(
-  supabase: any,
   profile: DashboardProfileWithUser
 ): Promise<ProfileActivities> {
   // Get the profile's Strava data source
-  const { data: dataSource, error: dsError } = await supabase
-    .from('data_sources')
-    .select('*')
-    .eq('user_id', profile.profile_id)
-    .eq('provider', 'strava')
-    .eq('is_active', true)
-    .maybeSingle()
+  const dataSource = await prisma.dataSource.findFirst({
+    where: {
+      userId: profile.profileId,
+      provider: 'strava',
+      isActive: true,
+    },
+  })
 
   const baseResult: ProfileActivities = {
-    userId: profile.profile_id,
+    userId: profile.profileId,
     profile: {
-      id: profile.profile_id,
-      fullName: profile.profile.full_name,
+      id: profile.profileId,
+      fullName: profile.profile.fullName,
     },
     athlete: profile.athlete || null,
     activities: [],
   }
 
   // If no Strava connection, return empty activities
-  if (!dataSource || dsError) {
+  if (!dataSource) {
     return {
       ...baseResult,
       error: 'Profile has not connected Strava',
     }
   }
 
+  const athleteData = dataSource.athleteData as any
+
   try {
     // Refresh token if needed
-    const { accessToken, updated, newTokens } = await refreshTokenIfNeeded(
-      dataSource as DataSource
-    )
+    const { accessToken, updated, newTokens } =
+      await refreshTokenIfNeeded(dataSource)
 
     // Update tokens in database if refreshed
     if (updated && newTokens) {
-      await supabase
-        .from('data_sources')
-        .update({
-          access_token: newTokens.access_token,
-          refresh_token: newTokens.refresh_token,
-          expires_at: new Date(newTokens.expires_at * 1000).toISOString(),
-        })
-        .eq('id', dataSource.id)
+      await prisma.dataSource.update({
+        where: { id: dataSource.id },
+        data: {
+          accessToken: newTokens.access_token,
+          refreshToken: newTokens.refresh_token,
+          expiresAt: new Date(newTokens.expires_at * 1000),
+        },
+      })
     }
 
     // Fetch YTD activities
@@ -161,19 +161,19 @@ async function fetchProfileActivities(
 
     return {
       ...baseResult,
-      athlete: dataSource.athlete_data
+      athlete: athleteData
         ? {
-            id: dataSource.athlete_data.id,
-            firstname: dataSource.athlete_data.firstname,
-            lastname: dataSource.athlete_data.lastname,
-            profile: dataSource.athlete_data.profile,
+            id: athleteData.id,
+            firstname: athleteData.firstname,
+            lastname: athleteData.lastname,
+            profile: athleteData.profile,
           }
         : null,
       activities,
     }
   } catch (error) {
     console.error(
-      `Error fetching activities for profile ${profile.profile_id}:`,
+      `Error fetching activities for profile ${profile.profileId}:`,
       error
     )
     return {
@@ -188,38 +188,39 @@ async function fetchProfileActivities(
  * Build profile objects with user info
  */
 async function buildDashboardProfiles(
-  supabase: any,
   profiles: any[]
 ): Promise<DashboardProfileWithUser[]> {
-  const profileIds = profiles.map((p: any) => p.profile_id)
+  const profileIds = profiles.map((p: any) => p.profileId)
 
   // Fetch user profiles
-  const { data: userProfiles } = await supabase
-    .from('profiles')
-    .select('id, full_name, email')
-    .in('id', profileIds)
+  const userProfiles = await prisma.user.findMany({
+    where: { id: { in: profileIds } },
+    select: { id: true, fullName: true, email: true },
+  })
 
   // Fetch athlete data
-  const { data: dataSources } = await supabase
-    .from('data_sources')
-    .select('user_id, athlete_data')
-    .eq('provider', 'strava')
-    .eq('is_active', true)
-    .in('user_id', profileIds)
+  const dataSources = await prisma.dataSource.findMany({
+    where: {
+      userId: { in: profileIds },
+      provider: 'strava',
+      isActive: true,
+    },
+    select: { userId: true, athleteData: true },
+  })
 
-  const profileMap = new Map((userProfiles || []).map((p: any) => [p.id, p]))
+  const profileMap = new Map(userProfiles.map((p) => [p.id, p]))
   const athleteMap = new Map(
-    (dataSources || []).map((ds: any) => [ds.user_id, ds.athlete_data])
+    dataSources.map((ds) => [ds.userId, ds.athleteData])
   )
 
   return profiles.map((p: any): DashboardProfileWithUser => {
-    const userProfile = profileMap.get(p.profile_id) as any
-    const athleteData = athleteMap.get(p.profile_id) as any
+    const userProfile = profileMap.get(p.profileId)
+    const athleteData = athleteMap.get(p.profileId) as any
     return {
       ...p,
       profile: {
-        id: p.profile_id,
-        full_name: userProfile?.full_name || null,
+        id: p.profileId,
+        fullName: userProfile?.fullName || null,
         email: userProfile?.email || '',
       },
       athlete: athleteData
@@ -246,16 +247,18 @@ async function buildDashboardProfiles(
 export const getDashboardData = createServerFn({ method: 'GET' })
   .inputValidator(DashboardIdSchema)
   .handler(async ({ data }): Promise<DashboardData> => {
-    const supabase = createServerClient() as any
+    // 1. Fetch dashboard details with cards
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { id: data.dashboardId },
+      include: {
+        cards: {
+          where: { visible: true },
+          orderBy: { position: 'asc' },
+        },
+      },
+    })
 
-    // 1. Fetch dashboard details
-    const { data: dashboard, error: dashboardError } = await supabase
-      .from('dashboards')
-      .select('*')
-      .eq('id', data.dashboardId)
-      .single()
-
-    if (dashboardError || !dashboard) {
+    if (!dashboard) {
       throw new Error('Dashboard not found')
     }
 
@@ -264,49 +267,39 @@ export const getDashboardData = createServerFn({ method: 'GET' })
     let canEdit = false
 
     if (data.userId) {
-      const { data: membership } = await supabase
-        .from('dashboard_profiles')
-        .select('role')
-        .eq('dashboard_id', data.dashboardId)
-        .eq('profile_id', data.userId)
-        .single()
+      const membership = await prisma.dashboardProfile.findUnique({
+        where: {
+          dashboardId_profileId: {
+            dashboardId: data.dashboardId,
+            profileId: data.userId,
+          },
+        },
+        select: { role: true },
+      })
 
       userRole = membership?.role || null
       canEdit = userRole === 'owner' || userRole === 'editor'
     }
 
     // If not public and not a member, deny access
-    if (!dashboard.is_public && !userRole) {
+    if (!dashboard.isPublic && !userRole) {
       throw new Error('You do not have access to this dashboard')
     }
 
     // 3. Fetch all profiles attached to this dashboard
-    const { data: profiles, error: profilesError } = await supabase
-      .from('dashboard_profiles')
-      .select('*')
-      .eq('dashboard_id', data.dashboardId)
-
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError)
-      throw new Error('Failed to fetch dashboard profiles')
-    }
+    const profiles = await prisma.dashboardProfile.findMany({
+      where: { dashboardId: data.dashboardId },
+    })
 
     // 4. Build profiles with user info
-    const dashboardProfiles = await buildDashboardProfiles(
-      supabase,
-      profiles || []
-    )
+    const dashboardProfiles = await buildDashboardProfiles(profiles)
 
-    // 5. Extract visible cards from dashboard config
-    const cards: ActivityCardConfig[] = dashboard.config?.cards
-      ? (Object.values(dashboard.config.cards) as ActivityCardConfig[])
-          .filter((card: any) => card.visible)
-          .sort((a: any, b: any) => a.position - b.position)
-      : []
+    // 5. Extract cards from the included relation
+    const cards: DashboardCard[] = dashboard.cards
 
     // 6. Fetch activities for all profiles in parallel
     const profileActivitiesPromises = dashboardProfiles.map((profile) =>
-      fetchProfileActivities(supabase, profile)
+      fetchProfileActivities(profile)
     )
 
     const profileActivities = await Promise.all(profileActivitiesPromises)
@@ -314,8 +307,11 @@ export const getDashboardData = createServerFn({ method: 'GET' })
     // 7. Combine all activities
     const combinedActivities = profileActivities.flatMap((pa) => pa.activities)
 
+    // Remove cards from dashboard object to avoid duplication
+    const { cards: _cards, ...dashboardWithoutCards } = dashboard
+
     return {
-      dashboard,
+      dashboard: dashboardWithoutCards,
       profiles: dashboardProfiles,
       currentUserRole: userRole as any,
       cards,
@@ -331,16 +327,18 @@ export const getDashboardData = createServerFn({ method: 'GET' })
 export const getDashboardDataBySlug = createServerFn({ method: 'GET' })
   .inputValidator(DashboardSlugSchema)
   .handler(async ({ data }): Promise<DashboardData> => {
-    const supabase = createServerClient() as any
+    // 1. Fetch dashboard by slug with cards
+    const dashboard = await prisma.dashboard.findUnique({
+      where: { slug: data.slug },
+      include: {
+        cards: {
+          where: { visible: true },
+          orderBy: { position: 'asc' },
+        },
+      },
+    })
 
-    // 1. Fetch dashboard by slug
-    const { data: dashboard, error: dashboardError } = await supabase
-      .from('dashboards')
-      .select('*')
-      .eq('slug', data.slug)
-      .single()
-
-    if (dashboardError || !dashboard) {
+    if (!dashboard) {
       throw new Error('Dashboard not found')
     }
 
@@ -349,49 +347,39 @@ export const getDashboardDataBySlug = createServerFn({ method: 'GET' })
     let canEdit = false
 
     if (data.userId) {
-      const { data: membership } = await supabase
-        .from('dashboard_profiles')
-        .select('role')
-        .eq('dashboard_id', dashboard.id)
-        .eq('profile_id', data.userId)
-        .single()
+      const membership = await prisma.dashboardProfile.findUnique({
+        where: {
+          dashboardId_profileId: {
+            dashboardId: dashboard.id,
+            profileId: data.userId,
+          },
+        },
+        select: { role: true },
+      })
 
       userRole = membership?.role || null
       canEdit = userRole === 'owner' || userRole === 'editor'
     }
 
     // If not public and not a member, deny access
-    if (!dashboard.is_public && !userRole) {
+    if (!dashboard.isPublic && !userRole) {
       throw new Error('This dashboard is private')
     }
 
     // 3. Fetch all profiles attached to this dashboard
-    const { data: profiles, error: profilesError } = await supabase
-      .from('dashboard_profiles')
-      .select('*')
-      .eq('dashboard_id', dashboard.id)
-
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError)
-      throw new Error('Failed to fetch dashboard profiles')
-    }
+    const profiles = await prisma.dashboardProfile.findMany({
+      where: { dashboardId: dashboard.id },
+    })
 
     // 4. Build profiles with user info
-    const dashboardProfiles = await buildDashboardProfiles(
-      supabase,
-      profiles || []
-    )
+    const dashboardProfiles = await buildDashboardProfiles(profiles)
 
-    // 5. Extract visible cards from dashboard config
-    const cards: ActivityCardConfig[] = dashboard.config?.cards
-      ? (Object.values(dashboard.config.cards) as ActivityCardConfig[])
-          .filter((card: any) => card.visible)
-          .sort((a: any, b: any) => a.position - b.position)
-      : []
+    // 5. Extract cards from the included relation
+    const cards: DashboardCard[] = dashboard.cards
 
     // 6. Fetch activities for all profiles in parallel
     const profileActivitiesPromises = dashboardProfiles.map((profile) =>
-      fetchProfileActivities(supabase, profile)
+      fetchProfileActivities(profile)
     )
 
     const profileActivities = await Promise.all(profileActivitiesPromises)
@@ -399,8 +387,11 @@ export const getDashboardDataBySlug = createServerFn({ method: 'GET' })
     // 7. Combine all activities
     const combinedActivities = profileActivities.flatMap((pa) => pa.activities)
 
+    // Remove cards from dashboard object to avoid duplication
+    const { cards: _cards, ...dashboardWithoutCards } = dashboard
+
     return {
-      dashboard,
+      dashboard: dashboardWithoutCards,
       profiles: dashboardProfiles,
       currentUserRole: userRole as any,
       cards,

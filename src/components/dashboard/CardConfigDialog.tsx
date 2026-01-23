@@ -4,8 +4,6 @@ import {
   SheetContent,
   SheetFooter,
   SheetHeader,
-  SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -18,31 +16,38 @@ import {
   CardHeader,
 } from '@/components/custom/Card/Card'
 import type {
-  ActivityCardConfig,
+  ActivityType,
+  Metric,
   TimeFrame,
-  DisplayMode,
+  DashboardCard,
+} from '@/types/dashboard'
+import {
+  METRICS,
+  TIME_FRAMES,
+  METRIC_LABELS,
+  METRIC_UNITS,
+  TIME_FRAME_LABELS,
 } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
-import { supabase } from '@/lib/supabase/client'
 import {
   addDashboardCard,
   updateDashboardCard,
   deleteDashboardCard,
-} from '@/lib/supabase/dashboard'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+} from '@/lib/server/dashboardConfig'
 
 interface CardConfigDialogProps {
-  existingCard?: ActivityCardConfig
+  dashboardId: string
+  existingCard?: DashboardCard
   onSave?: () => void
   trigger?: React.ReactNode
 }
 
 export function CardConfigDialog({
+  dashboardId,
   existingCard,
   onSave,
   trigger,
 }: CardConfigDialogProps) {
-  const { user } = useAuth()
   const [open, setOpen] = React.useState(false)
   const [isSaving, setIsSaving] = React.useState(false)
   const isEditMode = !!existingCard
@@ -50,66 +55,28 @@ export function CardConfigDialog({
   // Form state
   const [title, setTitle] = React.useState(existingCard?.title || '')
   const [timeFrame, setTimeFrame] = React.useState<TimeFrame>(
-    existingCard?.timeFrame || 'week',
+    (existingCard?.timeFrame as TimeFrame) || 'week',
   )
-  const [selectedActivities, setSelectedActivities] = React.useState<string[]>(
-    existingCard?.activityIds || [],
+  const [selectedActivities, setSelectedActivities] = React.useState<ActivityType[]>(
+    (existingCard?.activityTypes as ActivityType[]) || [],
   )
-  const [displayMode, setDisplayMode] = React.useState<DisplayMode>(
-    existingCard?.displayMode || 'card',
+  const [metric, setMetric] = React.useState<Metric>(
+    (existingCard?.metric as Metric) || 'distance',
   )
-
-  // Metric checkboxes state
-  const [showDistance, setShowDistance] = React.useState(
-    existingCard?.showMetrics.distance ?? false,
-  )
-  const [showCount, setShowCount] = React.useState(
-    existingCard?.showMetrics.count ?? false,
-  )
-  const [showElevation, setShowElevation] = React.useState(
-    existingCard?.showMetrics.elevation ?? false,
-  )
-  const [showTime, setShowTime] = React.useState(
-    existingCard?.showMetrics.time ?? false,
-  )
-
-  // Goal values
-  const [distance, setDistance] = React.useState<string>(
-    existingCard?.goal?.distance
-      ? (existingCard.goal.distance / 1000).toString()
-      : '',
-  )
-  const [count, setCount] = React.useState<string>(
-    existingCard?.goal?.count?.toString() || '',
-  )
-  const [elevation, setElevation] = React.useState<string>(
-    existingCard?.goal?.elevation?.toString() || '',
-  )
-  const [time, setTime] = React.useState<string>(
-    existingCard?.goal?.time ? (existingCard.goal.time / 3600).toString() : '',
+  const [goal, setGoal] = React.useState<string>(
+    existingCard?.goal ? formatGoalForDisplay(existingCard.goal, existingCard.metric as Metric) : '',
   )
 
   // Reset state when dialog opens
   React.useEffect(() => {
     if (open && existingCard) {
       setTitle(existingCard.title)
-      setTimeFrame(existingCard.timeFrame)
-      setSelectedActivities(existingCard.activityIds)
-      setDisplayMode(existingCard.displayMode)
-      setShowDistance(existingCard.showMetrics.distance)
-      setShowCount(existingCard.showMetrics.count)
-      setShowElevation(existingCard.showMetrics.elevation)
-      setShowTime(existingCard.showMetrics.time)
-      setDistance(
-        existingCard.goal?.distance
-          ? (existingCard.goal.distance / 1000).toString()
-          : '',
-      )
-      setCount(existingCard.goal?.count?.toString() || '')
-      setElevation(existingCard.goal?.elevation?.toString() || '')
-      setTime(
-        existingCard.goal?.time
-          ? (existingCard.goal.time / 3600).toString()
+      setTimeFrame(existingCard.timeFrame as TimeFrame)
+      setSelectedActivities(existingCard.activityTypes as ActivityType[])
+      setMetric(existingCard.metric as Metric)
+      setGoal(
+        existingCard.goal
+          ? formatGoalForDisplay(existingCard.goal, existingCard.metric as Metric)
           : '',
       )
     } else if (open && !existingCard) {
@@ -117,80 +84,82 @@ export function CardConfigDialog({
       setTitle('')
       setTimeFrame('week')
       setSelectedActivities([])
-      setDisplayMode('card')
-      setShowDistance(false)
-      setShowCount(false)
-      setShowElevation(false)
-      setShowTime(false)
-      setDistance('')
-      setCount('')
-      setElevation('')
-      setTime('')
+      setMetric('distance')
+      setGoal('')
     }
   }, [open, existingCard])
 
-  const toggleActivity = (activityId: string) => {
+  const toggleActivity = (activityType: ActivityType) => {
     setSelectedActivities((prev) =>
-      prev.includes(activityId)
-        ? prev.filter((id) => id !== activityId)
-        : [...prev, activityId],
+      prev.includes(activityType)
+        ? prev.filter((t) => t !== activityType)
+        : [...prev, activityType],
     )
   }
 
   // Determine which metrics are available based on selected activities
   const availableMetrics = React.useMemo(() => {
-    const metrics = {
-      distance: false,
-      count: false,
-      elevation: false,
-      time: false,
-    }
-    selectedActivities.forEach((activityId) => {
-      const config = ACTIVITY_CONFIGS[activityId]
+    const metrics = new Set<Metric>()
+    selectedActivities.forEach((activityType) => {
+      // Find the config for this activity type
+      const config = Object.values(ACTIVITY_CONFIGS).find(
+        (c) => c.activityType === activityType,
+      )
       if (config) {
-        if (config.metrics.distance) metrics.distance = true
-        if (config.metrics.count) metrics.count = true
-        if (config.metrics.elevation) metrics.elevation = true
-        if (config.metrics.time) metrics.time = true
+        if (config.metrics.distance) metrics.add('distance')
+        if (config.metrics.count) metrics.add('count')
+        if (config.metrics.elevation) metrics.add('elevation')
+        if (config.metrics.time) metrics.add('time')
       }
     })
     return metrics
   }, [selectedActivities])
 
+  // Reset metric if it's no longer available
+  React.useEffect(() => {
+    if (selectedActivities.length > 0 && !availableMetrics.has(metric)) {
+      // Pick the first available metric
+      const firstAvailable = Array.from(availableMetrics)[0]
+      if (firstAvailable) {
+        setMetric(firstAvailable)
+      }
+    }
+  }, [availableMetrics, metric, selectedActivities.length])
+
   const handleSave = async () => {
-    if (!title || selectedActivities.length === 0 || !user) return
+    if (!title || selectedActivities.length === 0) return
 
     setIsSaving(true)
     try {
-      const cardData = {
-        type: 'activity' as const,
-        title,
-        size: 'medium' as const,
-        visible: true,
-        timeFrame,
-        activityIds: selectedActivities,
-        metrics: availableMetrics,
-        showMetrics: {
-          distance: showDistance && availableMetrics.distance,
-          count: showCount && availableMetrics.count,
-          elevation: showElevation && availableMetrics.elevation,
-          time: showTime && availableMetrics.time,
-        },
-        goal: {
-          distance:
-            showDistance && distance ? parseFloat(distance) * 1000 : undefined,
-          count: showCount && count ? parseInt(count) : undefined,
-          elevation:
-            showElevation && elevation ? parseFloat(elevation) : undefined,
-          time: showTime && time ? parseFloat(time) * 3600 : undefined,
-        },
-        displayMode,
-      }
+      const goalValue = goal ? parseGoalForStorage(parseFloat(goal), metric) : null
 
       if (isEditMode) {
-        await updateDashboardCard(supabase, user.id, existingCard.id, cardData)
+        await updateDashboardCard({
+          data: {
+            cardId: existingCard.id,
+            updates: {
+              title,
+              activityTypes: selectedActivities,
+              metric,
+              timeFrame,
+              goal: goalValue,
+            },
+          },
+        })
       } else {
-        await addDashboardCard(supabase, user.id, cardData)
+        await addDashboardCard({
+          data: {
+            dashboardId,
+            card: {
+              type: 'activity',
+              title,
+              activityTypes: selectedActivities,
+              metric,
+              timeFrame,
+              goal: goalValue,
+            },
+          },
+        })
       }
 
       setOpen(false)
@@ -203,12 +172,12 @@ export function CardConfigDialog({
   }
 
   const handleDelete = async () => {
-    if (!existingCard || !user) return
+    if (!existingCard) return
     if (!window.confirm('Are you sure you want to delete this card?')) return
 
     setIsSaving(true)
     try {
-      await deleteDashboardCard(supabase, user.id, existingCard.id)
+      await deleteDashboardCard({ data: { cardId: existingCard.id } })
       setOpen(false)
       onSave?.()
     } catch (error) {
@@ -220,10 +189,14 @@ export function CardConfigDialog({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <Button size={isEditMode ? "small" : "default"} variant={ isEditMode ? "secondary" : "primary"} onClick={() => setOpen(true)}>
+      <Button
+        size={isEditMode ? 'small' : 'default'}
+        variant={isEditMode ? 'secondary' : 'primary'}
+        onClick={() => setOpen(true)}
+      >
         {trigger || <>{isEditMode ? <>Edit Card</> : <>Add Card</>}</>}
       </Button>
-      <SheetContent className="data-[side=right]:w-full  data-[side=right]:max-w-full  data-[side=right]:md:max-w-1/2  ">
+      <SheetContent className="data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:md:max-w-1/2">
         <SheetHeader>
           <h3>{isEditMode ? 'Edit Activity' : 'Add Activity'}</h3>
         </SheetHeader>
@@ -250,15 +223,17 @@ export function CardConfigDialog({
                   onChange={(e) => setTimeFrame(e.target.value as TimeFrame)}
                   className="border-input bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 rounded-4xl border px-3 py-2 text-sm transition-colors focus-visible:ring-[3px] h-9 w-full outline-none"
                 >
-                  <option value="day">Day</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="year">Year</option>
-                  <option value="all">All Time</option>
+                  {TIME_FRAMES.map((value) => (
+                    <option key={value} value={value}>
+                      {TIME_FRAME_LABELS[value]}
+                    </option>
+                  ))}
                 </select>
               </CardContent>
             </Field>
           </Card>
+
+          {/* Activity Selection */}
           <Card>
             <CardHeader />
             <CardContent>
@@ -267,8 +242,8 @@ export function CardConfigDialog({
                 {Object.values(ACTIVITY_CONFIGS).map((config) => (
                   <Checkbox
                     key={config.id}
-                    checked={selectedActivities.includes(config.id)}
-                    onCheckedChange={() => toggleActivity(config.id)}
+                    checked={selectedActivities.includes(config.activityType)}
+                    onCheckedChange={() => toggleActivity(config.activityType)}
                     label={config.displayName}
                   />
                 ))}
@@ -276,129 +251,65 @@ export function CardConfigDialog({
             </CardContent>
           </Card>
 
-          <Card>
-            <CardContent>
-              {/* Metrics & Goals */}
-              {selectedActivities.length > 0 && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold">Metrics & Goals</h3>
-                  <div className="space-y-3">
-                    {availableMetrics.distance && (
-                      <div className="flex flex-col items-start gap-3">
-                        <Checkbox
-                          checked={showDistance}
-                          onCheckedChange={(checked) =>
-                            setShowDistance(!!checked)
-                          }
-                          label="Distance"
-                        />
-                        {showDistance && (
-                          <Field>
-                            <FieldLabel htmlFor="goal-distance">
-                              Goal (km)
-                            </FieldLabel>
-                            <Input
-                              id="goal-distance"
-                              type="number"
-                              placeholder="e.g., 50"
-                              value={distance}
-                              onChange={(e) => setDistance(e.target.value)}
-                            />
-                          </Field>
-                        )}
-                      </div>
-                    )}
-
-                    {availableMetrics.count && (
-                      <div className="flex flex-col items-start gap-3">
-                        <Checkbox
-                          checked={showCount}
-                          onCheckedChange={(checked) => setShowCount(!!checked)}
-                          label="Count"
-                        />
-                        {showCount && (
-                          <Field>
-                            <FieldLabel htmlFor="goal-count">
-                              Goal (activities)
-                            </FieldLabel>
-                            <Input
-                              id="goal-count"
-                              type="number"
-                              placeholder="e.g., 10"
-                              value={count}
-                              onChange={(e) => setCount(e.target.value)}
-                            />
-                          </Field>
-                        )}
-                      </div>
-                    )}
-
-                    {availableMetrics.elevation && (
-                      <div className="flex flex-col items-start gap-3">
-                        <Checkbox
-                          checked={showElevation}
-                          onCheckedChange={(checked) =>
-                            setShowElevation(!!checked)
-                          }
-                          label="Elevation"
-                        />
-                        {showElevation && (
-                          <Field className="flex-1">
-                            <FieldLabel htmlFor="goal-elevation">
-                              Goal (m)
-                            </FieldLabel>
-                            <Input
-                              id="goal-elevation"
-                              type="number"
-                              placeholder="e.g., 1000"
-                              value={elevation}
-                              onChange={(e) => setElevation(e.target.value)}
-                            />
-                          </Field>
-                        )}
-                      </div>
-                    )}
-
-                    {availableMetrics.time && (
-                      <div className="flex flex-col items-start gap-3">
-                        <Checkbox
-                          checked={showTime}
-                          onCheckedChange={(checked) => setShowTime(!!checked)}
-                          label="Time"
-                        />
-                        {showTime && (
-                          <Field className="flex-1">
-                            <FieldLabel htmlFor="goal-time">
-                              Goal (hours)
-                            </FieldLabel>
-                            <Input
-                              id="goal-time"
-                              type="number"
-                              placeholder="e.g., 10"
-                              value={time}
-                              onChange={(e) => setTime(e.target.value)}
-                            />
-                          </Field>
-                        )}
-                      </div>
-                    )}
+          {/* Metric & Goal */}
+          {selectedActivities.length > 0 && (
+            <Card>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <FieldLabel>Metric to Track</FieldLabel>
+                    <div className="space-y-2 mt-2">
+                      {Array.from(availableMetrics).map((m) => (
+                        <label
+                          key={m}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <input
+                            type="radio"
+                            name="metric"
+                            value={m}
+                            checked={metric === m}
+                            onChange={() => setMetric(m)}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm">{METRIC_LABELS[m]}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
+
+                  <Field>
+                    <FieldLabel htmlFor="goal">
+                      Goal ({METRIC_UNITS[metric]})
+                    </FieldLabel>
+                    <Input
+                      id="goal"
+                      type="number"
+                      placeholder={`e.g., ${getGoalPlaceholder(metric)}`}
+                      value={goal}
+                      onChange={(e) => setGoal(e.target.value)}
+                    />
+                  </Field>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </FieldGroup>
 
         <SheetFooter className="flex flex-0 flex-col justify-center text-center">
-          <div className="flex flex-1 gap-2 justify-between ">
-            
+          <div className="flex flex-1 gap-2 justify-between">
             {isEditMode && (
-            <div className="w-full">
-              <Button variant="secondary" full destructive onClick={handleDelete}>
-                Delete Card
-              </Button>
-            </div>
-          )}
+              <div className="w-full">
+                <Button
+                  variant="secondary"
+                  full
+                  destructive
+                  onClick={handleDelete}
+                >
+                  Delete Card
+                </Button>
+              </div>
+            )}
             <Button
               full
               variant="primary"
@@ -408,9 +319,46 @@ export function CardConfigDialog({
               {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
             </Button>
           </div>
-          
         </SheetFooter>
       </SheetContent>
     </Sheet>
   )
+}
+
+// Helper functions for goal conversion
+function formatGoalForDisplay(goal: number, metric: Metric): string {
+  switch (metric) {
+    case 'distance':
+      return (goal / 1000).toString() // meters to km
+    case 'time':
+      return (goal / 3600).toString() // seconds to hours
+    default:
+      return goal.toString()
+  }
+}
+
+function parseGoalForStorage(displayValue: number, metric: Metric): number {
+  switch (metric) {
+    case 'distance':
+      return displayValue * 1000 // km to meters
+    case 'time':
+      return displayValue * 3600 // hours to seconds
+    default:
+      return displayValue
+  }
+}
+
+function getGoalPlaceholder(metric: Metric): string {
+  switch (metric) {
+    case 'distance':
+      return '50'
+    case 'count':
+      return '10'
+    case 'elevation':
+      return '1000'
+    case 'time':
+      return '10'
+    default:
+      return '10'
+  }
 }

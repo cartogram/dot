@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { supabase } from '@/lib/supabase/client'
+import { signUp } from '@/lib/server/auth'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -26,22 +26,12 @@ export function SignupForm() {
     setError(null)
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-        },
+      const result = await signUp({
+        data: { email, password, fullName: fullName || undefined },
       })
 
-      if (error) throw error
-
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
-        setError('Please check your email to confirm your account.')
+      if (result.error) {
+        setError(result.error)
         return
       }
 
@@ -99,10 +89,10 @@ export function SignupForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                minLength={6}
+                minLength={8}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Must be at least 6 characters
+                Must be at least 8 characters
               </p>
             </Field>
 

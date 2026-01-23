@@ -4,21 +4,41 @@
  * TypeScript types for the dashboards feature
  */
 
-import type { ActivityCardConfig } from './dashboard'
+import type { DashboardCard } from './dashboard'
 import type { StravaActivity } from './strava'
-import type {
-  Dashboard,
-  DashboardRole,
-  DashboardProfile,
-} from '@/lib/supabase/types'
 
-// Re-export base types for convenience
-export type {
-  Dashboard,
-  DashboardRole,
-  DashboardProfile,
-  DashboardInvite,
-} from '@/lib/supabase/types'
+// Dashboard role type
+export type DashboardRole = 'owner' | 'editor' | 'viewer'
+
+export interface Dashboard {
+  id: string
+  name: string
+  description: string | null
+  slug: string | null
+  ownerId: string
+  isPublic: boolean
+  isDefault: boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface DashboardProfile {
+  id: string
+  dashboardId: string
+  profileId: string
+  role: DashboardRole
+  inviteAccepted: boolean
+  joinedAt: Date
+}
+
+export interface DashboardInvite {
+  id: string
+  dashboardId: string
+  inviteCode: string
+  role: DashboardRole
+  expiresAt: Date | null
+  createdAt: Date
+}
 
 // =====================================================
 // PROFILE WITH USER INFO (for display)
@@ -26,7 +46,7 @@ export type {
 export interface DashboardProfileWithUser extends DashboardProfile {
   profile: {
     id: string
-    full_name: string | null
+    fullName: string | null
     email: string
   }
   athlete?: {
@@ -42,8 +62,8 @@ export interface DashboardProfileWithUser extends DashboardProfile {
 // =====================================================
 export interface DashboardWithProfiles extends Dashboard {
   profiles: DashboardProfileWithUser[]
-  profile_count: number
-  current_user_role: DashboardRole
+  profileCount: number
+  currentUserRole: DashboardRole
 }
 
 // =====================================================
@@ -69,7 +89,7 @@ export interface DashboardData {
   dashboard: Dashboard
   profiles: DashboardProfileWithUser[]
   currentUserRole: DashboardRole | null // null if viewing public dashboard without membership
-  cards: ActivityCardConfig[]
+  cards: DashboardCard[]
   profileActivities: ProfileActivities[]
   combinedActivities: StravaActivity[]
   canEdit: boolean
@@ -82,7 +102,7 @@ export interface DashboardData {
 export interface InviteLinkData {
   code: string
   role: DashboardRole
-  expiresAt: string | null
+  expiresAt: Date | null
   dashboardName: string
   dashboardId: string
 }

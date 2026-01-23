@@ -4,7 +4,7 @@ import { UserMenu } from '@/components/layout/UserMenu'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { Button } from '@/components/custom/Button/Button'
 import { IconSignOut } from '@/components/custom/Icons/Icons'
-import { useAuth } from '@/lib/auth/SimpleAuthContext'
+import { useAuth } from '@/lib/auth/AuthContext'
 
 import './styles/header.css'
 
