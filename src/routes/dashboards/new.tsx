@@ -1,23 +1,23 @@
 /**
- * Create Group Route
+ * Create Dashboard Route
  *
- * Form to create a new group.
+ * Form to create a new dashboard.
  */
 
 import * as React from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
-import { CreateGroupForm } from '@/components/groups/CreateGroupForm'
+import { CreateDashboardForm } from '@/components/dashboard/CreateDashboardForm'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 
-export const Route = createFileRoute('/groups/new')({
-  component: NewGroupPage,
+export const Route = createFileRoute('/dashboards/new')({
+  component: NewDashboardPage,
 })
 
 const queryClient = new QueryClient()
 
-function NewGroupPage() {
+function NewDashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -40,7 +40,7 @@ function NewGroupPage() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="max-w-xl mx-auto">
-        <CreateGroupForm userId={user.id} />
+        <CreateDashboardForm userId={user.id} />
       </div>
     </QueryClientProvider>
   )

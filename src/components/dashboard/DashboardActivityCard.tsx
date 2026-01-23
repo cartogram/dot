@@ -1,14 +1,14 @@
 /**
- * GroupDashboardCard Component
+ * DashboardActivityCard Component
  *
- * Displays aggregated activity stats for a group.
- * Similar to DashboardCard but combines activities from all members.
+ * Displays aggregated activity stats for a dashboard.
+ * Similar to DashboardCard but combines activities from all profiles.
  */
 
 import * as React from 'react'
 import type { ActivityCardConfig } from '@/types/dashboard'
 import type { StravaActivity, ActivityTotals } from '@/types/strava'
-import type { MemberActivities } from '@/types/groups'
+import type { ProfileActivities } from '@/types/dashboards'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
 import {
   filterActivitiesByTimeFrame,
@@ -24,22 +24,22 @@ import {
   CardContent,
 } from '@/components/custom/Card'
 
-interface GroupDashboardCardProps {
+interface DashboardActivityCardProps {
   config: ActivityCardConfig
   combinedActivities: StravaActivity[]
-  memberActivities: MemberActivities[]
+  profileActivities: ProfileActivities[]
 }
 
-export function GroupDashboardCard({
+export function DashboardActivityCard({
   config,
   combinedActivities,
-}: GroupDashboardCardProps) {
+}: DashboardActivityCardProps) {
   // Filter activities by the card's time frame
   const filteredActivities = React.useMemo(() => {
     return filterActivitiesByTimeFrame(
       combinedActivities,
       config.timeFrame,
-      config.customDateRange,
+      config.customDateRange
     )
   }, [combinedActivities, config.timeFrame, config.customDateRange])
 
@@ -56,7 +56,7 @@ export function GroupDashboardCard({
 
     // Filter activities that match any of the types
     const relevantActivities = filteredActivities.filter((activity) =>
-      activityTypes.includes(activity.type),
+      activityTypes.includes(activity.type)
     )
 
     // Aggregate them together
@@ -74,7 +74,7 @@ export function GroupDashboardCard({
         moving_time: 0,
         elapsed_time: 0,
         elevation_gain: 0,
-      },
+      }
     )
   }, [config.activityIds, filteredActivities])
 
@@ -93,7 +93,7 @@ export function GroupDashboardCard({
     }
 
     const hasAnyGoal = Object.values(filteredGoal).some(
-      (value) => value !== undefined,
+      (value) => value !== undefined
     )
     if (!hasAnyGoal) return undefined
 
@@ -101,7 +101,7 @@ export function GroupDashboardCard({
       totals,
       filteredGoal,
       config.timeFrame,
-      config.customDateRange,
+      config.customDateRange
     )
   }, [
     totals,
@@ -120,10 +120,10 @@ export function GroupDashboardCard({
         </CardHeader>
         <CardContent>
           <CardDescription>
-            No group activities for{' '}
+            No activities for{' '}
             {getTimeFrameDescription(
               config.timeFrame,
-              config.customDateRange,
+              config.customDateRange
             ).toLowerCase()}
           </CardDescription>
         </CardContent>

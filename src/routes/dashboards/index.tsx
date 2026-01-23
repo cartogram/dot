@@ -1,16 +1,20 @@
 /**
- * Groups List Route
+ * Dashboards List Route
  *
- * Lists user's groups and provides join functionality.
+ * Lists user's dashboards and provides join functionality.
  */
 
 import * as React from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
-import { getUserGroups } from '@/lib/server/groups'
-import { GroupCard } from '@/components/groups/GroupCard'
-import { JoinGroupForm } from '@/components/groups/JoinGroupForm'
+import { getUserDashboards } from '@/lib/server/dashboards'
+import { DashboardListCard } from '@/components/dashboard/DashboardListCard'
+import { JoinDashboardForm } from '@/components/dashboard/JoinDashboardForm'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Button } from '@/components/custom/Button/Button'
 import {
@@ -21,13 +25,13 @@ import {
   CardDescription,
 } from '@/components/custom/Card'
 
-export const Route = createFileRoute('/groups/')({
-  component: GroupsPage,
+export const Route = createFileRoute('/dashboards/')({
+  component: DashboardsPage,
 })
 
 const queryClient = new QueryClient()
 
-function GroupsPage() {
+function DashboardsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -49,19 +53,19 @@ function GroupsPage() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GroupsContent userId={user.id} />
+      <DashboardsContent userId={user.id} />
     </QueryClientProvider>
   )
 }
 
-function GroupsContent({ userId }: { userId: string }) {
+function DashboardsContent({ userId }: { userId: string }) {
   const {
-    data: groups,
+    data: dashboards,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['user-groups', userId],
-    queryFn: () => getUserGroups({ data: { userId } }),
+    queryKey: ['user-dashboards', userId],
+    queryFn: () => getUserDashboards({ data: { userId } }),
     staleTime: 5 * 60 * 1000,
   })
 
@@ -73,11 +77,13 @@ function GroupsContent({ userId }: { userId: string }) {
     return (
       <Card state="error">
         <CardHeader>
-          <CardTitle>Error Loading Groups</CardTitle>
+          <CardTitle>Error Loading Dashboards</CardTitle>
         </CardHeader>
         <CardContent>
           <CardDescription>
-            {error instanceof Error ? error.message : 'Failed to load groups'}
+            {error instanceof Error
+              ? error.message
+              : 'Failed to load dashboards'}
           </CardDescription>
         </CardContent>
       </Card>
@@ -88,42 +94,42 @@ function GroupsContent({ userId }: { userId: string }) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Groups</h1>
-        <Button to="/groups/new" variant="primary">
-          Create Group
+        <h1 className="text-2xl font-bold">My Dashboards</h1>
+        <Button to="/dashboards/new" variant="primary">
+          Create Dashboard
         </Button>
       </div>
 
-      {/* Groups Grid */}
-      {groups && groups.length > 0 ? (
+      {/* Dashboards Grid */}
+      {dashboards && dashboards.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groups.map((group) => (
-            <GroupCard key={group.id} group={group} />
+          {dashboards.map((dashboard) => (
+            <DashboardListCard key={dashboard.id} dashboard={dashboard} />
           ))}
         </div>
       ) : (
         <Card state="active">
           <CardHeader>
-            <CardTitle>No Groups Yet</CardTitle>
+            <CardTitle>No Dashboards Yet</CardTitle>
           </CardHeader>
           <CardContent>
             <CardDescription>
-              Create a group to share dashboards with friends, or join an existing
-              group using an invite code.
+              Create a dashboard to track and share your activities, or join an
+              existing dashboard using an invite code.
             </CardDescription>
           </CardContent>
         </Card>
       )}
 
-      {/* Join Group Section */}
+      {/* Join Dashboard Section */}
       <div className="max-w-md">
-        <JoinGroupForm userId={userId} />
+        <JoinDashboardForm userId={userId} />
       </div>
 
-      {/* Back to Dashboard */}
+      {/* Back to Home */}
       <div className="flex justify-center">
         <Button to="/" variant="secondary">
-          Back to Dashboard
+          Back to Home
         </Button>
       </div>
     </div>

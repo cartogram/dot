@@ -91,99 +91,88 @@ export interface DataSourceUpdate {
 }
 
 // =====================================================
-// DASHBOARD CONFIGS
+// DASHBOARDS
 // =====================================================
-export interface DashboardConfigRow {
-  id: string // UUID
-  user_id: string // UUID
-  version: number
-  config: DashboardConfig // JSONB
-  is_active: boolean
-  created_at: string // ISO timestamp
-  updated_at: string // ISO timestamp
-}
+export type DashboardRole = 'owner' | 'editor' | 'viewer'
 
-export interface DashboardConfigInsert {
-  user_id: string
-  version?: number
-  config: DashboardConfig
-  is_active?: boolean
-}
-
-export interface DashboardConfigUpdate {
-  version?: number
-  config?: DashboardConfig
-  is_active?: boolean
-}
-
-// =====================================================
-// GROUPS
-// =====================================================
-export type GroupRole = 'owner' | 'admin' | 'member'
-
-export interface Group {
+export interface Dashboard {
   id: string
   name: string
   description: string | null
+  slug: string | null
   owner_id: string
-  invite_code: string | null
+  is_public: boolean
+  is_default: boolean
+  config: DashboardConfig // JSONB - card configurations
   created_at: string
   updated_at: string
 }
 
-export interface GroupInsert {
+export interface DashboardInsert {
   name: string
   description?: string | null
+  slug?: string | null
   owner_id: string
+  is_public?: boolean
+  is_default?: boolean
+  config?: DashboardConfig
 }
 
-export interface GroupUpdate {
+export interface DashboardUpdate {
   name?: string
   description?: string | null
-  invite_code?: string | null
+  slug?: string | null
+  is_public?: boolean
+  is_default?: boolean
+  config?: DashboardConfig
 }
 
 // =====================================================
-// GROUP MEMBERS
+// DASHBOARD PROFILES (membership)
 // =====================================================
-export interface GroupMember {
+export interface DashboardProfile {
   id: string
-  group_id: string
-  user_id: string
-  role: GroupRole
+  dashboard_id: string
+  profile_id: string
+  role: DashboardRole
+  invite_accepted: boolean
   joined_at: string
 }
 
-export interface GroupMemberInsert {
-  group_id: string
-  user_id: string
-  role?: GroupRole
+export interface DashboardProfileInsert {
+  dashboard_id: string
+  profile_id: string
+  role?: DashboardRole
+  invite_accepted?: boolean
+}
+
+export interface DashboardProfileUpdate {
+  role?: DashboardRole
+  invite_accepted?: boolean
 }
 
 // =====================================================
-// GROUP DASHBOARD CONFIGS
+// DASHBOARD INVITES
 // =====================================================
-export interface GroupDashboardConfigRow {
+export interface DashboardInvite {
   id: string
-  group_id: string
-  version: number
-  config: DashboardConfig
-  is_active: boolean
+  dashboard_id: string
+  invite_code: string
+  role: 'editor' | 'viewer'
+  expires_at: string | null
   created_at: string
-  updated_at: string
 }
 
-export interface GroupDashboardConfigInsert {
-  group_id: string
-  version?: number
-  config: DashboardConfig
-  is_active?: boolean
+export interface DashboardInviteInsert {
+  dashboard_id: string
+  invite_code: string
+  role?: 'editor' | 'viewer'
+  expires_at?: string | null
 }
 
-export interface GroupDashboardConfigUpdate {
-  version?: number
-  config?: DashboardConfig
-  is_active?: boolean
+export interface DashboardInviteUpdate {
+  role?: 'editor' | 'viewer'
+  expires_at?: string | null
 }
 
 // =====================================================
@@ -203,25 +192,20 @@ export interface Database {
         Insert: DataSourceInsert
         Update: DataSourceUpdate
       }
-      dashboard_configs: {
-        Row: DashboardConfigRow
-        Insert: DashboardConfigInsert
-        Update: DashboardConfigUpdate
+      dashboards: {
+        Row: Dashboard
+        Insert: DashboardInsert
+        Update: DashboardUpdate
       }
-      groups: {
-        Row: Group
-        Insert: GroupInsert
-        Update: GroupUpdate
+      dashboard_profiles: {
+        Row: DashboardProfile
+        Insert: DashboardProfileInsert
+        Update: DashboardProfileUpdate
       }
-      group_members: {
-        Row: GroupMember
-        Insert: GroupMemberInsert
-        Update: { role?: GroupRole }
-      }
-      group_dashboard_configs: {
-        Row: GroupDashboardConfigRow
-        Insert: GroupDashboardConfigInsert
-        Update: GroupDashboardConfigUpdate
+      dashboard_invites: {
+        Row: DashboardInvite
+        Insert: DashboardInviteInsert
+        Update: DashboardInviteUpdate
       }
     }
   }

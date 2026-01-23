@@ -15,10 +15,11 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GroupsIndexRouteImport } from './routes/groups/index'
+import { Route as DashboardsIndexRouteImport } from './routes/dashboards/index'
 import { Route as ProfileUserIdRouteImport } from './routes/profile/$userId'
-import { Route as GroupsNewRouteImport } from './routes/groups/new'
-import { Route as GroupGroupIdRouteImport } from './routes/group/$groupId'
+import { Route as DashboardsNewRouteImport } from './routes/dashboards/new'
+import { Route as DashboardsDashboardIdRouteImport } from './routes/dashboards/$dashboardId'
+import { Route as DSlugRouteImport } from './routes/d/$slug'
 import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 
 const UpdatePasswordRoute = UpdatePasswordRouteImport.update({
@@ -51,9 +52,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GroupsIndexRoute = GroupsIndexRouteImport.update({
-  id: '/groups/',
-  path: '/groups/',
+const DashboardsIndexRoute = DashboardsIndexRouteImport.update({
+  id: '/dashboards/',
+  path: '/dashboards/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
@@ -61,14 +62,19 @@ const ProfileUserIdRoute = ProfileUserIdRouteImport.update({
   path: '/profile/$userId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GroupsNewRoute = GroupsNewRouteImport.update({
-  id: '/groups/new',
-  path: '/groups/new',
+const DashboardsNewRoute = DashboardsNewRouteImport.update({
+  id: '/dashboards/new',
+  path: '/dashboards/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GroupGroupIdRoute = GroupGroupIdRouteImport.update({
-  id: '/group/$groupId',
-  path: '/group/$groupId',
+const DashboardsDashboardIdRoute = DashboardsDashboardIdRouteImport.update({
+  id: '/dashboards/$dashboardId',
+  path: '/dashboards/$dashboardId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DSlugRoute = DSlugRouteImport.update({
+  id: '/d/$slug',
+  path: '/d/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthConfirmRoute = AuthConfirmRouteImport.update({
@@ -85,10 +91,11 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
-  '/group/$groupId': typeof GroupGroupIdRoute
-  '/groups/new': typeof GroupsNewRoute
+  '/d/$slug': typeof DSlugRoute
+  '/dashboards/$dashboardId': typeof DashboardsDashboardIdRoute
+  '/dashboards/new': typeof DashboardsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
-  '/groups': typeof GroupsIndexRoute
+  '/dashboards': typeof DashboardsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -98,10 +105,11 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
-  '/group/$groupId': typeof GroupGroupIdRoute
-  '/groups/new': typeof GroupsNewRoute
+  '/d/$slug': typeof DSlugRoute
+  '/dashboards/$dashboardId': typeof DashboardsDashboardIdRoute
+  '/dashboards/new': typeof DashboardsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
-  '/groups': typeof GroupsIndexRoute
+  '/dashboards': typeof DashboardsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -112,10 +120,11 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/update-password': typeof UpdatePasswordRoute
   '/auth/confirm': typeof AuthConfirmRoute
-  '/group/$groupId': typeof GroupGroupIdRoute
-  '/groups/new': typeof GroupsNewRoute
+  '/d/$slug': typeof DSlugRoute
+  '/dashboards/$dashboardId': typeof DashboardsDashboardIdRoute
+  '/dashboards/new': typeof DashboardsNewRoute
   '/profile/$userId': typeof ProfileUserIdRoute
-  '/groups/': typeof GroupsIndexRoute
+  '/dashboards/': typeof DashboardsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,10 +136,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/update-password'
     | '/auth/confirm'
-    | '/group/$groupId'
-    | '/groups/new'
+    | '/d/$slug'
+    | '/dashboards/$dashboardId'
+    | '/dashboards/new'
     | '/profile/$userId'
-    | '/groups'
+    | '/dashboards'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,10 +150,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/update-password'
     | '/auth/confirm'
-    | '/group/$groupId'
-    | '/groups/new'
+    | '/d/$slug'
+    | '/dashboards/$dashboardId'
+    | '/dashboards/new'
     | '/profile/$userId'
-    | '/groups'
+    | '/dashboards'
   id:
     | '__root__'
     | '/'
@@ -153,10 +164,11 @@ export interface FileRouteTypes {
     | '/signup'
     | '/update-password'
     | '/auth/confirm'
-    | '/group/$groupId'
-    | '/groups/new'
+    | '/d/$slug'
+    | '/dashboards/$dashboardId'
+    | '/dashboards/new'
     | '/profile/$userId'
-    | '/groups/'
+    | '/dashboards/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -167,10 +179,11 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   UpdatePasswordRoute: typeof UpdatePasswordRoute
   AuthConfirmRoute: typeof AuthConfirmRoute
-  GroupGroupIdRoute: typeof GroupGroupIdRoute
-  GroupsNewRoute: typeof GroupsNewRoute
+  DSlugRoute: typeof DSlugRoute
+  DashboardsDashboardIdRoute: typeof DashboardsDashboardIdRoute
+  DashboardsNewRoute: typeof DashboardsNewRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
-  GroupsIndexRoute: typeof GroupsIndexRoute
+  DashboardsIndexRoute: typeof DashboardsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -217,11 +230,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/groups/': {
-      id: '/groups/'
-      path: '/groups'
-      fullPath: '/groups'
-      preLoaderRoute: typeof GroupsIndexRouteImport
+    '/dashboards/': {
+      id: '/dashboards/'
+      path: '/dashboards'
+      fullPath: '/dashboards'
+      preLoaderRoute: typeof DashboardsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile/$userId': {
@@ -231,18 +244,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileUserIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/groups/new': {
-      id: '/groups/new'
-      path: '/groups/new'
-      fullPath: '/groups/new'
-      preLoaderRoute: typeof GroupsNewRouteImport
+    '/dashboards/new': {
+      id: '/dashboards/new'
+      path: '/dashboards/new'
+      fullPath: '/dashboards/new'
+      preLoaderRoute: typeof DashboardsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/group/$groupId': {
-      id: '/group/$groupId'
-      path: '/group/$groupId'
-      fullPath: '/group/$groupId'
-      preLoaderRoute: typeof GroupGroupIdRouteImport
+    '/dashboards/$dashboardId': {
+      id: '/dashboards/$dashboardId'
+      path: '/dashboards/$dashboardId'
+      fullPath: '/dashboards/$dashboardId'
+      preLoaderRoute: typeof DashboardsDashboardIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/d/$slug': {
+      id: '/d/$slug'
+      path: '/d/$slug'
+      fullPath: '/d/$slug'
+      preLoaderRoute: typeof DSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/confirm': {
@@ -263,10 +283,11 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   UpdatePasswordRoute: UpdatePasswordRoute,
   AuthConfirmRoute: AuthConfirmRoute,
-  GroupGroupIdRoute: GroupGroupIdRoute,
-  GroupsNewRoute: GroupsNewRoute,
+  DSlugRoute: DSlugRoute,
+  DashboardsDashboardIdRoute: DashboardsDashboardIdRoute,
+  DashboardsNewRoute: DashboardsNewRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,
-  GroupsIndexRoute: GroupsIndexRoute,
+  DashboardsIndexRoute: DashboardsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

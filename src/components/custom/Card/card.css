@@ -78,11 +78,12 @@
 
 .Card__Footer {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   gap: 1em;
   position: relative;
   padding: 1em 2em;
   background: var(--color-primary-light);
+  align-items: center;
 }
 
 .Card__Footer::before {

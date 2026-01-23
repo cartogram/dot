@@ -174,17 +174,17 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
       .eq('is_active', true)
       .maybeSingle() as { data: DataSource | null; error: any }
 
-    // 3. Fetch their dashboard config
-    const { data: dashboardConfig } = await (supabase as any)
-      .from('dashboard_configs')
+    // 3. Fetch their default dashboard config
+    const { data: defaultDashboard } = await (supabase as any)
+      .from('dashboards')
       .select('config')
-      .eq('user_id', data.userId)
-      .eq('is_active', true)
+      .eq('owner_id', data.userId)
+      .eq('is_default', true)
       .maybeSingle()
 
     // Extract visible cards
-    const cards: ActivityCardConfig[] = dashboardConfig?.config?.cards
-      ? (Object.values(dashboardConfig.config.cards) as ActivityCardConfig[])
+    const cards: ActivityCardConfig[] = defaultDashboard?.config?.cards
+      ? (Object.values(defaultDashboard.config.cards) as ActivityCardConfig[])
           .filter((card) => card.visible)
           .sort((a, b) => a.position - b.position)
       : []

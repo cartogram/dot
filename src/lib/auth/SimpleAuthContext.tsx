@@ -27,6 +27,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch Strava connection for a user
   const fetchStravaConnection = React.useCallback(async (userId: string) => {
+
+    try { 
+    console.log('Fetching Strava connection for user:', userId)
     const { data, error } = await supabase
       .from('data_sources')
       .select('*')
@@ -35,11 +38,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('is_active', true)
       .maybeSingle()
 
+      return data
+
+    console.log('Strava connection fetched:', data)
+    } catch (error) {
+      console.error('Error fetching Strava connection:', error)
+    }
+
     if (error) {
       console.error('Error fetching Strava connection:', error)
     }
 
-    return data
   }, [])
 
   // Initialize session and listen for auth changes

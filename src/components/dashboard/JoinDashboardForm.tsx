@@ -1,13 +1,13 @@
 /**
- * JoinGroupForm Component
+ * JoinDashboardForm Component
  *
- * Form to join a group using an invite code.
+ * Form to join a dashboard using an invite code.
  */
 
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { joinGroup } from '@/lib/server/groups'
+import { joinDashboard } from '@/lib/server/dashboards'
 import { Input } from '@/components/custom/Input/Input'
 import { Button } from '@/components/custom/Button/Button'
 import { Label } from '@/components/custom/Label/Label'
@@ -20,11 +20,11 @@ import {
   CardFooter,
 } from '@/components/custom/Card'
 
-interface JoinGroupFormProps {
+interface JoinDashboardFormProps {
   userId: string
 }
 
-export function JoinGroupForm({ userId }: JoinGroupFormProps) {
+export function JoinDashboardForm({ userId }: JoinDashboardFormProps) {
   const [inviteCode, setInviteCode] = React.useState('')
   const [error, setError] = React.useState<string | null>(null)
   const navigate = useNavigate()
@@ -32,15 +32,15 @@ export function JoinGroupForm({ userId }: JoinGroupFormProps) {
 
   const joinMutation = useMutation({
     mutationFn: (code: string) =>
-      joinGroup({ data: { inviteCode: code, userId } }),
-    onSuccess: (group) => {
-      // Invalidate groups list
-      queryClient.invalidateQueries({ queryKey: ['user-groups'] })
-      // Navigate to the new group
-      navigate({ to: `/group/${group.id}` })
+      joinDashboard({ data: { inviteCode: code, userId } }),
+    onSuccess: (dashboard) => {
+      // Invalidate dashboards list
+      queryClient.invalidateQueries({ queryKey: ['user-dashboards'] })
+      // Navigate to the dashboard
+      navigate({ to: `/dashboards/${dashboard.id}` })
     },
     onError: (err) => {
-      setError(err instanceof Error ? err.message : 'Failed to join group')
+      setError(err instanceof Error ? err.message : 'Failed to join dashboard')
     },
   })
 
@@ -56,9 +56,9 @@ export function JoinGroupForm({ userId }: JoinGroupFormProps) {
     <Card state="active">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>Join a Group</CardTitle>
+          <CardTitle>Join a Dashboard</CardTitle>
           <CardDescription>
-            Enter an invite code to join an existing group
+            Enter an invite code to join an existing dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,9 +74,7 @@ export function JoinGroupForm({ userId }: JoinGroupFormProps) {
                 style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
               />
             </div>
-            {error && (
-              <p className="text-sm text-red-500">{error}</p>
-            )}
+            {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
         </CardContent>
         <CardFooter>
@@ -85,7 +83,7 @@ export function JoinGroupForm({ userId }: JoinGroupFormProps) {
             variant="secondary"
             disabled={!inviteCode.trim() || joinMutation.isPending}
           >
-            {joinMutation.isPending ? 'Joining...' : 'Join Group'}
+            {joinMutation.isPending ? 'Joining...' : 'Join Dashboard'}
           </Button>
         </CardFooter>
       </form>

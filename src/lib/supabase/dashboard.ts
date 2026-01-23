@@ -1,12 +1,12 @@
 /**
- * Supabase Dashboard Storage
+ * Supabase Dashboard Storage (Personal Dashboard)
  *
- * Handles dashboard configuration persistence to Supabase.
- * This replaces the localStorage-based storage in lib/dashboard/storage.ts
+ * Handles dashboard configuration for the user's personal/default dashboard.
+ * This queries the user's default dashboard from the dashboards table.
  */
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database, DashboardConfigRow } from './types'
+import type { Database } from './types'
 import type { DashboardConfig, ActivityCardConfig } from '@/types/dashboard'
 
 /**
@@ -25,18 +25,65 @@ function getDefaultDashboardConfig(): DashboardConfig {
 }
 
 /**
+ * Get the user's default dashboard ID, creating one if it doesn't exist
+ */
+async function getOrCreateDefaultDashboard(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<string> {
+  // Try to find existing default dashboard
+  const { data: existing } = await supabase
+    .from('dashboards')
+    .select('id')
+    .eq('owner_id', userId)
+    .eq('is_default', true)
+    .maybeSingle()
+
+  if (existing) {
+    return existing.id
+  }
+
+  // Create a default dashboard for the user
+  const { data: newDashboard, error } = await supabase
+    .from('dashboards')
+    .insert({
+      name: 'My Dashboard',
+      owner_id: userId,
+      is_default: true,
+      config: getDefaultDashboardConfig(),
+    })
+    .select('id')
+    .single()
+
+  if (error || !newDashboard) {
+    console.error('Error creating default dashboard:', error)
+    throw new Error('Failed to create default dashboard')
+  }
+
+  // Add owner to dashboard_profiles
+  await supabase.from('dashboard_profiles').insert({
+    dashboard_id: newDashboard.id,
+    profile_id: userId,
+    role: 'owner',
+  })
+
+  return newDashboard.id
+}
+
+/**
  * Get the user's active dashboard configuration from Supabase
  */
 export async function getDashboardConfig(
   supabase: SupabaseClient<Database>,
-  userId: string,
+  userId: string
 ): Promise<DashboardConfig> {
+  const dashboardId = await getOrCreateDefaultDashboard(supabase, userId)
+
   const { data, error } = await supabase
-    .from('dashboard_configs')
+    .from('dashboards')
     .select('config')
-    .eq('user_id', userId)
-    .eq('is_active', true)
-    .maybeSingle()
+    .eq('id', dashboardId)
+    .single()
 
   if (error) {
     console.error('Error fetching dashboard config:', error)
@@ -44,14 +91,17 @@ export async function getDashboardConfig(
   }
 
   // If no config exists yet, return default
-  if (!data) {
+  if (!data?.config) {
     return getDefaultDashboardConfig()
   }
 
   // Ensure all required fields exist
-  const config = data.config
+  const config = data.config as DashboardConfig
   if (!config.preferences) {
     config.preferences = getDefaultDashboardConfig().preferences
+  }
+  if (!config.cards) {
+    config.cards = {}
   }
 
   return config
@@ -59,45 +109,22 @@ export async function getDashboardConfig(
 
 /**
  * Save dashboard configuration to Supabase
- * Uses upsert to handle both create and update
  */
 export async function saveDashboardConfig(
   supabase: SupabaseClient<Database>,
   userId: string,
-  config: DashboardConfig,
+  config: DashboardConfig
 ): Promise<void> {
-  // First, check if active config exists
-  const { data: existing } = await supabase
-    .from('dashboard_configs')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('is_active', true)
-    .maybeSingle()
+  const dashboardId = await getOrCreateDefaultDashboard(supabase, userId)
 
-  if (existing) {
-    // Update existing config
-    const { error } = await supabase
-      .from('dashboard_configs')
-      .update({ config, version: config.version })
-      .eq('id', existing.id)
+  const { error } = await supabase
+    .from('dashboards')
+    .update({ config })
+    .eq('id', dashboardId)
 
-    if (error) {
-      console.error('Error updating dashboard config:', error)
-      throw new Error('Failed to save dashboard configuration')
-    }
-  } else {
-    // Create new config
-    const { error } = await supabase.from('dashboard_configs').insert({
-      user_id: userId,
-      config,
-      version: config.version,
-      is_active: true,
-    })
-
-    if (error) {
-      console.error('Error creating dashboard config:', error)
-      throw new Error('Failed to save dashboard configuration')
-    }
+  if (error) {
+    console.error('Error saving dashboard config:', error)
+    throw new Error('Failed to save dashboard configuration')
   }
 }
 
@@ -107,7 +134,7 @@ export async function saveDashboardConfig(
 export async function addDashboardCard(
   supabase: SupabaseClient<Database>,
   userId: string,
-  card: Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>,
+  card: Omit<ActivityCardConfig, 'id' | 'position' | 'createdAt' | 'updatedAt'>
 ): Promise<string> {
   const config = await getDashboardConfig(supabase, userId)
 
@@ -117,7 +144,7 @@ export async function addDashboardCard(
   // Calculate next position
   const maxPosition = Math.max(
     0,
-    ...Object.values(config.cards).map((c) => c.position),
+    ...Object.values(config.cards).map((c) => c.position)
   )
 
   const newCard: ActivityCardConfig = {
@@ -141,7 +168,7 @@ export async function updateDashboardCard(
   supabase: SupabaseClient<Database>,
   userId: string,
   cardId: string,
-  updates: Partial<ActivityCardConfig>,
+  updates: Partial<ActivityCardConfig>
 ): Promise<void> {
   const config = await getDashboardConfig(supabase, userId)
 
@@ -164,7 +191,7 @@ export async function updateDashboardCard(
 export async function deleteDashboardCard(
   supabase: SupabaseClient<Database>,
   userId: string,
-  cardId: string,
+  cardId: string
 ): Promise<void> {
   const config = await getDashboardConfig(supabase, userId)
   delete config.cards[cardId]
@@ -176,7 +203,7 @@ export async function deleteDashboardCard(
  */
 export async function getVisibleCards(
   supabase: SupabaseClient<Database>,
-  userId: string,
+  userId: string
 ): Promise<ActivityCardConfig[]> {
   const config = await getDashboardConfig(supabase, userId)
   return Object.values(config.cards)
@@ -185,47 +212,21 @@ export async function getVisibleCards(
 }
 
 /**
- * Clear all dashboard data for a user
+ * Clear all dashboard data for a user (reset to default)
  */
 export async function clearDashboardConfig(
   supabase: SupabaseClient<Database>,
-  userId: string,
+  userId: string
 ): Promise<void> {
+  const dashboardId = await getOrCreateDefaultDashboard(supabase, userId)
+
   const { error } = await supabase
-    .from('dashboard_configs')
-    .delete()
-    .eq('user_id', userId)
+    .from('dashboards')
+    .update({ config: getDefaultDashboardConfig() })
+    .eq('id', dashboardId)
 
   if (error) {
     console.error('Error clearing dashboard config:', error)
     throw new Error('Failed to clear dashboard configuration')
-  }
-}
-
-/**
- * Migrate localStorage dashboard config to Supabase
- * Call this once during user onboarding/first login
- */
-export async function migrateLocalStorageToSupabase(
-  supabase: SupabaseClient<Database>,
-  userId: string,
-): Promise<void> {
-  const DASHBOARD_STORAGE_KEY = 'dashboard_config'
-  const stored = localStorage.getItem(DASHBOARD_STORAGE_KEY)
-
-  if (!stored) {
-    return // Nothing to migrate
-  }
-
-  try {
-    const config = JSON.parse(stored) as DashboardConfig
-    await saveDashboardConfig(supabase, userId, config)
-
-    // Clear localStorage after successful migration
-    localStorage.removeItem(DASHBOARD_STORAGE_KEY)
-    console.log('Successfully migrated dashboard config to Supabase')
-  } catch (error) {
-    console.error('Error migrating dashboard config:', error)
-    // Don't throw - migration failure shouldn't block user
   }
 }

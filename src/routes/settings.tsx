@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth/SimpleAuthContext'
 import { exchangeCodeForTokens } from '@/lib/server/oauth'
-import { getUserGroups } from '@/lib/server/groups'
+import { getUserDashboards, updateDashboard } from '@/lib/server/dashboards'
 import { Button } from '@/components/custom/Button/Button'
 import { Badge } from '@/components/custom/Badge/Badge'
 import {
@@ -24,10 +24,6 @@ const queryClient = new QueryClient()
 
 function SettingsPage() {
   const { user, stravaDataSource, refreshStravaConnection } = useAuth()
-
-  if (!user) {
-    return <SettingsPageContent user={null} stravaDataSource={null} refreshStravaConnection={refreshStravaConnection} />
-  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -50,11 +46,34 @@ function SettingsPageContent({
   const [error, setError] = React.useState<string | null>(null)
   const [copied, setCopied] = React.useState(false)
 
-  // Fetch user's groups
-  const { data: groups, isLoading: groupsLoading } = useQuery({
-    queryKey: ['user-groups', user?.id],
-    queryFn: () => getUserGroups({ data: { userId: user!.id } }),
+  // Track if we've already processed the OAuth callback to prevent double-processing
+  const oauthProcessedRef = React.useRef(false)
+
+  const queryClient = useQueryClient()
+
+  // Fetch user's dashboards
+  const { data: dashboards, isLoading: dashboardsLoading } = useQuery({
+    queryKey: ['user-dashboards', user?.id],
+    queryFn: () => getUserDashboards({ data: { userId: user!.id } }),
     enabled: !!user,
+  })
+
+  // Mutation to toggle dashboard visibility
+  const toggleVisibilityMutation = useMutation({
+    mutationFn: ({ dashboardId, isPublic }: { dashboardId: string; isPublic: boolean }) =>
+      updateDashboard({ data: { dashboardId, userId: user!.id, isPublic } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-dashboards', user?.id] })
+    },
+  })
+
+  // Mutation to set dashboard as default
+  const setDefaultMutation = useMutation({
+    mutationFn: ({ dashboardId }: { dashboardId: string }) =>
+      updateDashboard({ data: { dashboardId, userId: user!.id, isDefault: true } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-dashboards', user?.id] })
+    },
   })
 
   const profileUrl = user
@@ -80,10 +99,17 @@ function SettingsPageContent({
 
     if (oauthError) {
       setError(`Strava connection failed: ${oauthError}`)
+      // Clear the URL params
+      window.history.replaceState(null, '', '/settings')
       return
     }
 
     if (!code || !user) return
+
+    // Prevent processing the same code multiple times
+    // (effect can re-run due to dependency changes)
+    if (oauthProcessedRef.current) return
+    oauthProcessedRef.current = true
 
     const handleOAuthCallback = async () => {
       setIsConnecting(true)
@@ -262,50 +288,93 @@ function SettingsPageContent({
         </CardContent>
       </Card>
 
-      {/* Groups Section */}
+      {/* Dashboards Section */}
       <Card state="active">
         <CardHeader>
-          <CardTitle>Groups</CardTitle>
+          <CardTitle>Dashboards</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <CardDescription>
-            Join or create groups to share activity stats with friends.
+            Create and manage dashboards to track and share activity stats.
           </CardDescription>
 
-          {groupsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading groups...</p>
-          ) : groups && groups.length > 0 ? (
+          {dashboardsLoading ? (
+            <p className="text-sm text-muted-foreground">Loading dashboards...</p>
+          ) : dashboards && dashboards.length > 0 ? (
             <div className="space-y-2">
-              {groups.map((group) => (
-                <Link
-                  key={group.id}
-                  to="/group/$groupId"
-                  params={{ groupId: group.id }}
+              {dashboards.map((dashboard) => (
+                <div
+                  key={dashboard.id}
                   className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-muted transition-colors"
                 >
-                  <div>
-                    <p className="font-medium">{group.name}</p>
+                  <Link
+                    to="/dashboards/$dashboardId"
+                    params={{ dashboardId: dashboard.id }}
+                    className="flex-1"
+                  >
+                    <p className="font-medium">{dashboard.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {group.member_count} {group.member_count === 1 ? 'member' : 'members'}
+                      {dashboard.profile_count} {dashboard.profile_count === 1 ? 'profile' : 'profiles'}
                     </p>
+                  </Link>
+                  <div className="flex items-center gap-2">
+                    {dashboard.current_user_role === 'owner' && (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="small"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            toggleVisibilityMutation.mutate({
+                              dashboardId: dashboard.id,
+                              isPublic: !dashboard.is_public,
+                            })
+                          }}
+                          disabled={toggleVisibilityMutation.isPending}
+                        >
+                          {dashboard.is_public ? 'Make Private' : 'Make Public'}
+                        </Button>
+                        {!dashboard.is_default && (
+                          <Button
+                            variant="secondary"
+                            size="small"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              setDefaultMutation.mutate({ dashboardId: dashboard.id })
+                            }}
+                            disabled={setDefaultMutation.isPending}
+                          >
+                            Set as Default
+                          </Button>
+                        )}
+                      </>
+                    )}
+                    <div className="flex gap-1">
+                      {dashboard.is_default && (
+                        <Badge variant="secondary">Default</Badge>
+                      )}
+                      {dashboard.is_public && (
+                        <Badge variant="secondary">Public</Badge>
+                      )}
+                      <Badge variant={dashboard.current_user_role === 'owner' ? 'primary' : 'secondary'}>
+                        {dashboard.current_user_role === 'owner' ? 'Owner' :
+                         dashboard.current_user_role === 'editor' ? 'Editor' : 'Viewer'}
+                      </Badge>
+                    </div>
                   </div>
-                  <Badge variant={group.current_user_role === 'owner' ? 'primary' : 'secondary'}>
-                    {group.current_user_role === 'owner' ? 'Owner' :
-                     group.current_user_role === 'admin' ? 'Admin' : 'Member'}
-                  </Badge>
-                </Link>
+                </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">You're not a member of any groups yet.</p>
+            <p className="text-sm text-muted-foreground">You don't have any dashboards yet.</p>
           )}
 
           <div className="flex gap-2">
-            <Button to="/groups" variant="secondary">
-              View All Groups
+            <Button to="/dashboards" variant="secondary">
+              View All Dashboards
             </Button>
-            <Button to="/groups/new" variant="primary">
-              Create Group
+            <Button to="/dashboards/new" variant="primary">
+              Create Dashboard
             </Button>
           </div>
         </CardContent>
