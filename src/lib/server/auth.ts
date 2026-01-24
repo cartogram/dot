@@ -16,6 +16,7 @@ import {
   generateSalt,
 } from '@/lib/auth/password'
 import { useAppSession } from '@/lib/auth/session'
+import { generateUniqueUsername } from '@/lib/auth/username'
 
 // =====================================================
 // SCHEMAS
@@ -39,7 +40,9 @@ const SignInSchema = z.object({
 export interface AuthUser {
   id: string
   email: string
+  username: string
   fullName: string | null
+  profilePublic: boolean
   role: 'USER' | 'ADMIN'
   createdAt: Date
   updatedAt: Date
@@ -67,9 +70,13 @@ export const signUp = createServerFn({ method: 'POST' })
     const salt = generateSalt()
     const hashedPassword = await hashPassword(data.password, salt)
 
+    // Generate a unique username from email
+    const username = await generateUniqueUsername(data.email)
+
     const user = await prisma.user.create({
       data: {
         email: data.email.toLowerCase(),
+        username,
         password: hashedPassword,
         salt,
         fullName: data.fullName,
@@ -147,7 +154,9 @@ export const getCurrentUser = createServerFn({ method: 'GET' }).handler(
       select: {
         id: true,
         email: true,
+        username: true,
         fullName: true,
+        profilePublic: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -285,7 +294,9 @@ export const getCurrentUserWithStrava = createServerFn({
     select: {
       id: true,
       email: true,
+      username: true,
       fullName: true,
+      profilePublic: true,
       role: true,
       createdAt: true,
       updatedAt: true,
@@ -306,3 +317,39 @@ export const getCurrentUserWithStrava = createServerFn({
 
   return { user, stravaDataSource }
 })
+
+// =====================================================
+// UPDATE PROFILE SETTINGS
+// =====================================================
+
+const UpdateProfileSchema = z.object({
+  profilePublic: z.boolean().optional(),
+  fullName: z.string().optional(),
+})
+
+export const updateProfile = createServerFn({ method: 'POST' })
+  .inputValidator(UpdateProfileSchema)
+  .handler(async ({ data }) => {
+    const session = await useAppSession()
+
+    if (!session.data.userId) {
+      return { error: 'Not authenticated' }
+    }
+
+    const updateData: { profilePublic?: boolean; fullName?: string } = {}
+
+    if (data.profilePublic !== undefined) {
+      updateData.profilePublic = data.profilePublic
+    }
+
+    if (data.fullName !== undefined) {
+      updateData.fullName = data.fullName
+    }
+
+    await prisma.user.update({
+      where: { id: session.data.userId },
+      data: updateData,
+    })
+
+    return { success: true }
+  })

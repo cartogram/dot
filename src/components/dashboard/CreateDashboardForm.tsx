@@ -71,13 +71,14 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle>Create a New Dashboard</CardTitle>
+
+        </CardHeader>
+        <CardContent>
           <CardDescription>
             Create a dashboard to track and share activities with others
           </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
+          <div className="space-y-4 flex flex-col gap-4">
+            <div className="space-y-2 flex flex-col gap-2">
               <Label htmlFor="dashboard-name">Dashboard Name *</Label>
               <Input
                 id="dashboard-name"
@@ -88,7 +89,7 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 flex flex-col gap-2">
               <Label htmlFor="dashboard-description">
                 Description (optional)
               </Label>

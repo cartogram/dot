@@ -27,8 +27,10 @@ import { Button } from '@/components/custom/Button/Button'
 interface PublicProfileData {
   profile: {
     id: string
+    username: string
     fullName: string | null
-    createdAt: string
+    profilePublic: boolean
+    createdAt: string | Date
   }
   athlete: {
     id: number
@@ -79,6 +81,7 @@ export function PublicProfileDashboard({
             )}
             <div>
               <CardTitle>{displayName}</CardTitle>
+              <p className="text-sm text-muted-foreground">@{profile.username}</p>
               {location && (
                 <CardDescription className="mt-1">{location}</CardDescription>
               )}

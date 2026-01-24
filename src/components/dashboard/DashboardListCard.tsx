@@ -42,26 +42,22 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
     <Link to="/dashboards/$dashboardId" params={{ dashboardId: dashboard.id }}>
       <Card state="active">
         <CardHeader>
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <CardTitle className="truncate">{dashboard.name}</CardTitle>
-            </div>
-            <div className="flex gap-1.5 flex-shrink-0">
-              {dashboard.is_default && (
-                <Badge variant="secondary" className="text-xs">
-                  Default
-                </Badge>
-              )}
-              {dashboard.is_public && (
-                <Badge variant="secondary" className="text-xs">
-                  Public
-                </Badge>
-              )}
-              <Badge variant={roleVariant}>{roleLabel}</Badge>
-            </div>
-          </div>
+          <CardTitle className="truncate">{dashboard.name}</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex gap-1.5 flex-shrink-0">
+            {dashboard.isDefault && (
+              <Badge variant="secondary">
+                Default
+              </Badge>
+            )}
+            {dashboard.isPublic && (
+              <Badge variant="secondary" >
+                Public
+              </Badge>
+            )}
+            <Badge variant="secondary">{roleLabel}</Badge>
+          </div>
           {dashboard.description && (
             <CardDescription className="line-clamp-2">
               {dashboard.description}
@@ -73,8 +69,8 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
         </CardContent>
         <CardFooter>
           <span className="text-sm text-muted-foreground">
-            {dashboard.profile_count}{' '}
-            {dashboard.profile_count === 1 ? 'profile' : 'profiles'}
+            {dashboard.profileCount}{' '}
+            {dashboard.profileCount === 1 ? 'profile' : 'profiles'}
           </span>
         </CardFooter>
       </Card>
@@ -99,8 +95,8 @@ function ProfileAvatars({
       {displayProfiles.map((profile) => {
         const initials = profile.athlete
           ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
-          : profile.profile.full_name?.[0] ||
-            profile.profile.email[0].toUpperCase()
+          : profile.profile.fullName?.[0] ||
+          profile.profile.email[0].toUpperCase()
 
         return (
           <Avatar key={profile.id}>

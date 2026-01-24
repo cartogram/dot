@@ -20,9 +20,11 @@ enum DashboardRole {
 model User {
   id                  String    @id @default(uuid())
   email               String    @unique
+  username            String    @unique
   password            String?
   salt                String?
   fullName            String?   @map("full_name")
+  profilePublic       Boolean   @default(false) @map("profile_public")
   resetPasswordToken  String?   @map("reset_password_token")
   role                UserRole  @default(USER)
   createdAt           DateTime  @default(now()) @map("created_at")

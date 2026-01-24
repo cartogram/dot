@@ -99,7 +99,7 @@ export function StatsDashboard() {
 
   if (!stravaDataSource) {
     return (
-      <Card state="error">
+      <Card>
         <CardHeader>
           <CardTitle>No Data Sources</CardTitle>
         </CardHeader>
@@ -107,7 +107,7 @@ export function StatsDashboard() {
           <CardDescription>
             You need at least one data source to get started.
           </CardDescription>
-          <Button to="/settings" variant="secondary">
+          <Button to="/settings" variant="secondary" >
             View sources
           </Button>
         </CardContent>
@@ -172,11 +172,12 @@ export function StatsDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Welcome to Your Dashboard</CardTitle>
-            <CardDescription>
-              Get started by adding your first activity card
-            </CardDescription>
+   
           </CardHeader>
           <CardContent>
+          <CardDescription>
+              Get started by adding your first activity card
+            </CardDescription>
             <p className="text-sm text-muted-foreground mb-4">
               Click "Add Card" above to create a custom activity card with your
               preferred time frame, metrics, and goals.

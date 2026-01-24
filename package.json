@@ -7,6 +7,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "vitest --config=vitest.browser.config.ts",
+    "test:browser:ui": "vitest --config=vitest.browser.config.ts --browser.headless=false",
     "lint": "eslint",
     "format": "prettier --write .",
     "check": "prettier --write . && eslint --fix",
@@ -14,7 +17,7 @@
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "test:browser": "vitest --config=vitest.browser.config.ts"
+    "db:reset": "tsx scripts/reset-db.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",
@@ -64,6 +67,7 @@
     "playwright": "^1.57.0",
     "prettier": "^3.8.0",
     "prisma": "^7.3.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "vitest": "^4.0.16",

@@ -17,7 +17,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from '@/components/custom/Card'
 
 interface JoinDashboardFormProps {
@@ -53,39 +52,40 @@ export function JoinDashboardForm({ userId }: JoinDashboardFormProps) {
   }
 
   return (
-    <Card state="active">
+    <Card >
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle>Join a Dashboard</CardTitle>
+
+        </CardHeader>
+        <CardContent>
           <CardDescription>
             Enter an invite code to join an existing dashboard
           </CardDescription>
-        </CardHeader>
-        <CardContent>
           <div className="space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-2 flex flex-col gap-2">
               <Label htmlFor="invite-code">Invite Code</Label>
-              <Input
-                id="invite-code"
-                placeholder="ABCD1234"
-                value={inviteCode}
-                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-                maxLength={8}
-                style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="invite-code"
+                  placeholder="ABCD1234"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  maxLength={8}
+                  style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                />
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  disabled={!inviteCode.trim() || joinMutation.isPending}
+                >
+                  {joinMutation.isPending ? 'Joining...' : 'Join'}
+                </Button>
+              </div>
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
         </CardContent>
-        <CardFooter>
-          <Button
-            type="submit"
-            variant="secondary"
-            disabled={!inviteCode.trim() || joinMutation.isPending}
-          >
-            {joinMutation.isPending ? 'Joining...' : 'Join Dashboard'}
-          </Button>
-        </CardFooter>
       </form>
     </Card>
   )

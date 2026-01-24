@@ -15,10 +15,16 @@ const UserIdSchema = z.object({
   userId: z.string(),
 })
 
+const UsernameSchema = z.object({
+  username: z.string().min(1),
+})
+
 interface PublicProfileData {
   profile: {
     id: string
+    username: string
     fullName: string | null
+    profilePublic: boolean
     createdAt: Date
   }
   athlete: {
@@ -154,7 +160,7 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
     // 1. Fetch the target user's profile
     const user = await prisma.user.findUnique({
       where: { id: data.userId },
-      select: { id: true, fullName: true, createdAt: true },
+      select: { id: true, username: true, fullName: true, profilePublic: true, createdAt: true },
     })
 
     if (!user) {
@@ -192,7 +198,9 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
       return {
         profile: {
           id: user.id,
+          username: user.username,
           fullName: user.fullName,
+          profilePublic: user.profilePublic,
           createdAt: user.createdAt,
         },
         athlete: null,
@@ -233,7 +241,9 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
       return {
         profile: {
           id: user.id,
+          username: user.username,
           fullName: user.fullName,
+          profilePublic: user.profilePublic,
           createdAt: user.createdAt,
         },
         athlete: athleteData
@@ -256,7 +266,160 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
       return {
         profile: {
           id: user.id,
+          username: user.username,
           fullName: user.fullName,
+          profilePublic: user.profilePublic,
+          createdAt: user.createdAt,
+        },
+        athlete: athleteData
+          ? {
+              id: athleteData.id,
+              firstname: athleteData.firstname,
+              lastname: athleteData.lastname,
+              city: athleteData.city,
+              state: athleteData.state,
+              country: athleteData.country,
+              profile: athleteData.profile,
+            }
+          : null,
+        cards,
+        stats: null,
+        activities: [],
+        error:
+          error instanceof Error ? error.message : 'Failed to fetch Strava data',
+      }
+    }
+  })
+
+/**
+ * Get public profile data by username
+ *
+ * Returns profile data if the profile is public, or an error if hidden/not found.
+ */
+export const getProfileByUsername = createServerFn({ method: 'GET' })
+  .inputValidator(UsernameSchema)
+  .handler(async ({ data }): Promise<PublicProfileData | { notFound: true } | { hidden: true; username: string }> => {
+    // 1. Look up user by username
+    const user = await prisma.user.findUnique({
+      where: { username: data.username.toLowerCase() },
+      select: {
+        id: true,
+        username: true,
+        fullName: true,
+        profilePublic: true,
+        createdAt: true,
+      },
+    })
+
+    if (!user) {
+      return { notFound: true }
+    }
+
+    // 2. Check if profile is public
+    if (!user.profilePublic) {
+      return { hidden: true, username: user.username }
+    }
+
+    // 3. Fetch their active Strava data source
+    const dataSource = await prisma.dataSource.findFirst({
+      where: {
+        userId: user.id,
+        provider: 'strava',
+        isActive: true,
+      },
+    })
+
+    // 4. Fetch their default dashboard with cards
+    const defaultDashboard = await prisma.dashboard.findFirst({
+      where: {
+        ownerId: user.id,
+        isDefault: true,
+      },
+      include: {
+        cards: {
+          where: { visible: true },
+          orderBy: { position: 'asc' },
+        },
+      },
+    })
+
+    const cards: DashboardCard[] = defaultDashboard?.cards ?? []
+
+    // If no Strava connection, return what we have
+    if (!dataSource) {
+      return {
+        profile: {
+          id: user.id,
+          username: user.username,
+          fullName: user.fullName,
+          profilePublic: user.profilePublic,
+          createdAt: user.createdAt,
+        },
+        athlete: null,
+        cards,
+        stats: null,
+        activities: [],
+        error: 'User has not connected Strava',
+      }
+    }
+
+    const athleteData = dataSource.athleteData as any
+
+    try {
+      // 5. Refresh token if needed
+      const { accessToken, updated, newTokens } =
+        await refreshTokenIfNeeded(dataSource)
+
+      if (updated && newTokens) {
+        await prisma.dataSource.update({
+          where: { id: dataSource.id },
+          data: {
+            accessToken: newTokens.access_token,
+            refreshToken: newTokens.refresh_token,
+            expiresAt: new Date(newTokens.expires_at * 1000),
+          },
+        })
+      }
+
+      // 6. Fetch Strava stats
+      const stats = await fetchStats(dataSource.athleteId!, accessToken)
+
+      // 7. Fetch YTD activities
+      const yearStart = new Date(new Date().getFullYear(), 0, 1)
+      const unixYearStart = Math.floor(yearStart.getTime() / 1000)
+      const activities = await fetchActivities(accessToken, unixYearStart)
+
+      return {
+        profile: {
+          id: user.id,
+          username: user.username,
+          fullName: user.fullName,
+          profilePublic: user.profilePublic,
+          createdAt: user.createdAt,
+        },
+        athlete: athleteData
+          ? {
+              id: athleteData.id,
+              firstname: athleteData.firstname,
+              lastname: athleteData.lastname,
+              city: athleteData.city,
+              state: athleteData.state,
+              country: athleteData.country,
+              profile: athleteData.profile,
+            }
+          : null,
+        cards,
+        stats,
+        activities,
+      }
+    } catch (error) {
+      console.error('Error fetching Strava data for profile:', error)
+      return {
+        profile: {
+          id: user.id,
+          username: user.username,
+          fullName: user.fullName,
+          profilePublic: user.profilePublic,
           createdAt: user.createdAt,
         },
         athlete: athleteData

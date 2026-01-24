@@ -23,16 +23,23 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/custom/Card'
+import { CardConfigDialog } from './CardConfigDialog'
 
 interface DashboardActivityCardProps {
   config: DashboardCard
   combinedActivities: StravaActivity[]
   profileActivities: ProfileActivities[]
+  canEdit?: boolean
+  dashboardId?: string
+  onSave?: () => void
 }
 
 export function DashboardActivityCard({
   config,
   combinedActivities,
+  canEdit,
+  dashboardId,
+  onSave,
 }: DashboardActivityCardProps) {
   // Convert ActivityType enums to Strava type strings
   const stravaTypes = React.useMemo(
@@ -85,6 +92,15 @@ export function DashboardActivityCard({
     return calculateActivityProgress(totals, goal, config.timeFrame)
   }, [totals, config.goal, config.metric, config.timeFrame])
 
+  // Edit action for canEdit mode
+  const editAction = canEdit && dashboardId ? (
+    <CardConfigDialog
+      dashboardId={dashboardId}
+      existingCard={config}
+      onSave={onSave}
+    />
+  ) : null
+
   // No data state
   if (!totals || totals.count === 0) {
     return (
@@ -96,6 +112,7 @@ export function DashboardActivityCard({
           <CardDescription>
             No activities for {getTimeFrameDescription(config.timeFrame).toLowerCase()}
           </CardDescription>
+          {editAction && <div className="mt-4">{editAction}</div>}
         </CardContent>
       </Card>
     )
@@ -109,6 +126,7 @@ export function DashboardActivityCard({
       totals={totals}
       timeFrame={config.timeFrame}
       progress={progress}
+      actions={editAction}
     />
   )
 }

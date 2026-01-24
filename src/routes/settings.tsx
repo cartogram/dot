@@ -4,6 +4,7 @@ import { useNavigate, Link } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { exchangeCodeForTokens, saveStravaConnection, disconnectStrava } from '@/lib/server/oauth'
+import { updateProfile } from '@/lib/server/auth'
 import { getUserDashboards, updateDashboard } from '@/lib/server/dashboards'
 import { Button } from '@/components/custom/Button/Button'
 import { Badge } from '@/components/custom/Badge/Badge'
@@ -76,8 +77,18 @@ function SettingsPageContent({
   })
 
   const profileUrl = user
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/profile/${user.id}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${user.username}`
     : ''
+
+  // Mutation to toggle profile visibility
+  const toggleProfileVisibilityMutation = useMutation({
+    mutationFn: (profilePublic: boolean) =>
+      updateProfile({ data: { profilePublic } }),
+    onSuccess: () => {
+      // Refresh auth context to get updated user data
+      window.location.reload()
+    },
+  })
 
   const handleCopyProfileLink = async () => {
     if (!profileUrl) return
@@ -211,29 +222,53 @@ function SettingsPageContent({
         </CardContent>
       </Card>
 
-      {/* Share Profile Section */}
+      {/* Public Profile Section */}
       <Card state="active">
         <CardHeader>
-          <CardTitle>Share Profile</CardTitle>
+          <CardTitle>Public Profile</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <CardDescription>
-            Share your dashboard with other logged-in users. They'll be able to
-            view your activity stats (read-only).
-          </CardDescription>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              readOnly
-              value={profileUrl}
-              className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
-            />
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium">Profile Visibility</p>
+              <CardDescription>
+                {user.profilePublic
+                  ? 'Your profile is visible to anyone with your link.'
+                  : 'Your profile is hidden from public view.'}
+              </CardDescription>
+            </div>
             <Button
-              onClick={handleCopyProfileLink}
-              variant="secondary"
+              variant={user.profilePublic ? 'secondary' : 'primary'}
+              onClick={() => toggleProfileVisibilityMutation.mutate(!user.profilePublic)}
+              disabled={toggleProfileVisibilityMutation.isPending}
             >
-              {copied ? 'Copied!' : 'Copy Link'}
+              {toggleProfileVisibilityMutation.isPending
+                ? 'Updating...'
+                : user.profilePublic
+                  ? 'Make Private'
+                  : 'Make Public'}
             </Button>
+          </div>
+
+          <div className="border-t border-border pt-4">
+            <p className="font-medium mb-2">Your Profile URL</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={profileUrl}
+                className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
+              />
+              <Button
+                onClick={handleCopyProfileLink}
+                variant="secondary"
+              >
+                {copied ? 'Copied!' : 'Copy Link'}
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              @{user.username}
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -25,6 +25,8 @@ export default defineConfig({
       // https://vitest.dev/guide/browser/playwright
     },
     globals: true,
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.browser.test.ts', 'src/**/*.browser.test.tsx'],
     // Suppress React act() warnings - these are expected in browser mode
     // All state updates are properly handled by userEvent
     onConsoleLog(log) {

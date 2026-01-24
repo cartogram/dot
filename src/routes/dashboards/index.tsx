@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import {
   QueryClient,
   QueryClientProvider,
@@ -24,33 +24,23 @@ import {
   CardContent,
   CardDescription,
 } from '@/components/custom/Card'
+import { getCurrentUser } from '@/lib/server/auth'
 
 export const Route = createFileRoute('/dashboards/')({
   component: DashboardsPage,
+  beforeLoad: async () => {
+    const user = await getCurrentUser()
+    if (!user) {
+      throw redirect({ to: '/login' })
+    }
+    return { user }
+  },
 })
 
 const queryClient = new QueryClient()
 
 function DashboardsPage() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-
-  // If not logged in, redirect to login
-  React.useEffect(() => {
-    if (user === null) {
-      const timeout = setTimeout(() => {
-        if (!user) {
-          navigate({ to: '/login' })
-        }
-      }, 1000)
-      return () => clearTimeout(timeout)
-    }
-  }, [user, navigate])
-
-  if (!user) {
-    return <DashboardSkeleton />
-  }
-
+  const { user } = Route.useRouteContext()
   return (
     <QueryClientProvider client={queryClient}>
       <DashboardsContent userId={user.id} />
@@ -91,22 +81,28 @@ function DashboardsContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6 ">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Dashboards</h1>
-        <Button to="/dashboards/new" variant="primary">
-          Create Dashboard
-        </Button>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>My Dashboards</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button to="/dashboards/new" variant="primary">
+            Create Dashboard
+          </Button>
+        </CardContent>
+      </Card>
+
+      <JoinDashboardForm userId={userId} />
 
       {/* Dashboards Grid */}
       {dashboards && dashboards.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <>
           {dashboards.map((dashboard) => (
             <DashboardListCard key={dashboard.id} dashboard={dashboard} />
           ))}
-        </div>
+        </>
       ) : (
         <Card state="active">
           <CardHeader>
@@ -121,10 +117,7 @@ function DashboardsContent({ userId }: { userId: string }) {
         </Card>
       )}
 
-      {/* Join Dashboard Section */}
-      <div className="max-w-md">
-        <JoinDashboardForm userId={userId} />
-      </div>
+
 
       {/* Back to Home */}
       <div className="flex justify-center">

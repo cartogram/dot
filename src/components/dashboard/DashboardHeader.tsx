@@ -12,6 +12,7 @@ import {
   leaveDashboard,
   deleteDashboard,
   createInvite,
+  updateDashboard,
 } from '@/lib/server/dashboards'
 import {
   Avatar,
@@ -36,18 +37,21 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/custom/Card'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface DashboardHeaderProps {
   data: DashboardData
   userId: string
+  onRefresh?: () => void
 }
 
-export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
+export function DashboardHeader({ data, userId, onRefresh }: DashboardHeaderProps) {
   const { dashboard, profiles, currentUserRole, canEdit } = data
   const [showInviteDialog, setShowInviteDialog] = React.useState(false)
   const [inviteCode, setInviteCode] = React.useState<string | null>(null)
   const [showLeaveConfirm, setShowLeaveConfirm] = React.useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = React.useState(false)
   const navigate = useNavigate()
   const router = useRouter()
 
@@ -82,6 +86,25 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
       setInviteCode(result.code)
     },
   })
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: (updates: { isPublic?: boolean; isDefault?: boolean }) =>
+      updateDashboard({
+        data: { dashboardId: dashboard.id, userId, ...updates },
+      }),
+    onSuccess: () => {
+      router.invalidate()
+      onRefresh?.()
+    },
+  })
+
+  const handleTogglePublic = () => {
+    updateSettingsMutation.mutate({ isPublic: !dashboard.isPublic })
+  }
+
+  const handleToggleDefault = () => {
+    updateSettingsMutation.mutate({ isDefault: !dashboard.isDefault })
+  }
 
   const copyInviteCode = () => {
     if (inviteCode) {
@@ -122,10 +145,10 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
             )}
         <div className="space-y-4">
           <div className="flex gap-2">
-          {dashboard.is_public && (
+          {dashboard.isPublic && (
               <Badge variant="secondary">Public</Badge>
             )}
-            {dashboard.is_default && (
+            {dashboard.isDefault && (
               <Badge variant="secondary">Default</Badge>
             )}
             <Badge variant={isOwner ? 'primary' : 'secondary'}>
@@ -141,11 +164,11 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
               {profiles.map((profile) => {
                 const name = profile.athlete
                   ? `${profile.athlete.firstname || ''} ${profile.athlete.lastname || ''}`.trim()
-                  : profile.profile.full_name || profile.profile.email
+                  : profile.profile.fullName || profile.profile.email
 
                 const initials = profile.athlete
                   ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
-                  : profile.profile.full_name?.[0] ||
+                  : profile.profile.fullName?.[0] ||
                     profile.profile.email[0].toUpperCase()
 
                 return (
@@ -163,7 +186,7 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm">{name}</span>
-                   
+
                   </div>
                 )
               })}
@@ -171,7 +194,7 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
           </div>
 
           {/* Public URL */}
-          {dashboard.is_public && dashboard.slug && (
+          {dashboard.isPublic && dashboard.slug && (
             <div>
               <h4 className="text-sm font-medium mb-2">Public URL</h4>
               <code className="text-sm bg-muted px-2 py-1 rounded">
@@ -188,7 +211,12 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
             destructive
             onClick={() => setShowDeleteConfirm(true)}
           >
-            Delete 
+            Delete
+          </Button>
+        )}
+        {isOwner && (
+          <Button variant="secondary" onClick={() => setShowSettingsDialog(true)}>
+            Settings
           </Button>
         )}
         {canEdit && (
@@ -202,10 +230,10 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
             destructive
             onClick={() => setShowLeaveConfirm(true)}
           >
-            Leave 
+            Leave
           </Button>
         )}
-        
+
       </CardFooter>
 
       {/* Invite Dialog */}
@@ -299,6 +327,47 @@ export function DashboardHeader({ data, userId }: DashboardHeaderProps) {
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending ? 'Deleting...' : 'Delete Dashboard'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dashboard Settings</DialogTitle>
+            <DialogDescription>
+              Configure visibility and default settings for this dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <Checkbox
+              checked={dashboard.isPublic}
+              onCheckedChange={handleTogglePublic}
+              disabled={updateSettingsMutation.isPending}
+              label="Make Public"
+            />
+            <p className="text-sm text-muted-foreground ml-6">
+              Public dashboards can be viewed by anyone with the link.
+            </p>
+
+            <Checkbox
+              checked={dashboard.isDefault}
+              onCheckedChange={handleToggleDefault}
+              disabled={updateSettingsMutation.isPending}
+              label="Set as Default"
+            />
+            <p className="text-sm text-muted-foreground ml-6">
+              Your default dashboard is shown on your public profile.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowSettingsDialog(false)}
+            >
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

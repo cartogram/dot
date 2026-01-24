@@ -8,6 +8,7 @@ import type { DashboardData } from '@/types/dashboards'
 import { DashboardHeader } from './DashboardHeader'
 import { DashboardActivityCard } from './DashboardActivityCard'
 import { ProfileBreakdown } from './ProfileBreakdown'
+import { CardConfigDialog } from './CardConfigDialog'
 import {
   Card,
   CardHeader,
@@ -15,7 +16,6 @@ import {
   CardDescription,
   CardContent,
 } from '@/components/custom/Card'
-import { Button } from '@/components/custom/Button/Button'
 
 interface DashboardViewProps {
   data: DashboardData
@@ -35,7 +35,7 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
   return (
     <div className="gap-6 flex flex-col">
       {/* Dashboard Header */}
-      <DashboardHeader data={data} userId={userId} />
+      <DashboardHeader data={data} userId={userId} onRefresh={onRefresh} />
 
       {/* Status Messages */}
       {profilesWithErrors > 0 && (
@@ -64,15 +64,28 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
 
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cards.map((card) => (
-            <DashboardActivityCard
-              key={card.id}
-              config={card}
-              combinedActivities={combinedActivities}
-              profileActivities={profileActivities}
-            />
-          ))}
+        <div className="space-y-4">
+          {data.canEdit && (
+            <div className="flex justify-end">
+              <CardConfigDialog
+                dashboardId={data.dashboard.id}
+                onSave={onRefresh}
+              />
+            </div>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cards.map((card) => (
+              <DashboardActivityCard
+                key={card.id}
+                config={card}
+                combinedActivities={combinedActivities}
+                profileActivities={profileActivities}
+                canEdit={data.canEdit}
+                dashboardId={data.dashboard.id}
+                onSave={onRefresh}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <Card state="active">
@@ -86,9 +99,12 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
                 : "The dashboard hasn't been set up yet. An editor can add cards."}
             </CardDescription>
             {data.canEdit && (
-              <Button variant="primary" className="mt-4" onClick={onRefresh}>
-                Add Card (Coming Soon)
-              </Button>
+              <div className="mt-4">
+                <CardConfigDialog
+                  dashboardId={data.dashboard.id}
+                  onSave={onRefresh}
+                />
+              </div>
             )}
           </CardContent>
         </Card>

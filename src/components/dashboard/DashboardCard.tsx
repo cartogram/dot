@@ -42,7 +42,11 @@ export function DashboardCard({
 
   // Filter activities by the card's time frame
   const filteredActivities = React.useMemo(() => {
-    return filterActivitiesByTimeFrame(allActivities, config.timeFrame)
+
+
+
+
+    return filterActivitiesByTimeFrame(allActivities, config.timeFrame as TimeFrame)
   }, [allActivities, config.timeFrame])
 
   // Aggregate activities based on selected activity types
