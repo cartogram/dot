@@ -1,10 +1,5 @@
 import * as React from 'react'
-import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-} from '@/components/ui/sheet'
+import { SidePanel } from '@/components/custom/SidePanel'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -22,7 +17,6 @@ import type {
   DashboardCard,
 } from '@/types/dashboard'
 import {
-  METRICS,
   TIME_FRAMES,
   METRIC_LABELS,
   METRIC_UNITS,
@@ -187,8 +181,12 @@ export function CardConfigDialog({
     }
   }
 
+  const handleCancel = () => {
+    setOpen(false)
+  }
+
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <>
       <Button
         size={isEditMode ? 'small' : 'default'}
         variant={isEditMode ? 'secondary' : 'primary'}
@@ -196,12 +194,38 @@ export function CardConfigDialog({
       >
         {trigger || <>{isEditMode ? <>Edit Card</> : <>Add Card</>}</>}
       </Button>
-      <SheetContent className="data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:md:max-w-1/2">
-        <SheetHeader>
-          <h3>{isEditMode ? 'Edit Activity' : 'Add Activity'}</h3>
-        </SheetHeader>
-
-        <FieldGroup className="py-4 overflow-y-auto">
+      <SidePanel
+        open={open}
+        onOpenChange={setOpen}
+        title={isEditMode ? 'Edit Activity' : 'Add Activity'}
+        className="data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:md:max-w-1/2"
+        footer={
+          <div className="flex flex-1 gap-2 justify-between w-full">
+            {isEditMode && (
+              <Button
+                variant="secondary"
+                destructive
+                onClick={handleDelete}
+              >
+                Delete Card
+              </Button>
+            )}
+            <div className="flex gap-2 ml-auto">
+              <Button variant="secondary" onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={!title || selectedActivities.length === 0 || isSaving}
+              >
+                {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
+              </Button>
+            </div>
+          </div>
+        }
+      >
+        <FieldGroup>
           {/* General Settings */}
           <Card state="active">
             <Field>
@@ -295,33 +319,8 @@ export function CardConfigDialog({
             </Card>
           )}
         </FieldGroup>
-
-        <SheetFooter className="flex flex-0 flex-col justify-center text-center">
-          <div className="flex flex-1 gap-2 justify-between">
-            {isEditMode && (
-              <div className="w-full">
-                <Button
-                  variant="secondary"
-                  full
-                  destructive
-                  onClick={handleDelete}
-                >
-                  Delete Card
-                </Button>
-              </div>
-            )}
-            <Button
-              full
-              variant="primary"
-              onClick={handleSave}
-              disabled={!title || selectedActivities.length === 0 || isSaving}
-            >
-              {isSaving ? 'Saving...' : isEditMode ? 'Save' : 'Add Card'}
-            </Button>
-          </div>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+      </SidePanel>
+    </>
   )
 }
 

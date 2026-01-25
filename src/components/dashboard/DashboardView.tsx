@@ -35,7 +35,17 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
   return (
     <div className="gap-6 flex flex-col">
       {/* Dashboard Header */}
-      <DashboardHeader data={data} userId={userId} onRefresh={onRefresh} />
+      <DashboardHeader
+        data={data}
+        userId={userId}
+        onRefresh={onRefresh}
+        stats={{
+          profileCount: data.profiles.length,
+          profilesWithData,
+          totalActivities: combinedActivities.length,
+          cardCount: cards.length,
+        }}
+      />
 
       {/* Status Messages */}
       {profilesWithErrors > 0 && (
@@ -64,9 +74,9 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
 
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data.canEdit && (
-            <div className="flex justify-end">
+            <div className="flex justify-center">
               <CardConfigDialog
                 dashboardId={data.dashboard.id}
                 onSave={onRefresh}
@@ -112,39 +122,6 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
 
       {/* Profile Breakdown */}
       <ProfileBreakdown profileActivities={profileActivities} />
-
-      {/* Summary Stats */}
-      <Card state="active">
-        <CardHeader>
-          <CardTitle>Dashboard Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold">{data.profiles.length}</div>
-              <div className="text-sm text-muted-foreground">Profiles</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{profilesWithData}</div>
-              <div className="text-sm text-muted-foreground">With Strava</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {combinedActivities.length}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Total Activities
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">{cards.length}</div>
-              <div className="text-sm text-muted-foreground">
-                Dashboard Cards
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

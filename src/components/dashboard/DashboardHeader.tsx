@@ -12,7 +12,6 @@ import {
   leaveDashboard,
   deleteDashboard,
   createInvite,
-  updateDashboard,
 } from '@/lib/server/dashboards'
 import {
   Avatar,
@@ -37,21 +36,27 @@ import {
   CardContent,
   CardFooter,
 } from '@/components/custom/Card'
-import { Checkbox } from '@/components/ui/checkbox'
+import { DashboardSettingsSheet } from './DashboardSettingsSheet'
 
 interface DashboardHeaderProps {
   data: DashboardData
   userId: string
   onRefresh?: () => void
+  stats?: {
+    profileCount: number
+    profilesWithData: number
+    totalActivities: number
+    cardCount: number
+  }
 }
 
-export function DashboardHeader({ data, userId, onRefresh }: DashboardHeaderProps) {
+export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHeaderProps) {
   const { dashboard, profiles, currentUserRole, canEdit } = data
   const [showInviteDialog, setShowInviteDialog] = React.useState(false)
   const [inviteCode, setInviteCode] = React.useState<string | null>(null)
   const [showLeaveConfirm, setShowLeaveConfirm] = React.useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false)
-  const [showSettingsDialog, setShowSettingsDialog] = React.useState(false)
+  const [showSettingsSheet, setShowSettingsSheet] = React.useState(false)
   const navigate = useNavigate()
   const router = useRouter()
 
@@ -86,25 +91,6 @@ export function DashboardHeader({ data, userId, onRefresh }: DashboardHeaderProp
       setInviteCode(result.code)
     },
   })
-
-  const updateSettingsMutation = useMutation({
-    mutationFn: (updates: { isPublic?: boolean; isDefault?: boolean }) =>
-      updateDashboard({
-        data: { dashboardId: dashboard.id, userId, ...updates },
-      }),
-    onSuccess: () => {
-      router.invalidate()
-      onRefresh?.()
-    },
-  })
-
-  const handleTogglePublic = () => {
-    updateSettingsMutation.mutate({ isPublic: !dashboard.isPublic })
-  }
-
-  const handleToggleDefault = () => {
-    updateSettingsMutation.mutate({ isDefault: !dashboard.isDefault })
-  }
 
   const copyInviteCode = () => {
     if (inviteCode) {
@@ -205,17 +191,8 @@ export function DashboardHeader({ data, userId, onRefresh }: DashboardHeaderProp
         </div>
       </CardContent>
       <CardFooter>
-      {isOwner && (
-          <Button
-            variant="secondary"
-            destructive
-            onClick={() => setShowDeleteConfirm(true)}
-          >
-            Delete
-          </Button>
-        )}
         {isOwner && (
-          <Button variant="secondary" onClick={() => setShowSettingsDialog(true)}>
+          <Button variant="secondary" onClick={() => setShowSettingsSheet(true)}>
             Settings
           </Button>
         )}
@@ -233,7 +210,6 @@ export function DashboardHeader({ data, userId, onRefresh }: DashboardHeaderProp
             Leave
           </Button>
         )}
-
       </CardFooter>
 
       {/* Invite Dialog */}
@@ -332,46 +308,16 @@ export function DashboardHeader({ data, userId, onRefresh }: DashboardHeaderProp
         </DialogContent>
       </Dialog>
 
-      {/* Settings Dialog */}
-      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Dashboard Settings</DialogTitle>
-            <DialogDescription>
-              Configure visibility and default settings for this dashboard.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 space-y-4">
-            <Checkbox
-              checked={dashboard.isPublic}
-              onCheckedChange={handleTogglePublic}
-              disabled={updateSettingsMutation.isPending}
-              label="Make Public"
-            />
-            <p className="text-sm text-muted-foreground ml-6">
-              Public dashboards can be viewed by anyone with the link.
-            </p>
-
-            <Checkbox
-              checked={dashboard.isDefault}
-              onCheckedChange={handleToggleDefault}
-              disabled={updateSettingsMutation.isPending}
-              label="Set as Default"
-            />
-            <p className="text-sm text-muted-foreground ml-6">
-              Your default dashboard is shown on your public profile.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowSettingsDialog(false)}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Settings Sheet */}
+      <DashboardSettingsSheet
+        dashboard={dashboard}
+        userId={userId}
+        stats={stats}
+        open={showSettingsSheet}
+        onOpenChange={setShowSettingsSheet}
+        onRefresh={onRefresh}
+        onDeleteClick={() => setShowDeleteConfirm(true)}
+      />
     </Card>
   )
 }
