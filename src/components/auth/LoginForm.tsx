@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { signIn } from '@/lib/server/auth'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -14,6 +15,7 @@ import {
 
 export function LoginForm() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
@@ -31,6 +33,9 @@ export function LoginForm() {
         setError(result.error)
         return
       }
+
+      // Refresh auth context with new user data before navigating
+      await refreshUser()
 
       // Navigate to home after successful login
       navigate({ to: '/' })

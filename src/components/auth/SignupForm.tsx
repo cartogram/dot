@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { signUp } from '@/lib/server/auth'
+import { useAuth } from '@/lib/auth/AuthContext'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
@@ -14,6 +15,7 @@ import {
 
 export function SignupForm() {
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
   const [email, setEmail] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [fullName, setFullName] = React.useState('')
@@ -34,6 +36,9 @@ export function SignupForm() {
         setError(result.error)
         return
       }
+
+      // Refresh auth context with new user data before navigating
+      await refreshUser()
 
       // Redirect to dashboard on success
       navigate({ to: '/' })

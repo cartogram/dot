@@ -5,7 +5,7 @@
  * Uses route loaders for data fetching (no client-side loading states needed).
  */
 
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { getAuthUser } from '@/lib/server/auth'
 import { getDashboardData } from '@/lib/server/getDashboardData'
@@ -64,6 +64,7 @@ export const Route = createFileRoute('/dashboards/$dashboardId')({
 
 function DashboardPage() {
   const loaderData = Route.useLoaderData()
+  const router = useRouter()
 
   // Handle error state from loader
   if ('error' in loaderData && loaderData.error) {
@@ -109,8 +110,8 @@ function DashboardPage() {
         data={data}
         userId={userId}
         onRefresh={() => {
-          // Use router's invalidate instead of React Query
-          Route.router?.invalidate()
+          // Invalidate router to refetch loader data
+          router.invalidate()
         }}
       />
     </QueryClientProvider>

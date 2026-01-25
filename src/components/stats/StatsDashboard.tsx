@@ -14,31 +14,28 @@ import {
   CardContent,
 } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
-import type { DashboardCard as DashboardCardType } from '@/types/dashboard'
 
 export function StatsDashboard() {
   const { user, stravaDataSource, getStravaAccessToken } = useAuth()
-  const [refreshKey, setRefreshKey] = React.useState(0)
-  const [dashboardId, setDashboardId] = React.useState<string | null>(null)
-  const [cards, setCards] = React.useState<DashboardCardType[]>([])
   const currentYear = new Date().getFullYear()
 
-  // Fetch cards from server
-  React.useEffect(() => {
-    if (!user) return
+  // Fetch cards from server using React Query for proper cache invalidation
+  const {
+    data: cardsData,
+    refetch: refetchCards,
+  } = useQuery({
+    queryKey: ['dashboard-cards', user?.id],
+    queryFn: () => getVisibleCardsForUser({ data: { userId: user!.id } }),
+    enabled: !!user,
+    staleTime: 0, // Always consider stale to ensure fresh data on refetch
+  })
 
-    const fetchCards = async () => {
-      const result = await getVisibleCardsForUser({ data: { userId: user.id } })
-      setDashboardId(result.dashboardId)
-      setCards(result.cards)
-    }
-
-    fetchCards()
-  }, [user, refreshKey])
+  const dashboardId = cardsData?.dashboardId ?? null
+  const cards = cardsData?.cards ?? []
 
   const handleRefresh = React.useCallback(() => {
-    setRefreshKey((k) => k + 1)
-  }, [])
+    refetchCards()
+  }, [refetchCards])
 
   // Fetch Stats API for Ride/Run/Swim (pre-aggregated data)
   const {
