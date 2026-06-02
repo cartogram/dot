@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/custom/Button/Button'
 
 export function StatsDashboard() {
-  const { user, stravaDataSource, getStravaAccessToken } = useAuth()
+  const { user, stravaDataSource } = useAuth()
   const currentYear = new Date().getFullYear()
 
   // Fetch cards from server using React Query for proper cache invalidation
@@ -45,16 +45,10 @@ export function StatsDashboard() {
   } = useQuery({
     queryKey: ['athlete-stats', stravaDataSource?.athleteId?.toString()],
     queryFn: async () => {
-      const accessToken = await getStravaAccessToken()
-      if (!accessToken || !stravaDataSource)
+      if (!stravaDataSource)
         throw new Error('Not authenticated')
 
-      return fetchAthleteStats({
-        data: {
-          athleteId: Number(stravaDataSource.athleteId!),
-          accessToken,
-        },
-      })
+      return fetchAthleteStats()
     },
     enabled: !!stravaDataSource,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -73,15 +67,13 @@ export function StatsDashboard() {
       currentYear,
     ],
     queryFn: async () => {
-      const accessToken = await getStravaAccessToken()
-      if (!accessToken) throw new Error('Not authenticated')
+      if (!stravaDataSource) throw new Error('Not authenticated')
 
       const yearStart = new Date(currentYear, 0, 1)
       const unixYearStart = Math.floor(yearStart.getTime() / 1000)
 
       return fetchAthleteActivities({
         data: {
-          accessToken,
           perPage: 200, // Fetch up to 200 activities
           after: unixYearStart, // Only YTD activities
         },

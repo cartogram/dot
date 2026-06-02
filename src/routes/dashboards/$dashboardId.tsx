@@ -6,7 +6,6 @@
  */
 
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { getAuthUser } from '@/lib/server/auth'
 import { getDashboardData } from '@/lib/server/getDashboardData'
 import { DashboardView } from '@/components/dashboard/DashboardView'
@@ -20,7 +19,6 @@ import {
 } from '@/components/custom/Card'
 
 // QueryClient for mutations only (DashboardHeader uses useMutation)
-const queryClient = new QueryClient()
 
 export const Route = createFileRoute('/dashboards/$dashboardId')({
   // beforeLoad: Check authentication before loading data
@@ -105,16 +103,14 @@ function DashboardPage() {
 
   // QueryClientProvider only needed for mutations in DashboardHeader
   return (
-    <QueryClientProvider client={queryClient}>
-      <DashboardView
-        data={data}
-        userId={userId}
-        onRefresh={() => {
-          // Invalidate router to refetch loader data
-          router.invalidate()
-        }}
-      />
-    </QueryClientProvider>
+    <DashboardView
+      data={data}
+      userId={userId}
+      onRefresh={() => {
+        // Invalidate router to refetch loader data
+        router.invalidate()
+      }}
+    />
   )
 }
 

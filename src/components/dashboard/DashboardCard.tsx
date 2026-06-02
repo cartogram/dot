@@ -1,5 +1,5 @@
 import * as React from 'react'
-import type { DashboardCard as DashboardCardType, Metric } from '@/types/dashboard'
+import type { DashboardCard as DashboardCardType, Metric, TimeFrame } from '@/types/dashboard'
 import type { StravaActivity, ActivityTotals } from '@/types/strava'
 import { activityTypesToStravaTypes } from '@/config/activities'
 import {
@@ -40,28 +40,23 @@ export function DashboardCard({
     [config.activityTypes],
   )
 
+  // Filter activities that match the card's activity types
+  const cardActivities = React.useMemo(() => {
+    if (isLoading || !allActivities || stravaTypes.length === 0) return []
+    return allActivities.filter((activity) => stravaTypes.includes(activity.type))
+  }, [allActivities, stravaTypes, isLoading])
+
   // Filter activities by the card's time frame
-  const filteredActivities = React.useMemo(() => {
-
-
-
-
-    return filterActivitiesByTimeFrame(allActivities, config.timeFrame as TimeFrame)
-  }, [allActivities, config.timeFrame])
+  const filteredCardActivities = React.useMemo(() => {
+    return filterActivitiesByTimeFrame(cardActivities, config.timeFrame as TimeFrame)
+  }, [cardActivities, config.timeFrame])
 
   // Aggregate activities based on selected activity types
   const totals = React.useMemo<ActivityTotals | null>(() => {
-    if (isLoading || !filteredActivities) return null
-
-    if (stravaTypes.length === 0) return null
-
-    // Filter activities that match any of the types
-    const relevantActivities = filteredActivities.filter((activity) =>
-      stravaTypes.includes(activity.type),
-    )
+    if (isLoading || !filteredCardActivities) return null
 
     // Aggregate them together
-    return relevantActivities.reduce(
+    return filteredCardActivities.reduce(
       (totals, activity) => ({
         count: totals.count + 1,
         distance: totals.distance + activity.distance,
@@ -77,16 +72,16 @@ export function DashboardCard({
         elevation_gain: 0,
       },
     )
-  }, [stravaTypes, filteredActivities, isLoading])
+  }, [filteredCardActivities, isLoading])
 
   // Calculate progress based on the single metric and goal
   const progress = React.useMemo(() => {
     if (!config.goal || !totals) return undefined
 
     // Build goal object with just the single metric
-    const goal = buildGoalFromMetric(config.metric, config.goal)
+    const goal = buildGoalFromMetric(config.metric as Metric, config.goal)
 
-    return calculateActivityProgress(totals, goal, config.timeFrame)
+    return calculateActivityProgress(totals, goal, config.timeFrame as TimeFrame)
   }, [totals, config.goal, config.metric, config.timeFrame])
 
   // Loading state
@@ -112,7 +107,7 @@ export function DashboardCard({
         </CardHeader>
         <CardContent>
           <CardDescription>
-            No activities for {getTimeFrameDescription(config.timeFrame).toLowerCase()}
+            No activities for {getTimeFrameDescription(config.timeFrame as TimeFrame).toLowerCase()}
           </CardDescription>
         </CardContent>
         <CardFooter>
@@ -139,8 +134,12 @@ export function DashboardCard({
       types={stravaTypes}
       title={config.title}
       totals={totals}
-      timeFrame={config.timeFrame}
+      timeFrame={config.timeFrame as TimeFrame}
       progress={progress}
+      cardActivities={cardActivities}
+      filteredActivities={filteredCardActivities}
+      metric={config.metric as Metric}
+      goal={config.goal}
     />
   )
 }

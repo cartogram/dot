@@ -46,6 +46,11 @@ Required in `.env.local`:
 - **Tailwind CSS 4** + custom CSS variables (in `src/css/`)
 - **shadcn/ui** (base: `@base-ui/react`, not Radix) + custom components in `src/components/custom/`
 
+### Styling Conventions
+
+- **Page-level Layouts, Spacing & Grids**: Use Tailwind CSS 4 utility classes (e.g. `flex`, `grid`, `gap-*`, `mb-*`, `space-y-*`, `justify-*`).
+- **Component-level Styling**: Use Vanilla CSS co-located with the component (e.g., `button.css`, `card.css`, `charts.css`) following a BEM-like modifier convention. Link variables using CSS custom properties (like `var(--color-primary)`, `var(--card)`) for theme-aware properties. Avoid inline styles or Tailwind utilities inside custom component templates.
+
 ### Auth
 
 Authentication is entirely custom (no Supabase auth despite the `supabase/` directory existing for local DB tooling). It uses:

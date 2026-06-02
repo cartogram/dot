@@ -5,6 +5,9 @@ import type {
   StravaActivity,
 } from '@/types/strava'
 import { z } from 'zod'
+import { prisma } from '@/lib/db/client'
+import { useAppSession } from '@/lib/auth/session'
+import type { DataSource } from '@prisma/client'
 
 const RefreshTokenSchema = z.object({
   refresh_token: z.string(),
@@ -35,86 +38,178 @@ export const refreshStravaToken = createServerFn({ method: 'POST' })
     return response.json()
   })
 
-const AthleteSchema = z.object({
-  athleteId: z.number(),
-  accessToken: z.string(),
-})
+/**
+ * Centralized server-side helper to refresh token in-place in database if expired
+ */
+export async function refreshTokenIfNeeded(
+  dataSource: DataSource,
+): Promise<string> {
+  const expiresAt = dataSource.expiresAt ? new Date(dataSource.expiresAt) : null
+  const now = new Date()
+  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
+
+  // Token still valid
+  if (expiresAt && expiresAt > fiveMinutesFromNow) {
+    return dataSource.accessToken
+  }
+
+  if (!dataSource.refreshToken) {
+    throw new Error('No refresh token available')
+  }
+
+  // Refresh token
+  const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      client_id: import.meta.env.VITE_STRAVA_CLIENT_ID,
+      client_secret: process.env.STRAVA_CLIENT_SECRET,
+      refresh_token: dataSource.refreshToken,
+      grant_type: 'refresh_token',
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to refresh token')
+  }
+
+  const tokens = await response.json()
+
+  // Update tokens in database in-place
+  await prisma.dataSource.update({
+    where: { id: dataSource.id },
+    data: {
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiresAt: new Date(tokens.expires_at * 1000),
+    },
+  })
+
+  return tokens.access_token
+}
+
+/**
+ * Centralized helper to fetch activities directly from Strava API
+ */
+export async function fetchActivities(
+  accessToken: string,
+  after?: number,
+  perPage = 200,
+): Promise<StravaActivity[]> {
+  const params = new URLSearchParams({
+    per_page: perPage.toString(),
+    page: '1',
+  })
+
+  if (after) {
+    params.append('after', after.toString())
+  }
+
+  const response = await fetch(
+    `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+
+  if (response.status === 401) {
+    throw new Error('UNAUTHORIZED')
+  }
+
+  if (response.status === 429) {
+    throw new Error('RATE_LIMITED')
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch activities: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+/**
+ * Centralized helper to fetch athlete stats directly from Strava API
+ */
+export async function fetchStats(
+  athleteId: bigint,
+  accessToken: string,
+): Promise<StravaStats> {
+  const response = await fetch(
+    `https://www.strava.com/api/v3/athletes/${athleteId.toString()}/stats`,
+    { headers: { Authorization: `Bearer ${accessToken}` } },
+  )
+
+  if (response.status === 401) {
+    throw new Error('UNAUTHORIZED')
+  }
+
+  if (response.status === 429) {
+    throw new Error('RATE_LIMITED')
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch stats: ${response.statusText}`)
+  }
+
+  return response.json()
+}
 
 /**
  * Server function to fetch athlete stats from Strava
- * Handles authentication and rate limiting
+ * Resolves user from session, fetches user token from database, and refreshes it if needed
  */
-export const fetchAthleteStats = createServerFn({ method: 'POST' })
-  .inputValidator(AthleteSchema)
-  .handler(async ({ data }) => {
-    const response = await fetch(
-      `https://www.strava.com/api/v3/athletes/${data.athleteId}/stats`,
-      { headers: { Authorization: `Bearer ${data.accessToken}` } },
-    )
-
-    if (response.status === 401) {
+export const fetchAthleteStats = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const session = await useAppSession()
+    if (!session.data.userId) {
       throw new Error('UNAUTHORIZED')
     }
 
-    if (response.status === 429) {
-      throw new Error('RATE_LIMITED')
+    const dataSource = await prisma.dataSource.findFirst({
+      where: {
+        userId: session.data.userId,
+        provider: 'strava',
+        isActive: true,
+      },
+    })
+
+    if (!dataSource || !dataSource.athleteId) {
+      throw new Error('Strava not connected')
     }
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch stats: ${response.statusText}`)
-    }
-
-    return response.json()
+    const accessToken = await refreshTokenIfNeeded(dataSource)
+    return fetchStats(dataSource.athleteId, accessToken)
   })
 
-const ActivitiesSchema = z.object({
-  accessToken: z.string(),
+const ActivitiesInputSchema = z.object({
   perPage: z.number().optional(),
-  page: z.number().optional(),
-  after: z.number().optional(), // Unix timestamp - only return activities after this time
-  before: z.number().optional(), // Unix timestamp - only return activities before this time
+  after: z.number().optional(),
+  before: z.number().optional(),
 })
 
 /**
  * Server function to fetch athlete activities from Strava
- * Returns list of activities sorted by date
+ * Resolves user from session, fetches user token from database, and refreshes it if needed
  */
-export const fetchAthleteActivities = createServerFn({ method: 'POST' })
-  .inputValidator(ActivitiesSchema)
+export const fetchAthleteActivities = createServerFn({ method: 'GET' })
+  .inputValidator(ActivitiesInputSchema.optional())
   .handler(async ({ data }) => {
-    const perPage = data.perPage || 7
-    const page = data.page || 1
-
-    // Build query parameters
-    const params = new URLSearchParams({
-      per_page: perPage.toString(),
-      page: page.toString(),
-    })
-
-    if (data.after) {
-      params.append('after', data.after.toString())
-    }
-
-    if (data.before) {
-      params.append('before', data.before.toString())
-    }
-
-    const response = await fetch(
-      `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
-      { headers: { Authorization: `Bearer ${data.accessToken}` } },
-    )
-
-    if (response.status === 401) {
+    const session = await useAppSession()
+    if (!session.data.userId) {
       throw new Error('UNAUTHORIZED')
     }
 
-    if (response.status === 429) {
-      throw new Error('RATE_LIMITED')
+    const dataSource = await prisma.dataSource.findFirst({
+      where: {
+        userId: session.data.userId,
+        provider: 'strava',
+        isActive: true,
+      },
+    })
+
+    if (!dataSource) {
+      throw new Error('Strava not connected')
     }
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch activities: ${response.statusText}`)
-    }
-
-    return response.json() as Promise<StravaActivity[]>
+    const accessToken = await refreshTokenIfNeeded(dataSource)
+    return fetchActivities(accessToken, data?.after, data?.perPage)
   })
+

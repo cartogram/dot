@@ -7,11 +7,7 @@
 
 import * as React from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { getDashboardDataBySlug } from '@/lib/server/getDashboardData'
 import { DashboardView } from '@/components/dashboard/DashboardView'
@@ -29,16 +25,12 @@ export const Route = createFileRoute('/d/$slug')({
   component: PublicDashboardPage,
 })
 
-const queryClient = new QueryClient()
-
 function PublicDashboardPage() {
   const { slug } = Route.useParams()
   const { user } = useAuth()
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <PublicDashboardContent slug={slug} userId={user?.id} />
-    </QueryClientProvider>
+    <PublicDashboardContent slug={slug} userId={user?.id} />
   )
 }
 

@@ -9,6 +9,7 @@ import { DashboardHeader } from './DashboardHeader'
 import { DashboardActivityCard } from './DashboardActivityCard'
 import { ProfileBreakdown } from './ProfileBreakdown'
 import { CardConfigDialog } from './CardConfigDialog'
+import { Grid } from '@/components/custom/Grid/Grid'
 import {
   Card,
   CardHeader,
@@ -71,32 +72,30 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
           </CardContent>
         </Card>
       )}
-
+      {data.canEdit && (
+        <div className="flex justify-center">
+          <CardConfigDialog
+            dashboardId={data.dashboard.id}
+            onSave={onRefresh}
+          />
+        </div>
+      )}
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.canEdit && (
-            <div className="flex justify-center">
-              <CardConfigDialog
-                dashboardId={data.dashboard.id}
-                onSave={onRefresh}
-              />
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cards.map((card) => (
-              <DashboardActivityCard
-                key={card.id}
-                config={card}
-                combinedActivities={combinedActivities}
-                profileActivities={profileActivities}
-                canEdit={data.canEdit}
-                dashboardId={data.dashboard.id}
-                onSave={onRefresh}
-              />
-            ))}
-          </div>
-        </div>
+        <Grid>
+
+          {cards.map((card) => (
+            <DashboardActivityCard
+              key={card.id}
+              config={card}
+              combinedActivities={combinedActivities}
+              profileActivities={profileActivities}
+              canEdit={data.canEdit}
+              dashboardId={data.dashboard.id}
+              onSave={onRefresh}
+            />
+          ))}
+        </Grid>
       ) : (
         <Card state="active">
           <CardHeader>

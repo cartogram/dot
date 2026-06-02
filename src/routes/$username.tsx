@@ -7,7 +7,6 @@
 
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import { getProfileByUsername } from '@/lib/server/getUserStats'
 import { PublicProfileDashboard } from '@/components/stats/PublicProfileDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
@@ -24,15 +23,11 @@ export const Route = createFileRoute('/$username')({
   component: UsernameProfilePage,
 })
 
-const queryClient = new QueryClient()
-
 function UsernameProfilePage() {
   const { username } = Route.useParams()
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ProfileContent username={username} />
-    </QueryClientProvider>
+    <ProfileContent username={username} />
   )
 }
 

@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { exchangeCodeForTokens, saveStravaConnection, disconnectStrava } from '@/lib/server/oauth'
 import { updateProfile } from '@/lib/server/auth'
@@ -20,15 +20,11 @@ export const Route = createFileRoute('/settings')({
   component: SettingsPage,
 })
 
-const queryClient = new QueryClient()
-
 function SettingsPage() {
   const { user, stravaDataSource, refreshStravaConnection } = useAuth()
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <SettingsPageContent user={user} stravaDataSource={stravaDataSource} refreshStravaConnection={refreshStravaConnection} />
-    </QueryClientProvider>
+    <SettingsPageContent user={user} stravaDataSource={stravaDataSource} refreshStravaConnection={refreshStravaConnection} />
   )
 }
 

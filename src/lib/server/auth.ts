@@ -5,16 +5,10 @@
  * and secure password hashing with scrypt.
  */
 
-import crypto from 'crypto'
 import { createServerFn } from '@tanstack/react-start'
 import { redirect } from '@tanstack/react-router'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/client'
-import {
-  hashPassword,
-  comparePasswords,
-  generateSalt,
-} from '@/lib/auth/password'
 import { useAppSession } from '@/lib/auth/session'
 import { generateUniqueUsername } from '@/lib/auth/username'
 
@@ -56,6 +50,7 @@ export const signUp = createServerFn({ method: 'POST' })
   .inputValidator(SignUpSchema)
   .handler(async ({ data }) => {
     const session = await useAppSession()
+    const { hashPassword, generateSalt } = await import('@/lib/auth/password')
 
     // Check if email exists
     const existing = await prisma.user.findUnique({
@@ -100,6 +95,7 @@ export const signIn = createServerFn({ method: 'POST' })
   .inputValidator(SignInSchema)
   .handler(async ({ data }) => {
     const session = await useAppSession()
+    const { comparePasswords } = await import('@/lib/auth/password')
 
     const user = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },
@@ -184,6 +180,7 @@ const RequestResetSchema = z.object({
 export const requestPasswordReset = createServerFn({ method: 'POST' })
   .inputValidator(RequestResetSchema)
   .handler(async ({ data }) => {
+    const crypto = await import('crypto')
     const user = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },
     })
@@ -220,6 +217,7 @@ const ResetPasswordSchema = z.object({
 export const resetPassword = createServerFn({ method: 'POST' })
   .inputValidator(ResetPasswordSchema)
   .handler(async ({ data }) => {
+    const { hashPassword, generateSalt } = await import('@/lib/auth/password')
     const user = await prisma.user.findFirst({
       where: { resetPasswordToken: data.token },
     })
@@ -255,6 +253,7 @@ const UpdatePasswordSchema = z.object({
 export const updatePassword = createServerFn({ method: 'POST' })
   .inputValidator(UpdatePasswordSchema)
   .handler(async ({ data }) => {
+    const { hashPassword, generateSalt } = await import('@/lib/auth/password')
     const session = await useAppSession()
 
     if (!session.data.userId) {

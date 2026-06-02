@@ -6,7 +6,6 @@
 
 import * as React from 'react'
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { CreateDashboardForm } from '@/components/dashboard/CreateDashboardForm'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
@@ -23,14 +22,10 @@ export const Route = createFileRoute('/dashboards/new')({
   },
 })
 
-const queryClient = new QueryClient()
-
 function NewDashboardPage() {
   const { user } = Route.useRouteContext()
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <CreateDashboardForm userId={user.id} />
-    </QueryClientProvider>
+    <CreateDashboardForm userId={user.id} />
   )
 }

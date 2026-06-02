@@ -8,8 +8,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { prisma } from '@/lib/db/client'
 import type { StravaStats, StravaActivity } from '@/types/strava'
-import type { DataSource } from '@prisma/client'
-import type { DashboardCard } from '@/types/dashboard'
+import { refreshTokenIfNeeded, fetchStats, fetchActivities } from '@/lib/server/strava'
 
 const UserIdSchema = z.object({
   userId: z.string(),
@@ -40,108 +39,6 @@ interface PublicProfileData {
   stats: StravaStats | null
   activities: StravaActivity[]
   error?: string
-}
-
-/**
- * Refresh Strava token if expired
- */
-async function refreshTokenIfNeeded(
-  dataSource: DataSource,
-): Promise<{ accessToken: string; updated: boolean; newTokens?: any }> {
-  const expiresAt = dataSource.expiresAt ? new Date(dataSource.expiresAt) : null
-  const now = new Date()
-  const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
-
-  // Token still valid
-  if (expiresAt && expiresAt > fiveMinutesFromNow) {
-    return { accessToken: dataSource.accessToken, updated: false }
-  }
-
-  // Refresh token
-  const response = await fetch('https://www.strava.com/api/v3/oauth/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      client_id: import.meta.env.VITE_STRAVA_CLIENT_ID,
-      client_secret: process.env.STRAVA_CLIENT_SECRET,
-      refresh_token: dataSource.refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error('Failed to refresh token')
-  }
-
-  const tokens = await response.json()
-  return {
-    accessToken: tokens.access_token,
-    updated: true,
-    newTokens: tokens,
-  }
-}
-
-/**
- * Fetch athlete stats from Strava API
- */
-async function fetchStats(
-  athleteId: bigint,
-  accessToken: string,
-): Promise<StravaStats> {
-  const response = await fetch(
-    `https://www.strava.com/api/v3/athletes/${athleteId.toString()}/stats`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  )
-
-  if (response.status === 401) {
-    throw new Error('UNAUTHORIZED')
-  }
-
-  if (response.status === 429) {
-    throw new Error('RATE_LIMITED')
-  }
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch stats: ${response.statusText}`)
-  }
-
-  return response.json()
-}
-
-/**
- * Fetch athlete activities from Strava API
- */
-async function fetchActivities(
-  accessToken: string,
-  after?: number,
-): Promise<StravaActivity[]> {
-  const params = new URLSearchParams({
-    per_page: '200',
-    page: '1',
-  })
-
-  if (after) {
-    params.append('after', after.toString())
-  }
-
-  const response = await fetch(
-    `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  )
-
-  if (response.status === 401) {
-    throw new Error('UNAUTHORIZED')
-  }
-
-  if (response.status === 429) {
-    throw new Error('RATE_LIMITED')
-  }
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch activities: ${response.statusText}`)
-  }
-
-  return response.json()
 }
 
 /**
@@ -214,21 +111,8 @@ export const getPublicProfileData = createServerFn({ method: 'GET' })
     const athleteData = dataSource.athleteData as any
 
     try {
-      // 4. Refresh token if needed
-      const { accessToken, updated, newTokens } =
-        await refreshTokenIfNeeded(dataSource)
-
-      // Update tokens in database if refreshed
-      if (updated && newTokens) {
-        await prisma.dataSource.update({
-          where: { id: dataSource.id },
-          data: {
-            accessToken: newTokens.access_token,
-            refreshToken: newTokens.refresh_token,
-            expiresAt: new Date(newTokens.expires_at * 1000),
-          },
-        })
-      }
+      // 4. Refresh token if needed (centralized helper updates DB in-place)
+      const accessToken = await refreshTokenIfNeeded(dataSource)
 
       // 5. Fetch Strava stats
       const stats = await fetchStats(dataSource.athleteId!, accessToken)
@@ -366,20 +250,8 @@ export const getProfileByUsername = createServerFn({ method: 'GET' })
     const athleteData = dataSource.athleteData as any
 
     try {
-      // 5. Refresh token if needed
-      const { accessToken, updated, newTokens } =
-        await refreshTokenIfNeeded(dataSource)
-
-      if (updated && newTokens) {
-        await prisma.dataSource.update({
-          where: { id: dataSource.id },
-          data: {
-            accessToken: newTokens.access_token,
-            refreshToken: newTokens.refresh_token,
-            expiresAt: new Date(newTokens.expires_at * 1000),
-          },
-        })
-      }
+      // 5. Refresh token if needed (centralized helper updates DB in-place)
+      const accessToken = await refreshTokenIfNeeded(dataSource)
 
       // 6. Fetch Strava stats
       const stats = await fetchStats(dataSource.athleteId!, accessToken)

@@ -8,7 +8,6 @@
 import * as React from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { getCurrentUserWithStrava, signOut } from '@/lib/server/auth'
-import { refreshStravaToken } from '@/lib/server/strava'
 import { saveStravaConnection } from '@/lib/server/oauth'
 import type { AuthUser } from '@/lib/server/auth'
 
@@ -37,7 +36,6 @@ interface AuthContextValue {
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   refreshStravaConnection: () => Promise<void>
-  getStravaAccessToken: () => Promise<string | null>
 }
 
 const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
@@ -93,50 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     window.location.href = '/login'
   }, [])
 
-  const getStravaAccessToken = React.useCallback(async (): Promise<string | null> => {
-    if (!stravaDataSource) {
-      return null
-    }
-
-    const now = new Date()
-    const expiresAt = stravaDataSource.expiresAt ? new Date(stravaDataSource.expiresAt) : null
-    const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
-
-    // Token still valid
-    if (expiresAt && expiresAt > fiveMinutesFromNow) {
-      return stravaDataSource.accessToken
-    }
-
-    // Need to refresh token
-    if (!stravaDataSource.refreshToken) {
-      console.error('No refresh token available')
-      return null
-    }
-
-    try {
-      const newTokens = await refreshStravaToken({
-        data: { refresh_token: stravaDataSource.refreshToken },
-      })
-
-      // Update local state with new tokens
-      setStravaDataSource((prev) =>
-        prev
-          ? {
-              ...prev,
-              accessToken: newTokens.access_token,
-              refreshToken: newTokens.refresh_token,
-              expiresAt: new Date(newTokens.expires_at * 1000),
-            }
-          : null
-      )
-
-      return newTokens.access_token
-    } catch (error) {
-      console.error('Failed to refresh Strava token:', error)
-      return null
-    }
-  }, [stravaDataSource])
-
   return (
     <AuthContext.Provider
       value={{
@@ -146,7 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         logout,
         refreshUser,
         refreshStravaConnection,
-        getStravaAccessToken,
       }}
     >
       {children}
