@@ -25,5 +25,8 @@ if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
 export function useAppSession() {
   return useSession<SessionUser>({
     password: SESSION_SECRET || 'development-secret-at-least-32-chars!',
+    cookie: {
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    },
   })
 }
