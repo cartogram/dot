@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { DashboardSettingsSheet } from './DashboardSettingsSheet'
 import type { DashboardData } from '@/types/dashboards'
-import { createInvite, deleteDashboard, leaveDashboard } from '@/lib/server/dashboards'
+import { deleteDashboard, leaveDashboard } from '@/lib/server/dashboards'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Button } from '@/components/custom/Button/Button'
@@ -44,8 +44,6 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHeaderProps) {
   const { dashboard, profiles, currentUserRole, canEdit } = data
-  const [showInviteDialog, setShowInviteDialog] = React.useState(false)
-  const [inviteCode, setInviteCode] = React.useState<string | null>(null)
   const [showLeaveConfirm, setShowLeaveConfirm] = React.useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false)
   const [showSettingsSheet, setShowSettingsSheet] = React.useState(false)
@@ -71,27 +69,6 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
       navigate({ to: '/dashboards' })
     },
   })
-
-  const inviteMutation = useMutation({
-    mutationFn: () =>
-      createInvite({
-        data: { dashboardId: dashboard.id, userId, role: 'viewer' },
-      }),
-    onSuccess: (result) => {
-      setInviteCode(result.code)
-    },
-  })
-
-  const copyInviteCode = () => {
-    if (inviteCode) {
-      navigator.clipboard.writeText(inviteCode)
-    }
-  }
-
-  const handleCreateInvite = () => {
-    setShowInviteDialog(true)
-    inviteMutation.mutate()
-  }
 
   const roleLabel =
     currentUserRole === 'owner' ? 'Owner' : currentUserRole === 'editor' ? 'Editor' : 'Viewer'
@@ -161,54 +138,12 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
             Settings
           </Button>
         )}
-        {canEdit && (
-          <Button variant="secondary" onClick={handleCreateInvite}>
-            Invite
-          </Button>
-        )}
         {!isOwner && currentUserRole && (
           <Button variant="secondary" destructive onClick={() => setShowLeaveConfirm(true)}>
             Leave
           </Button>
         )}
       </CardFooter>
-
-      {/* Invite Dialog */}
-      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite to Dashboard</DialogTitle>
-            <DialogDescription>
-              Share this invite code with others to let them join your dashboard.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            {inviteMutation.isPending ? (
-              <p>Generating invite code...</p>
-            ) : inviteCode ? (
-              <div className="flex items-center gap-2">
-                <code className="flex-1 rounded bg-muted px-3 py-2 font-mono text-lg tracking-wider text-center">
-                  {inviteCode}
-                </code>
-                <Button variant="secondary" onClick={copyInviteCode}>
-                  Copy
-                </Button>
-              </div>
-            ) : null}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setShowInviteDialog(false)
-                setInviteCode(null)
-              }}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Leave Confirmation Dialog */}
       <Dialog open={showLeaveConfirm} onOpenChange={setShowLeaveConfirm}>

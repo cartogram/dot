@@ -68,6 +68,9 @@ const config = defineConfig({
     // instead of a cryptic "Class extends undefined" at runtime.
     exclude: ['pg', '@prisma/adapter-pg', '@prisma/client'],
   },
+  ssr: {
+    noExternal: ['@tabler/icons-react'],
+  },
 })
 
 export default config

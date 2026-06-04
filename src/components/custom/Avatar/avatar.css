@@ -1,9 +1,6 @@
 .Avatar {
-  width: 3em;
-  height: 3em;
   border-radius: 50%;
   overflow: hidden;
-  margin: 0 auto;
   position: relative;
   display: flex;
   align-items: center;
@@ -29,27 +26,6 @@
   margin-left: -0.6em;
 }
 
-.AvatarGroup--sm .Avatar,
-.AvatarGroup--sm .AvatarGroup__More {
-  width: 1.75em;
-  height: 1.75em;
-  font-size: 0.75em;
-}
-
-.AvatarGroup--md .Avatar,
-.AvatarGroup--md .AvatarGroup__More {
-  width: 2.25em;
-  height: 2.25em;
-  font-size: 0.875em;
-}
-
-.AvatarGroup--lg .Avatar,
-.AvatarGroup--lg .AvatarGroup__More {
-  width: 3em;
-  height: 3em;
-  font-size: 1em;
-}
-
 .AvatarGroup__More {
   display: flex;
   align-items: center;
@@ -57,4 +33,33 @@
   background-color: var(--muted, #e5e7eb);
   color: var(--muted-foreground, #4b5563);
   font-weight: 600;
+}
+
+/* Shared sizes for standalone Avatar and AvatarGroup items */
+
+/* Small (sm) */
+.Avatar--sm,
+.AvatarGroup--sm .Avatar,
+.AvatarGroup--sm .AvatarGroup__More {
+  width: 1.75em;
+  height: 1.75em;
+  font-size: 0.75em;
+}
+
+/* Medium (md) */
+.Avatar--md,
+.AvatarGroup--md .Avatar,
+.AvatarGroup--md .AvatarGroup__More {
+  width: 2.5em;
+  height: 2.5em;
+  font-size: 0.875em;
+}
+
+/* Large (lg) */
+.Avatar--lg,
+.AvatarGroup--lg .Avatar,
+.AvatarGroup--lg .AvatarGroup__More {
+  width: 3em;
+  height: 3em;
+  font-size: 1em;
 }

@@ -6,6 +6,7 @@
 
 import { Link } from '@tanstack/react-router'
 import type { DashboardWithProfiles } from '@/types/dashboards'
+import type { AvatarGroupItem } from '@/components/custom/Avatar/AvatarGroup'
 import {
   Card,
   CardContent,
@@ -14,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/custom/Card'
-import { AvatarGroup, type AvatarGroupItem } from '@/components/custom/Avatar/AvatarGroup'
+import { AvatarGroup } from '@/components/custom/Avatar/AvatarGroup'
 import { Badge } from '@/components/custom/Badge/Badge'
 
 interface DashboardListCardProps {
@@ -61,7 +62,7 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
 }
 
 function ProfileAvatars({ profiles }: { profiles: DashboardWithProfiles['profiles'] }) {
-  const items: AvatarGroupItem[] = profiles.map((profile) => {
+  const items: Array<AvatarGroupItem> = profiles.map((profile) => {
     const initials = profile.athlete
       ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
       : profile.profile.fullName?.[0] || profile.profile.email[0].toUpperCase()

@@ -4,11 +4,17 @@
  * Main dashboard view, showing combined activity stats from all attached profiles.
  */
 
+import * as React from 'react'
+import { useMutation } from '@tanstack/react-query'
 import { DashboardHeader } from './DashboardHeader'
 import { DashboardActivityCard } from './DashboardActivityCard'
 import { ProfileBreakdown } from './ProfileBreakdown'
 import { CardConfigDialog } from './CardConfigDialog'
 import type { DashboardData } from '@/types/dashboards'
+import { createInvite } from '@/lib/server/dashboards'
+import { Input } from '@/components/custom/Input/Input'
+import { Button } from '@/components/custom/Button/Button'
+import { Label } from '@/components/custom/Label/Label'
 import { Grid } from '@/components/custom/Grid/Grid'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
@@ -111,6 +117,82 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
 
       {/* Profile Breakdown */}
       <ProfileBreakdown profileActivities={profileActivities} />
+
+      {/* Invite Athletes Card */}
+      {data.canEdit && <InviteAthletesCard dashboardId={data.dashboard.id} userId={userId} />}
     </div>
+  )
+}
+
+interface InviteAthletesCardProps {
+  dashboardId: string
+  userId: string
+}
+
+function InviteAthletesCard({ dashboardId, userId }: InviteAthletesCardProps) {
+  const [inviteCode, setInviteCode] = React.useState<string | null>(null)
+  const [copied, setCopied] = React.useState(false)
+  const hasRequested = React.useRef(false)
+
+  const inviteMutation = useMutation({
+    mutationFn: () =>
+      createInvite({
+        data: { dashboardId, userId, role: 'viewer' },
+      }),
+    onSuccess: (result) => {
+      setInviteCode(result.code)
+    },
+  })
+
+  React.useEffect(() => {
+    if (!hasRequested.current) {
+      hasRequested.current = true
+      inviteMutation.mutate()
+    }
+  }, [dashboardId, userId])
+
+  const copyInviteCode = () => {
+    if (inviteCode) {
+      navigator.clipboard.writeText(inviteCode)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Invite athletes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CardDescription>
+          Share this invite code with other athletes to let them join this dashboard.
+        </CardDescription>
+        <div className="space-y-4">
+          <div className="space-y-2 flex flex-col gap-2">
+            <Label htmlFor="invite-code">Invite Code</Label>
+            <div className="flex gap-2">
+              <Input
+                id="invite-code"
+                readOnly
+                placeholder={inviteMutation.isPending ? 'Generating...' : 'ABCD1234'}
+                value={inviteCode || ''}
+                maxLength={8}
+                style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                className="font-mono text-center tracking-wider"
+              />
+              <Button
+                variant="secondary"
+                onClick={copyInviteCode}
+                disabled={!inviteCode}
+                className="shrink-0"
+              >
+                {copied ? 'Copied' : 'Copy'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

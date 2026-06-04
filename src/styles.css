@@ -16,6 +16,9 @@
     --color-primary: #c60e83;
     --site-width: 1400px;
     --background-texture: url('/noise.png');
+    --unit: 4px;
+    --font-size-small: 0.85em;
+    --font-size-medium: 1em;
   }
 
   .dark {

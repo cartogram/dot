@@ -1,9 +1,3 @@
-/**
- * DashboardSettingsSheet Component
- *
- * Sheet-based settings panel for dashboard configuration.
- */
-
 import * as React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
@@ -13,6 +7,8 @@ import { SidePanel } from '@/components/custom/SidePanel'
 import { Button } from '@/components/custom/Button/Button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/custom/Input/Input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 
 interface DashboardSettingsSheetProps {
   dashboard: DashboardData['dashboard']
@@ -97,7 +93,7 @@ export function DashboardSettingsSheet({
       open={open}
       onOpenChange={onOpenChange}
       title="Dashboard Settings"
-      description="Configure visibility and default settings for this dashboard."
+      className="data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:md:max-w-1/2"
       footer={
         <div className="flex gap-2 justify-end w-full">
           <Button
@@ -117,86 +113,98 @@ export function DashboardSettingsSheet({
         </div>
       }
     >
-      <div className="space-y-6">
-        {/* Dashboard Name */}
-        <div className="space-y-2">
-          <label htmlFor="dashboard-name" className="text-sm font-medium">
-            Dashboard Name
-          </label>
-          <Input
-            id="dashboard-name"
-            value={editedName}
-            onChange={(e) => setEditedName(e.target.value)}
-            disabled={updateSettingsMutation.isPending}
-          />
-        </div>
+      <FieldGroup>
+        {/* General Settings */}
+        <Card state="active">
+          <Field>
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FieldLabel htmlFor="dashboard-name">Dashboard Name</FieldLabel>
+              <Input
+                id="dashboard-name"
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
+                disabled={updateSettingsMutation.isPending}
+              />
 
-        {/* Visibility Settings */}
-        <div className="space-y-4">
-          <Checkbox
-            checked={editedIsPublic}
-            onCheckedChange={() => setEditedIsPublic(!editedIsPublic)}
-            disabled={updateSettingsMutation.isPending}
-            label="Make Public"
-          />
-          <p className="text-sm text-muted-foreground ml-6">
-            Public dashboards can be viewed by anyone with the link.
-          </p>
+              <div className="space-y-4 pt-2">
+                <Checkbox
+                  checked={editedIsPublic}
+                  onCheckedChange={() => setEditedIsPublic(!editedIsPublic)}
+                  disabled={updateSettingsMutation.isPending}
+                  label="Make Public"
+                />
+                <p className="text-sm text-muted-foreground ml-6">
+                  Public dashboards can be viewed by anyone with the link.
+                </p>
 
-          <Checkbox
-            checked={editedIsDefault}
-            onCheckedChange={() => setEditedIsDefault(!editedIsDefault)}
-            disabled={updateSettingsMutation.isPending}
-            label="Set as Default"
-          />
-          <p className="text-sm text-muted-foreground ml-6">
-            Your default dashboard is shown on your public profile.
-          </p>
-        </div>
+                <Checkbox
+                  checked={editedIsDefault}
+                  onCheckedChange={() => setEditedIsDefault(!editedIsDefault)}
+                  disabled={updateSettingsMutation.isPending}
+                  label="Set as Default"
+                />
+                <p className="text-sm text-muted-foreground ml-6">
+                  Your default dashboard is shown on your public profile.
+                </p>
+              </div>
+            </CardContent>
+          </Field>
+        </Card>
 
         {/* Dashboard Summary */}
         {stats && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Dashboard Summary</h4>
-            <div className="grid grid-cols-2 gap-3 text-center bg-muted/50 rounded-lg p-3">
-              <div>
-                <div className="text-xl font-bold">{stats.profileCount}</div>
-                <div className="text-xs text-muted-foreground">Profiles</div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Dashboard Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3 text-center bg-muted/50 rounded-lg p-3">
+                <div>
+                  <div className="text-xl font-bold">{stats.profileCount}</div>
+                  <div className="text-xs text-muted-foreground">Profiles</div>
+                </div>
+                <div>
+                  <div className="text-xl font-bold">{stats.profilesWithData}</div>
+                  <div className="text-xs text-muted-foreground">With Strava</div>
+                </div>
+                <div>
+                  <div className="text-xl font-bold">{stats.totalActivities}</div>
+                  <div className="text-xs text-muted-foreground">Activities</div>
+                </div>
+                <div>
+                  <div className="text-xl font-bold">{stats.cardCount}</div>
+                  <div className="text-xs text-muted-foreground">Cards</div>
+                </div>
               </div>
-              <div>
-                <div className="text-xl font-bold">{stats.profilesWithData}</div>
-                <div className="text-xs text-muted-foreground">With Strava</div>
-              </div>
-              <div>
-                <div className="text-xl font-bold">{stats.totalActivities}</div>
-                <div className="text-xs text-muted-foreground">Activities</div>
-              </div>
-              <div>
-                <div className="text-xl font-bold">{stats.cardCount}</div>
-                <div className="text-xs text-muted-foreground">Cards</div>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Danger Zone */}
-        <div className="space-y-2 pt-4 border-t">
-          <h4 className="text-sm font-medium text-destructive">Danger Zone</h4>
-          <p className="text-sm text-muted-foreground">
-            Permanently delete this dashboard and all its cards.
-          </p>
-          <Button
-            variant="secondary"
-            destructive
-            onClick={() => {
-              onOpenChange(false)
-              onDeleteClick()
-            }}
-          >
-            Delete Dashboard
-          </Button>
-        </div>
-      </div>
+        <Card state="error">
+          <CardHeader>
+            <CardTitle>Danger Zone</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription className="mb-4">
+              Permanently delete this dashboard and all its cards.
+            </CardDescription>
+            <Button
+              variant="secondary"
+              destructive
+              onClick={() => {
+                onOpenChange(false)
+                onDeleteClick()
+              }}
+            >
+              Delete Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </FieldGroup>
     </SidePanel>
   )
 }

@@ -1,0 +1,112 @@
+.UserMenu__Trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 1em 1em 1em 1em;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: var(--font-sans);
+  pointer-events: auto;
+  min-width: 240px;
+  justify-content: space-between;
+}
+
+.UserMenu__Trigger:hover,
+.UserMenu__Trigger:focus {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+.UserMenu__Username {
+  display: flex;
+  flex: 1;
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+/* Custom Dropdown Styling */
+.UserMenu__Dropdown {
+  min-width: 240px;
+  animation-duration: 150ms;
+  background: var(--background);
+  border-radius: 0.5em;
+  border: 1px solid var(--color-primary);
+  padding-top: 0.25em;
+}
+
+/* Dropdown Item Styling */
+.UserMenu__Item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+  color: var(--color-primary);
+  font-weight: 400;
+  padding: 0.25em 1em;
+  font-size: 0.9rem;
+}
+
+.UserMenu__Item:hover,
+.UserMenu__Item:focus {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  background: none;
+}
+
+/* Theme Switcher Row */
+.ThemeSelectorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5em 1em;
+}
+
+.ThemeSelectorRow__Label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.ThemeSelector {
+  display: flex;
+  align-items: center;
+  background: var(--secondary);
+  border-radius: 9999px;
+  padding: 2px;
+  gap: 1px;
+}
+
+.ThemeSelector__Button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ThemeSelector__Button:hover {
+  color: var(--foreground);
+}
+
+.ThemeSelector__Button--active {
+  background: var(--background);
+  color: var(--color-primary);
+}
+
+/* Separator styling */
+.UserMenu__Separator {
+  height: 1px;
+  background: var(--border);
+  margin: 0.5em 0.5em;
+  opacity: 0.5;
+}
