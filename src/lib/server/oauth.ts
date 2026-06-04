@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import type { StravaTokenResponse } from '@/types/strava'
 import { z } from 'zod'
+import type { StravaTokenResponse } from '@/types/strava'
 import { prisma } from '@/lib/db/client'
 import { useAppSession } from '@/lib/auth/session'
 
@@ -102,9 +102,7 @@ export const saveStravaConnection = createServerFn({ method: 'POST' })
 
     // Update user profile with Strava name if available
     if (tokens.athlete.firstname || tokens.athlete.lastname) {
-      const fullName = [tokens.athlete.firstname, tokens.athlete.lastname]
-        .filter(Boolean)
-        .join(' ')
+      const fullName = [tokens.athlete.firstname, tokens.athlete.lastname].filter(Boolean).join(' ')
 
       if (fullName) {
         await prisma.user.update({

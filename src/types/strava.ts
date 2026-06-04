@@ -75,7 +75,7 @@ export interface ActivityGoal {
 export interface CombinedActivityGoal {
   id: string // Unique identifier for this combined goal
   name: string // Display name (e.g., "Cardio", "All Running")
-  activityIds: string[] // Array of activity IDs to combine (from ACTIVITY_CONFIGS)
+  activityIds: Array<string> // Array of activity IDs to combine (from ACTIVITY_CONFIGS)
   goal: ActivityGoal // The goal metrics for the combined activities
   visible: boolean // Whether to show this on the dashboard
 }

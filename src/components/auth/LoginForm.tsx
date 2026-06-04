@@ -5,13 +5,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export function LoginForm() {
   const navigate = useNavigate()
@@ -88,12 +82,7 @@ export function LoginForm() {
               </div>
             )}
 
-            <Button
-              variant="primary"
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button variant="primary" type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Logging in...' : 'Log in'}
             </Button>
           </FieldGroup>

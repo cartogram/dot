@@ -6,15 +6,15 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
+import type { DashboardCard } from '@/types/dashboard'
 import { prisma } from '@/lib/db/client'
 import {
-  CardTypeSchema,
   ActivityTypeSchema,
+  CardSizeSchema,
+  CardTypeSchema,
   MetricSchema,
   TimeFrameSchema,
-  CardSizeSchema,
 } from '@/types/dashboard'
-import type { DashboardCard } from '@/types/dashboard'
 
 // =====================================================
 // SCHEMAS
@@ -104,7 +104,7 @@ async function getOrCreateDefaultDashboard(userId: string): Promise<string> {
 
 export const getDashboardCards = createServerFn({ method: 'GET' })
   .inputValidator(DashboardIdSchema)
-  .handler(async ({ data }): Promise<DashboardCard[]> => {
+  .handler(async ({ data }): Promise<Array<DashboardCard>> => {
     const cards = await prisma.dashboardCard.findMany({
       where: { dashboardId: data.dashboardId },
       orderBy: { position: 'asc' },
@@ -118,7 +118,7 @@ export const getDashboardCards = createServerFn({ method: 'GET' })
 
 export const getVisibleCards = createServerFn({ method: 'GET' })
   .inputValidator(DashboardIdSchema)
-  .handler(async ({ data }): Promise<DashboardCard[]> => {
+  .handler(async ({ data }): Promise<Array<DashboardCard>> => {
     const cards = await prisma.dashboardCard.findMany({
       where: {
         dashboardId: data.dashboardId,
@@ -203,19 +203,17 @@ export const getDefaultDashboardId = createServerFn({ method: 'GET' })
 
 export const getVisibleCardsForUser = createServerFn({ method: 'GET' })
   .inputValidator(UserIdSchema)
-  .handler(
-    async ({ data }): Promise<{ dashboardId: string; cards: DashboardCard[] }> => {
-      const dashboardId = await getOrCreateDefaultDashboard(data.userId)
-      const cards = await prisma.dashboardCard.findMany({
-        where: {
-          dashboardId,
-          visible: true,
-        },
-        orderBy: { position: 'asc' },
-      })
-      return { dashboardId, cards }
-    },
-  )
+  .handler(async ({ data }): Promise<{ dashboardId: string; cards: Array<DashboardCard> }> => {
+    const dashboardId = await getOrCreateDefaultDashboard(data.userId)
+    const cards = await prisma.dashboardCard.findMany({
+      where: {
+        dashboardId,
+        visible: true,
+      },
+      orderBy: { position: 'asc' },
+    })
+    return { dashboardId, cards }
+  })
 
 // =====================================================
 // CLEAR ALL CARDS (for dashboard reset)

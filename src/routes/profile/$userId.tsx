@@ -12,13 +12,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { getPublicProfileData } from '@/lib/server/getUserStats'
 import { PublicProfileDashboard } from '@/components/stats/PublicProfileDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
 
 export const Route = createFileRoute('/profile/$userId')({
@@ -35,9 +29,7 @@ function ProfilePage() {
     if (user === null) {
       // Wait a moment for auth to initialize
       const timeout = setTimeout(() => {
-        if (!user) {
-          navigate({ to: '/login' })
-        }
+        navigate({ to: '/login' })
       }, 1000)
       return () => clearTimeout(timeout)
     }
@@ -49,9 +41,7 @@ function ProfilePage() {
     return null
   }
 
-  return (
-    <ProfileContent userId={userId} />
-  )
+  return <ProfileContent userId={userId} />
 }
 
 function ProfileContent({ userId }: { userId: string }) {
@@ -77,9 +67,7 @@ function ProfileContent({ userId }: { userId: string }) {
           <CardTitle>Authentication Required</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            Please log in to view this profile.
-          </CardDescription>
+          <CardDescription>Please log in to view this profile.</CardDescription>
           <Button to="/login" variant="primary" className="mt-4">
             Log In
           </Button>

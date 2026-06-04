@@ -1,35 +1,33 @@
 import * as React from 'react'
 import type { ActivityTotals, StravaActivity } from '@/types/strava'
-import { type TimeFrame, type Metric } from '@/types/dashboard'
+import type { Metric, TimeFrame } from '@/types/dashboard'
 import type { ProgressMetric } from '@/lib/goals/calculations'
 import {
-  formatDailyPace,
-  formatRemainder,
+  formatBehindPlan,
   formatCurrent,
+  formatDailyPace,
   formatGoal,
   formatProgressSummary,
-  formatBehindPlan,
+  formatRemainder,
 } from '@/lib/goals/calculations'
-import {
-  getTimeFrameDescription,
-} from '@/lib/dashboard/timeframes'
+import { getTimeFrameDescription } from '@/lib/dashboard/timeframes'
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardContent,
-  CardFooter,
-  CardDescription,
 } from '@/components/custom/Card'
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Progress } from '@/components/custom/Progress/Progress'
 
 // Import data processing utilities
 import {
-  getBurnUpData,
-  getWeeklyVolumeData,
   getActivityContribution,
+  getBurnUpData,
   getHeatmapData,
+  getWeeklyVolumeData,
 } from '@/lib/dashboard/chartData'
 
 // Import charts and charts styles
@@ -40,7 +38,7 @@ import { ConsistencyHeatmap } from '@/components/charts/ConsistencyHeatmap'
 import '@/components/charts/charts.css'
 
 interface ActivityStatsCardProps {
-  types: string[]
+  types: Array<string>
   totals: ActivityTotals
   title: string
   timeFrame: TimeFrame
@@ -53,8 +51,8 @@ interface ActivityStatsCardProps {
     time?: ProgressMetric
   }
   // Data props for charts
-  cardActivities?: StravaActivity[]
-  filteredActivities?: StravaActivity[]
+  cardActivities?: Array<StravaActivity>
+  filteredActivities?: Array<StravaActivity>
   metric?: Metric
   goal?: number | null
 }
@@ -109,33 +107,31 @@ export function ActivityStatsCard({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <CardDescription>
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-2">
-              {types.map((type) => (
-                <Badge key={type} variant="secondary">
-                  {type}
-                </Badge>
-              ))}
-            </div>
-            <Badge>{totals.count} Activities</Badge>
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center gap-2">
+            {types.map((type) => (
+              <Badge key={type} variant="secondary">
+                {type}
+              </Badge>
+            ))}
           </div>
-        </CardDescription>
+          <Badge>{totals.count} Activities</Badge>
+        </div>
 
         {/* Tab Switcher - styled using native variables and CSS, no Tailwind */}
         {cardActivities.length > 0 && (
-          <div className="Chart-tabs">
+          <div className="Chart__Tabs">
             <button
               onClick={() => setActiveTab('summary')}
-              className={`Chart-tab ${activeTab === 'summary' ? 'Chart-tab--active' : ''}`}
+              className={`Chart__Tab ${activeTab === 'summary' ? 'Chart__Tab--active' : ''}`}
             >
               Summary
             </button>
-            
+
             {goal && (
               <button
                 onClick={() => setActiveTab('trend')}
-                className={`Chart-tab ${activeTab === 'trend' ? 'Chart-tab--active' : ''}`}
+                className={`Chart__Tab ${activeTab === 'trend' ? 'Chart__Tab--active' : ''}`}
               >
                 Trend
               </button>
@@ -143,14 +139,14 @@ export function ActivityStatsCard({
 
             <button
               onClick={() => setActiveTab('weekly')}
-              className={`Chart-tab ${activeTab === 'weekly' ? 'Chart-tab--active' : ''}`}
+              className={`Chart__Tab ${activeTab === 'weekly' ? 'Chart__Tab--active' : ''}`}
             >
               Weekly
             </button>
 
             <button
               onClick={() => setActiveTab('heatmap')}
-              className={`Chart-tab ${activeTab === 'heatmap' ? 'Chart-tab--active' : ''}`}
+              className={`Chart__Tab ${activeTab === 'heatmap' ? 'Chart__Tab--active' : ''}`}
             >
               Heatmap
             </button>
@@ -158,7 +154,7 @@ export function ActivityStatsCard({
             {types.length > 1 && (
               <button
                 onClick={() => setActiveTab('breakdown')}
-                className={`Chart-tab ${activeTab === 'breakdown' ? 'Chart-tab--active' : ''}`}
+                className={`Chart__Tab ${activeTab === 'breakdown' ? 'Chart__Tab--active' : ''}`}
               >
                 Breakdown
               </button>
@@ -183,13 +179,14 @@ export function ActivityStatsCard({
               </div>
               <div>
                 <div className="text-muted-foreground text-xs mb-1">Remainder</div>
-                <div className="heading--4">{formatRemainder(primaryProgress)} {primaryProgress.unit !== 'hours' && primaryProgress.unit}</div>
+                <div className="heading--4">
+                  {formatRemainder(primaryProgress)}{' '}
+                  {primaryProgress.unit !== 'hours' && primaryProgress.unit}
+                </div>
               </div>
               <div>
                 <div className="text-muted-foreground text-xs mb-1">Under/Over</div>
-                <div className="heading--4">
-                  {formatBehindPlan(primaryProgress)}
-                </div>
+                <div className="heading--4">{formatBehindPlan(primaryProgress)}</div>
               </div>
               <div>
                 <div className="text-muted-foreground text-xs mb-1">Daily Pace</div>
@@ -207,9 +204,7 @@ export function ActivityStatsCard({
           <WeeklyVolumeChart data={weeklyData} metric={metric} />
         )}
 
-        {activeTab === 'heatmap' && (
-          <ConsistencyHeatmap data={heatmapData} metric="count" />
-        )}
+        {activeTab === 'heatmap' && <ConsistencyHeatmap data={heatmapData} metric="count" />}
 
         {activeTab === 'breakdown' && metric && (
           <ActivityContributionChart data={contributionData} metric={metric} />

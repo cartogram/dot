@@ -6,14 +6,14 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { prisma } from '@/lib/db/client'
 import type {
   Dashboard,
   DashboardInvite,
-  DashboardWithProfiles,
   DashboardProfileWithUser,
+  DashboardWithProfiles,
   InviteLinkData,
 } from '@/types/dashboards'
+import { prisma } from '@/lib/db/client'
 
 // =====================================================
 // HELPER: Generate slug from name
@@ -47,7 +47,7 @@ function generateInviteCode(): string {
 // =====================================================
 
 async function buildProfilesWithUser(
-  profileIds: string[]
+  profileIds: Array<string>,
 ): Promise<Map<string, { profile: any; athlete: any }>> {
   const users = await prisma.user.findMany({
     where: { id: { in: profileIds } },
@@ -64,9 +64,7 @@ async function buildProfilesWithUser(
   })
 
   const userMap = new Map(users.map((u) => [u.id, u]))
-  const athleteMap = new Map(
-    dataSources.map((ds) => [ds.userId, ds.athleteData])
-  )
+  const athleteMap = new Map(dataSources.map((ds) => [ds.userId, ds.athleteData]))
 
   const result = new Map<string, { profile: any; athlete: any }>()
   for (const id of profileIds) {
@@ -261,9 +259,7 @@ export const leaveDashboard = createServerFn({ method: 'POST' })
     })
 
     if (dashboard?.ownerId === data.userId) {
-      throw new Error(
-        'Dashboard owners cannot leave. Transfer ownership or delete the dashboard.'
-      )
+      throw new Error('Dashboard owners cannot leave. Transfer ownership or delete the dashboard.')
     }
 
     // Remove user from dashboard
@@ -285,7 +281,7 @@ export const leaveDashboard = createServerFn({ method: 'POST' })
 
 export const getUserDashboards = createServerFn({ method: 'GET' })
   .inputValidator(GetUserDashboardsSchema)
-  .handler(async ({ data }): Promise<DashboardWithProfiles[]> => {
+  .handler(async ({ data }): Promise<Array<DashboardWithProfiles>> => {
     // Get all dashboards the user is a member of
     const memberships = await prisma.dashboardProfile.findMany({
       where: { profileId: data.userId },
@@ -330,9 +326,7 @@ export const getUserDashboards = createServerFn({ method: 'GET' })
           }
         })
 
-      const userMembership = memberships.find(
-        (m) => m.dashboardId === dashboard.id
-      )
+      const userMembership = memberships.find((m) => m.dashboardId === dashboard.id)
 
       return {
         ...dashboard,
@@ -583,9 +577,9 @@ export const getDashboardInvites = createServerFn({ method: 'GET' })
     z.object({
       dashboardId: z.string().uuid(),
       userId: z.string().uuid(),
-    })
+    }),
   )
-  .handler(async ({ data }): Promise<DashboardInvite[]> => {
+  .handler(async ({ data }): Promise<Array<DashboardInvite>> => {
     // Verify user can edit dashboard
     const membership = await prisma.dashboardProfile.findUnique({
       where: {
@@ -606,7 +600,7 @@ export const getDashboardInvites = createServerFn({ method: 'GET' })
       orderBy: { createdAt: 'desc' },
     })
 
-    return invites as DashboardInvite[]
+    return invites as Array<DashboardInvite>
   })
 
 // =====================================================

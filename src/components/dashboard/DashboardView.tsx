@@ -4,19 +4,13 @@
  * Main dashboard view, showing combined activity stats from all attached profiles.
  */
 
-import type { DashboardData } from '@/types/dashboards'
 import { DashboardHeader } from './DashboardHeader'
 import { DashboardActivityCard } from './DashboardActivityCard'
 import { ProfileBreakdown } from './ProfileBreakdown'
 import { CardConfigDialog } from './CardConfigDialog'
+import type { DashboardData } from '@/types/dashboards'
 import { Grid } from '@/components/custom/Grid/Grid'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 interface DashboardViewProps {
   data: DashboardData
@@ -29,7 +23,7 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
 
   // Count profiles with Strava connected vs. with errors
   const profilesWithData = profileActivities.filter(
-    (pa) => !pa.error && pa.activities.length > 0
+    (pa) => !pa.error && pa.activities.length > 0,
   ).length
   const profilesWithErrors = profileActivities.filter((pa) => pa.error).length
 
@@ -51,11 +45,14 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
       {/* Status Messages */}
       {profilesWithErrors > 0 && (
         <Card state="active">
+          <CardHeader>
+            <CardTitle>Missing Strava data</CardTitle>
+          </CardHeader>
           <CardContent>
             <CardDescription>
               {profilesWithErrors} profile
-              {profilesWithErrors !== 1 ? 's' : ''} without Strava data. They
-              may not have connected Strava yet.
+              {profilesWithErrors !== 1 ? 's' : ''} without Strava data. They may not have connected
+              Strava yet.
             </CardDescription>
           </CardContent>
         </Card>
@@ -74,16 +71,12 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
       )}
       {data.canEdit && (
         <div className="flex justify-center">
-          <CardConfigDialog
-            dashboardId={data.dashboard.id}
-            onSave={onRefresh}
-          />
+          <CardConfigDialog dashboardId={data.dashboard.id} onSave={onRefresh} />
         </div>
       )}
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
         <Grid>
-
           {cards.map((card) => (
             <DashboardActivityCard
               key={card.id}
@@ -109,10 +102,7 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
             </CardDescription>
             {data.canEdit && (
               <div className="mt-4">
-                <CardConfigDialog
-                  dashboardId={data.dashboard.id}
-                  onSave={onRefresh}
-                />
+                <CardConfigDialog dashboardId={data.dashboard.id} onSave={onRefresh} />
               </div>
             )}
           </CardContent>

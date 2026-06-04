@@ -1,4 +1,4 @@
-import type { StravaActivity, ActivityTotals } from '@/types/strava'
+import type { ActivityTotals, StravaActivity } from '@/types/strava'
 
 /**
  * Aggregates activities by type into ActivityTotals format
@@ -9,7 +9,7 @@ import type { StravaActivity, ActivityTotals } from '@/types/strava'
  * @returns ActivityTotals with aggregated metrics
  */
 export function aggregateActivities(
-  activities: StravaActivity[],
+  activities: Array<StravaActivity>,
   activityType: string,
 ): ActivityTotals {
   // Fast filter + reduce in single pass
@@ -42,8 +42,8 @@ export function aggregateActivities(
  * @returns Record mapping activity type to its totals
  */
 export function aggregateActivitiesByType(
-  activities: StravaActivity[],
-  activityTypes: string[],
+  activities: Array<StravaActivity>,
+  activityTypes: Array<string>,
 ): Record<string, ActivityTotals> {
   const result: Record<string, ActivityTotals> = {}
 

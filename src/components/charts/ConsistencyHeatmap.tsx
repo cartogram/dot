@@ -1,12 +1,12 @@
 import * as React from 'react'
+import { format, parseISO } from 'date-fns'
 import type { HeatmapPoint } from '@/lib/dashboard/chartData'
 import type { Metric } from '@/types/dashboard'
 import { METRIC_UNITS } from '@/types/dashboard'
-import { parseISO, format } from 'date-fns'
 import './charts.css'
 
 interface ConsistencyHeatmapProps {
-  data: HeatmapPoint[]
+  data: Array<HeatmapPoint>
   metric: Metric
 }
 
@@ -54,7 +54,7 @@ export function ConsistencyHeatmap({ data, metric }: ConsistencyHeatmapProps) {
   const handleMouseMove = (e: React.MouseEvent, day: HeatmapPoint) => {
     if (!containerRef.current) return
     const rect = containerRef.current.getBoundingClientRect()
-    
+
     // Position tooltip above the cell
     setTooltipPos({
       x: e.clientX - rect.left,
@@ -95,7 +95,7 @@ export function ConsistencyHeatmap({ data, metric }: ConsistencyHeatmapProps) {
   const monthLabels = React.useMemo(() => {
     const labels: Array<{ text: string; colIndex: number }> = []
     let currentMonth = -1
-    
+
     // Scan aligned days in column chunks of 7
     for (let i = 0; i < alignedDays.length; i += 7) {
       // Find first non-null day in this week column
@@ -123,14 +123,14 @@ export function ConsistencyHeatmap({ data, metric }: ConsistencyHeatmapProps) {
   }, [alignedDays])
 
   return (
-    <div ref={containerRef} className="Heatmap-container">
+    <div ref={containerRef} className="Heatmap__Container">
       {/* Month Labels row */}
-      <div className="Heatmap-months">
+      <div className="Heatmap__Months">
         {monthLabels.map((lbl, idx) => (
-          <span 
+          <span
             key={`${lbl.text}-${idx}`}
-            className="Heatmap-month"
-            style={{ 
+            className="Heatmap__Month"
+            style={{
               left: `${lbl.colIndex * 11}px`, // 11px is the column width (9px cell + 2px gap)
             }}
           >
@@ -140,24 +140,19 @@ export function ConsistencyHeatmap({ data, metric }: ConsistencyHeatmapProps) {
       </div>
 
       {/* Grid container with days label on the left */}
-      <div className="Heatmap-layout">
+      <div className="Heatmap__Layout">
         {/* Left Day labels */}
-        <div className="Heatmap-dayLabels">
+        <div className="Heatmap__DayLabels">
           <span>Mon</span>
           <span>Wed</span>
           <span>Fri</span>
         </div>
 
         {/* Heatmap Grid */}
-        <div className="Heatmap-grid">
+        <div className="Heatmap__Grid">
           {alignedDays.map((day, idx) => {
             if (!day) {
-              return (
-                <div 
-                  key={`empty-${idx}`} 
-                  className="Heatmap-cell--empty"
-                />
-              )
+              return <div key={`empty-${idx}`} className="Heatmap__Cell--empty" />
             }
 
             return (
@@ -165,7 +160,7 @@ export function ConsistencyHeatmap({ data, metric }: ConsistencyHeatmapProps) {
                 key={day.date}
                 onMouseMove={(e) => handleMouseMove(e, day)}
                 onMouseLeave={handleMouseLeave}
-                className="Heatmap-cell"
+                className="Heatmap__Cell"
                 style={{
                   transform: hoveredDay?.date === day.date ? 'scale(1.3)' : 'scale(1)',
                   zIndex: hoveredDay?.date === day.date ? 10 : 1,
@@ -180,19 +175,21 @@ export function ConsistencyHeatmap({ data, metric }: ConsistencyHeatmapProps) {
       {/* Premium custom tooltip popup */}
       {hoveredDay && (
         <div
-          className="Heatmap-tooltip"
+          className="Heatmap__Tooltip"
           style={{
             left: `${tooltipPos.x}px`,
             top: `${tooltipPos.y}px`,
           }}
         >
-          <span className="Heatmap-tooltip-title">
+          <span className="Heatmap__TooltipTitle">
             {hoveredDay.count} {hoveredDay.count === 1 ? 'activity' : 'activities'}
           </span>
           {hoveredDay.value > 0 && (
-            <span>: {hoveredDay.value} {unit}</span>
+            <span>
+              : {hoveredDay.value} {unit}
+            </span>
           )}
-          <div className="Heatmap-tooltip-date">
+          <div className="Heatmap__TooltipDate">
             {format(parseISO(hoveredDay.date), 'EEEE, MMMM d, yyyy')}
           </div>
         </div>

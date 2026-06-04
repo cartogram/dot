@@ -1,10 +1,10 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/custom/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Spinner } from '@/components/ui/spinner'
+
 export function DashboardSkeleton() {
   return (
     <div className="space-y-6">
       {/* Dashboard Toolbar Skeleton */}
-
 
       {/* Dashboard Grid Skeleton */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">

@@ -1,18 +1,12 @@
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { fetchAthleteStats, fetchAthleteActivities } from '@/lib/server/strava'
+import { fetchAthleteActivities, fetchAthleteStats } from '@/lib/server/strava'
 import { getVisibleCardsForUser } from '@/lib/server/dashboardConfig'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
 
 export function StatsDashboard() {
@@ -20,10 +14,7 @@ export function StatsDashboard() {
   const currentYear = new Date().getFullYear()
 
   // Fetch cards from server using React Query for proper cache invalidation
-  const {
-    data: cardsData,
-    refetch: refetchCards,
-  } = useQuery({
+  const { data: cardsData, refetch: refetchCards } = useQuery({
     queryKey: ['dashboard-cards', user?.id],
     queryFn: () => getVisibleCardsForUser({ data: { userId: user!.id } }),
     enabled: !!user,
@@ -45,8 +36,7 @@ export function StatsDashboard() {
   } = useQuery({
     queryKey: ['athlete-stats', stravaDataSource?.athleteId?.toString()],
     queryFn: async () => {
-      if (!stravaDataSource)
-        throw new Error('Not authenticated')
+      if (!stravaDataSource) throw new Error('Not authenticated')
 
       return fetchAthleteStats()
     },
@@ -61,11 +51,7 @@ export function StatsDashboard() {
     isLoading: isLoadingActivities,
     error: activitiesError,
   } = useQuery({
-    queryKey: [
-      'athlete-activities-ytd',
-      stravaDataSource?.athleteId?.toString(),
-      currentYear,
-    ],
+    queryKey: ['athlete-activities-ytd', stravaDataSource?.athleteId?.toString(), currentYear],
     queryFn: async () => {
       if (!stravaDataSource) throw new Error('Not authenticated')
 
@@ -93,10 +79,8 @@ export function StatsDashboard() {
           <CardTitle>No Data Sources</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            You need at least one data source to get started.
-          </CardDescription>
-          <Button to="/settings" variant="secondary" >
+          <CardDescription>You need at least one data source to get started.</CardDescription>
+          <Button to="/settings" variant="secondary">
             View sources
           </Button>
         </CardContent>
@@ -116,8 +100,7 @@ export function StatsDashboard() {
           ? activitiesError.message
           : 'Failed to load statistics'
     const isAuthError =
-      errorMessage.includes('UNAUTHORIZED') ||
-      errorMessage.includes('Not authenticated')
+      errorMessage.includes('UNAUTHORIZED') || errorMessage.includes('Not authenticated')
 
     return (
       <Card state="error">
@@ -125,15 +108,12 @@ export function StatsDashboard() {
           <CardTitle>Error Loading Stats</CardTitle>
         </CardHeader>
         <CardDescription>
-          {isAuthError
-            ? 'Your session has expired. Please log in again.'
-            : errorMessage}
+          {isAuthError ? 'Your session has expired. Please log in again.' : errorMessage}
         </CardDescription>
         {isAuthError && (
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              Your Strava authentication has expired. Please refresh the page to
-              log in again.
+              Your Strava authentication has expired. Please refresh the page to log in again.
             </p>
           </CardContent>
         )}
@@ -143,6 +123,7 @@ export function StatsDashboard() {
 
   return (
     <div className="space-y-6">
+
       {/* Dashboard Grid */}
       {cards.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -161,19 +142,14 @@ export function StatsDashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Welcome to Your Dashboard</CardTitle>
-   
           </CardHeader>
           <CardContent>
-          <CardDescription>
-              Get started by adding your first activity card
-            </CardDescription>
+            <CardDescription>Get started by adding your first activity card</CardDescription>
             <p className="text-sm text-muted-foreground mb-4">
-              Click "Add Card" above to create a custom activity card with your
-              preferred time frame, metrics, and goals.
+              Click "Add Card" above to create a custom activity card with your preferred time
+              frame, metrics, and goals.
             </p>
-            {dashboardId && (
-              <CardConfigDialog dashboardId={dashboardId} onSave={handleRefresh} />
-            )}
+            {dashboardId && <CardConfigDialog dashboardId={dashboardId} onSave={handleRefresh} />}
           </CardContent>
         </Card>
       )}

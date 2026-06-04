@@ -10,13 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getProfileByUsername } from '@/lib/server/getUserStats'
 import { PublicProfileDashboard } from '@/components/stats/PublicProfileDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
 
 export const Route = createFileRoute('/$username')({
@@ -26,9 +20,7 @@ export const Route = createFileRoute('/$username')({
 function UsernameProfilePage() {
   const { username } = Route.useParams()
 
-  return (
-    <ProfileContent username={username} />
-  )
+  return <ProfileContent username={username} />
 }
 
 function ProfileContent({ username }: { username: string }) {
@@ -55,9 +47,7 @@ function ProfileContent({ username }: { username: string }) {
         </CardHeader>
         <CardContent>
           <CardDescription>
-            {error instanceof Error
-              ? error.message
-              : 'Failed to load profile.'}
+            {error instanceof Error ? error.message : 'Failed to load profile.'}
           </CardDescription>
           <Button to="/" variant="primary" className="mt-4">
             Go Home
@@ -75,9 +65,7 @@ function ProfileContent({ username }: { username: string }) {
           <CardTitle>Profile Not Found</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            The user @{username} does not exist.
-          </CardDescription>
+          <CardDescription>The user @{username} does not exist.</CardDescription>
           <Button to="/" variant="primary" className="mt-4">
             Go Home
           </Button>
@@ -117,9 +105,7 @@ function ProfileContent({ username }: { username: string }) {
         <CardTitle>Something went wrong</CardTitle>
       </CardHeader>
       <CardContent>
-        <CardDescription>
-          Unable to load this profile.
-        </CardDescription>
+        <CardDescription>Unable to load this profile.</CardDescription>
         <Button to="/" variant="primary" className="mt-4">
           Go Home
         </Button>

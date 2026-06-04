@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { cn } from './utils'
 
 describe('cn utility', () => {
@@ -8,7 +8,8 @@ describe('cn utility', () => {
   })
 
   it('should handle conditional classes', () => {
-    const result = cn('foo', false && 'bar', 'baz')
+    const condition = false as boolean
+    const result = cn('foo', condition && 'bar', 'baz')
     expect(result).toBe('foo baz')
   })
 
@@ -28,10 +29,7 @@ describe('cn utility', () => {
   })
 
   it('should handle mixed inputs', () => {
-    const result = cn('base-class', { active: true, disabled: false }, [
-      'extra',
-      undefined,
-    ])
+    const result = cn('base-class', { active: true, disabled: false }, ['extra', undefined])
     expect(result).toBe('base-class active extra')
   })
 })

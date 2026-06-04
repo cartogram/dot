@@ -5,32 +5,21 @@
  * Uses Vitest Browser Mode with Playwright for real browser testing.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { page } from '@vitest/browser/context'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import {
-  mockPublicProfile,
-  mockHiddenProfile,
-  mockNotFoundProfile,
-} from '@/test/mocks/server'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
+import { mockHiddenProfile, mockNotFoundProfile, mockPublicProfile } from '@/test/mocks/server'
+
+import { getProfileByUsername } from '@/lib/server/getUserStats'
+
+// Import the component under test after mocking
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 // Mock the server function
 vi.mock('@/lib/server/getUserStats', () => ({
   getProfileByUsername: vi.fn(),
 }))
-
-import { getProfileByUsername } from '@/lib/server/getUserStats'
-
-// Import the component under test after mocking
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
-import { useQuery } from '@tanstack/react-query'
 
 /**
  * ProfileContent component extracted for testing
@@ -60,9 +49,7 @@ function ProfileContent({ username }: { username: string }) {
         </CardHeader>
         <CardContent>
           <CardDescription>
-            {error instanceof Error
-              ? error.message
-              : 'Failed to load profile.'}
+            {error instanceof Error ? error.message : 'Failed to load profile.'}
           </CardDescription>
         </CardContent>
       </Card>
@@ -77,9 +64,7 @@ function ProfileContent({ username }: { username: string }) {
           <CardTitle>Profile Not Found</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            The user @{username} does not exist.
-          </CardDescription>
+          <CardDescription>The user @{username} does not exist.</CardDescription>
         </CardContent>
       </Card>
     )
@@ -106,9 +91,7 @@ function ProfileContent({ username }: { username: string }) {
     return (
       <div data-testid="public-profile">
         <h1>@{profileData.profile.username}</h1>
-        {profileData.profile.fullName && (
-          <p>{profileData.profile.fullName}</p>
-        )}
+        {profileData.profile.fullName && <p>{profileData.profile.fullName}</p>}
       </div>
     )
   }
@@ -119,13 +102,7 @@ function ProfileContent({ username }: { username: string }) {
 /**
  * Test wrapper that provides necessary context
  */
-function TestWrapper({
-  username,
-  children,
-}: {
-  username: string
-  children: React.ReactNode
-}) {
+function TestWrapper({ username, children }: { username: string; children: React.ReactNode }) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -135,9 +112,7 @@ function TestWrapper({
     },
   })
 
-  return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  )
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 }
 
 describe('Public Profile Page', () => {
@@ -151,7 +126,7 @@ describe('Public Profile Page', () => {
     const screen = await render(
       <TestWrapper username="nonexistent-user-xyz">
         <ProfileContent username="nonexistent-user-xyz" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Wait for loading to complete
@@ -168,15 +143,13 @@ describe('Public Profile Page', () => {
     const screen = await render(
       <TestWrapper username="privateuser">
         <ProfileContent username="privateuser" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await expect.element(screen.getByTestId('hidden-profile')).toBeInTheDocument()
     await expect.element(screen.getByText('Profile Hidden')).toBeInTheDocument()
     await expect
-      .element(
-        screen.getByText('@privateuser has chosen to keep their profile private.')
-      )
+      .element(screen.getByText('@privateuser has chosen to keep their profile private.'))
       .toBeInTheDocument()
   })
 
@@ -186,7 +159,7 @@ describe('Public Profile Page', () => {
     const screen = await render(
       <TestWrapper username="publicuser">
         <ProfileContent username="publicuser" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     await expect.element(screen.getByTestId('public-profile')).toBeInTheDocument()
@@ -206,7 +179,7 @@ describe('Public Profile Page', () => {
     const screen = await render(
       <TestWrapper username="slowuser">
         <ProfileContent username="slowuser" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Should show loading initially
@@ -222,7 +195,7 @@ describe('Public Profile Page', () => {
     await render(
       <TestWrapper username="testuser123">
         <ProfileContent username="testuser123" />
-      </TestWrapper>
+      </TestWrapper>,
     )
 
     // Wait for the query to be called

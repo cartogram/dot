@@ -105,11 +105,7 @@ export const signIn = createServerFn({ method: 'POST' })
       return { error: 'Invalid email or password' }
     }
 
-    const validPassword = await comparePasswords(
-      data.password,
-      user.salt,
-      user.password,
-    )
+    const validPassword = await comparePasswords(data.password, user.salt, user.password)
     if (!validPassword) {
       return { error: 'Invalid email or password' }
     }
@@ -180,7 +176,7 @@ const RequestResetSchema = z.object({
 export const requestPasswordReset = createServerFn({ method: 'POST' })
   .inputValidator(RequestResetSchema)
   .handler(async ({ data }) => {
-    const crypto = await import('crypto')
+    const crypto = await import('node:crypto')
     const user = await prisma.user.findUnique({
       where: { email: data.email.toLowerCase() },
     })

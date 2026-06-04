@@ -1,13 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
-import type {
-  StravaTokenResponse,
-  StravaStats,
-  StravaActivity,
-} from '@/types/strava'
 import { z } from 'zod'
+import type { StravaActivity, StravaStats, StravaTokenResponse } from '@/types/strava'
+import type { DataSource } from '@prisma/client'
 import { prisma } from '@/lib/db/client'
 import { useAppSession } from '@/lib/auth/session'
-import type { DataSource } from '@prisma/client'
 
 const RefreshTokenSchema = z.object({
   refresh_token: z.string(),
@@ -41,9 +37,7 @@ export const refreshStravaToken = createServerFn({ method: 'POST' })
 /**
  * Centralized server-side helper to refresh token in-place in database if expired
  */
-export async function refreshTokenIfNeeded(
-  dataSource: DataSource,
-): Promise<string> {
+export async function refreshTokenIfNeeded(dataSource: DataSource): Promise<string> {
   const expiresAt = dataSource.expiresAt ? new Date(dataSource.expiresAt) : null
   const now = new Date()
   const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000)
@@ -95,7 +89,7 @@ export async function fetchActivities(
   accessToken: string,
   after?: number,
   perPage = 200,
-): Promise<StravaActivity[]> {
+): Promise<Array<StravaActivity>> {
   const params = new URLSearchParams({
     per_page: perPage.toString(),
     page: '1',
@@ -128,10 +122,7 @@ export async function fetchActivities(
 /**
  * Centralized helper to fetch athlete stats directly from Strava API
  */
-export async function fetchStats(
-  athleteId: bigint,
-  accessToken: string,
-): Promise<StravaStats> {
+export async function fetchStats(athleteId: bigint, accessToken: string): Promise<StravaStats> {
   const response = await fetch(
     `https://www.strava.com/api/v3/athletes/${athleteId.toString()}/stats`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
@@ -156,28 +147,27 @@ export async function fetchStats(
  * Server function to fetch athlete stats from Strava
  * Resolves user from session, fetches user token from database, and refreshes it if needed
  */
-export const fetchAthleteStats = createServerFn({ method: 'GET' })
-  .handler(async () => {
-    const session = await useAppSession()
-    if (!session.data.userId) {
-      throw new Error('UNAUTHORIZED')
-    }
+export const fetchAthleteStats = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await useAppSession()
+  if (!session.data.userId) {
+    throw new Error('UNAUTHORIZED')
+  }
 
-    const dataSource = await prisma.dataSource.findFirst({
-      where: {
-        userId: session.data.userId,
-        provider: 'strava',
-        isActive: true,
-      },
-    })
-
-    if (!dataSource || !dataSource.athleteId) {
-      throw new Error('Strava not connected')
-    }
-
-    const accessToken = await refreshTokenIfNeeded(dataSource)
-    return fetchStats(dataSource.athleteId, accessToken)
+  const dataSource = await prisma.dataSource.findFirst({
+    where: {
+      userId: session.data.userId,
+      provider: 'strava',
+      isActive: true,
+    },
   })
+
+  if (!dataSource || !dataSource.athleteId) {
+    throw new Error('Strava not connected')
+  }
+
+  const accessToken = await refreshTokenIfNeeded(dataSource)
+  return fetchStats(dataSource.athleteId, accessToken)
+})
 
 const ActivitiesInputSchema = z.object({
   perPage: z.number().optional(),
@@ -212,4 +202,3 @@ export const fetchAthleteActivities = createServerFn({ method: 'GET' })
     const accessToken = await refreshTokenIfNeeded(dataSource)
     return fetchActivities(accessToken, data?.after, data?.perPage)
   })
-

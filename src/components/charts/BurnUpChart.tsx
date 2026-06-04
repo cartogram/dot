@@ -1,13 +1,13 @@
 import * as React from 'react'
 import {
-  ResponsiveContainer,
-  ComposedChart,
   Area,
+  CartesianGrid,
+  ComposedChart,
   Line,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
 } from 'recharts'
 import type { BurnUpPoint } from '@/lib/dashboard/chartData'
 import type { Metric } from '@/types/dashboard'
@@ -15,7 +15,7 @@ import { METRIC_UNITS } from '@/types/dashboard'
 import './charts.css'
 
 interface BurnUpChartProps {
-  data: BurnUpPoint[]
+  data: Array<BurnUpPoint>
   metric: Metric
   goal: number | null | undefined
 }
@@ -36,13 +36,17 @@ export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
           {actualVal !== undefined && (
             <div className="Chart__TooltipRow">
               <span style={{ color: 'var(--color-primary)', fontWeight: 500 }}>Actual:</span>
-              <span style={{ fontWeight: 600 }}>{actualVal} {unit}</span>
+              <span style={{ fontWeight: 600 }}>
+                {actualVal} {unit}
+              </span>
             </div>
           )}
           {targetVal !== undefined && goal && (
             <div className="Chart__TooltipRow">
               <span style={{ color: 'var(--muted-foreground)' }}>Target Pace:</span>
-              <span style={{ fontWeight: 600 }}>{targetVal} {unit}</span>
+              <span style={{ fontWeight: 600 }}>
+                {targetVal} {unit}
+              </span>
             </div>
           )}
         </div>
@@ -61,10 +65,7 @@ export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
   return (
     <div className="Chart__Wrapper">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart
-          data={data}
-          margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-        >
+        <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.25} />
@@ -91,7 +92,7 @@ export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
             tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
           />
           <Tooltip content={<CustomTooltip />} />
-          
+
           {/* Cumulative Actual Progress Area */}
           <Area
             type="monotone"
@@ -102,7 +103,7 @@ export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
             activeDot={{ r: 5, strokeWidth: 0, fill: 'var(--color-primary)' }}
             connectNulls={false}
           />
-          
+
           {/* Target Pace Line */}
           {goal && (
             <Line

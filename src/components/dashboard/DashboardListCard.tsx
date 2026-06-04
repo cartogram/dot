@@ -8,17 +8,13 @@ import { Link } from '@tanstack/react-router'
 import type { DashboardWithProfiles } from '@/types/dashboards'
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/custom/Card'
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from '@/components/custom/Avatar/Avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
 import { Badge } from '@/components/custom/Badge/Badge'
 
 interface DashboardListCardProps {
@@ -33,10 +29,7 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
         ? 'Editor'
         : 'Viewer'
 
-  const roleVariant =
-    dashboard.current_user_role === 'owner'
-      ? 'primary'
-      : 'secondary'
+  const roleVariant = dashboard.current_user_role === 'owner' ? 'primary' : 'secondary'
 
   return (
     <Link to="/dashboards/$dashboardId" params={{ dashboardId: dashboard.id }}>
@@ -46,22 +39,12 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
         </CardHeader>
         <CardContent>
           <div className="flex gap-1.5 flex-shrink-0">
-            {dashboard.isDefault && (
-              <Badge variant="secondary">
-                Default
-              </Badge>
-            )}
-            {dashboard.isPublic && (
-              <Badge variant="secondary" >
-                Public
-              </Badge>
-            )}
+            {dashboard.isDefault && <Badge variant="secondary">Default</Badge>}
+            {dashboard.isPublic && <Badge variant="secondary">Public</Badge>}
             <Badge variant="secondary">{roleLabel}</Badge>
           </div>
           {dashboard.description && (
-            <CardDescription className="line-clamp-2">
-              {dashboard.description}
-            </CardDescription>
+            <CardDescription className="line-clamp-2">{dashboard.description}</CardDescription>
           )}
           <div className="mt-4">
             <ProfileAvatars profiles={dashboard.profiles} />
@@ -69,8 +52,7 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
         </CardContent>
         <CardFooter>
           <span className="text-sm text-muted-foreground">
-            {dashboard.profileCount}{' '}
-            {dashboard.profileCount === 1 ? 'profile' : 'profiles'}
+            {dashboard.profileCount} {dashboard.profileCount === 1 ? 'profile' : 'profiles'}
           </span>
         </CardFooter>
       </Card>
@@ -81,11 +63,7 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
 /**
  * Display stacked avatars for dashboard profiles
  */
-function ProfileAvatars({
-  profiles,
-}: {
-  profiles: DashboardWithProfiles['profiles']
-}) {
+function ProfileAvatars({ profiles }: { profiles: DashboardWithProfiles['profiles'] }) {
   // Show max 5 avatars
   const displayProfiles = profiles.slice(0, 5)
   const remainingCount = profiles.length - 5
@@ -95,8 +73,7 @@ function ProfileAvatars({
       {displayProfiles.map((profile) => {
         const initials = profile.athlete
           ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
-          : profile.profile.fullName?.[0] ||
-          profile.profile.email[0].toUpperCase()
+          : profile.profile.fullName?.[0] || profile.profile.email[0].toUpperCase()
 
         return (
           <Avatar key={profile.id}>

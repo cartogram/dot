@@ -6,33 +6,20 @@
 
 import * as React from 'react'
 import type { ProfileActivities } from '@/types/dashboards'
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from '@/components/custom/Avatar/Avatar'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/custom/Card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/custom/Card'
 
 interface ProfileBreakdownProps {
-  profileActivities: ProfileActivities[]
+  profileActivities: Array<ProfileActivities>
 }
 
 export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
   // Calculate totals for each profile
   const profileStats = React.useMemo(() => {
     return profileActivities.map((pa) => {
-      const totalDistance = pa.activities.reduce(
-        (sum, a) => sum + a.distance,
-        0
-      )
-      const totalTime = pa.activities.reduce(
-        (sum, a) => sum + a.moving_time,
-        0
-      )
-      const totalElevation = pa.activities.reduce(
-        (sum, a) => sum + a.total_elevation_gain,
-        0
-      )
+      const totalDistance = pa.activities.reduce((sum, a) => sum + a.distance, 0)
+      const totalTime = pa.activities.reduce((sum, a) => sum + a.moving_time, 0)
+      const totalElevation = pa.activities.reduce((sum, a) => sum + a.total_elevation_gain, 0)
 
       return {
         ...pa,
@@ -47,9 +34,7 @@ export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
   }, [profileActivities])
 
   // Sort by activity count descending
-  const sortedProfiles = [...profileStats].sort(
-    (a, b) => b.stats.count - a.stats.count
-  )
+  const sortedProfiles = [...profileStats].sort((a, b) => b.stats.count - a.stats.count)
 
   const formatDistance = (meters: number) => {
     const km = meters / 1000
@@ -89,19 +74,14 @@ export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
                 <div className="flex items-center gap-3">
                   <Avatar>
                     {profile.athlete?.profile ? (
-                      <AvatarImage
-                        src={profile.athlete.profile}
-                        alt={initials}
-                      />
+                      <AvatarImage src={profile.athlete.profile} alt={initials} />
                     ) : null}
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="font-medium">{name}</div>
                     {profile.error ? (
-                      <div className="text-sm text-muted-foreground">
-                        {profile.error}
-                      </div>
+                      <div className="text-sm text-muted-foreground">{profile.error}</div>
                     ) : (
                       <div className="text-sm text-muted-foreground">
                         {profile.stats.count} activities
@@ -112,9 +92,7 @@ export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
                 {!profile.error && profile.stats.count > 0 && (
                   <div className="text-right text-sm">
                     <div>{formatDistance(profile.stats.distance)}</div>
-                    <div className="text-muted-foreground">
-                      {formatTime(profile.stats.time)}
-                    </div>
+                    <div className="text-muted-foreground">{formatTime(profile.stats.time)}</div>
                   </div>
                 )}
               </div>

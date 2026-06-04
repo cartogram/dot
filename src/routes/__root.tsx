@@ -3,6 +3,7 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import appCss from '../styles.css?url'
 import { AuthProvider } from '@/lib/auth/AuthContext'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { Header } from '@/components/layout/Header'
@@ -10,8 +11,6 @@ import { Page } from '@/components/layout/Page'
 import { Main } from '@/components/layout/Main'
 import { Logo } from '@/components/layout/Logo'
 import { getCurrentUser } from '@/lib/server/auth'
-
-import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -33,7 +32,8 @@ export const Route = createRootRoute({
       },
       {
         name: 'description',
-        content: 'Distance Over Time is a platform for tracking your activities and sharing them with your friends.',
+        content:
+          'Distance Over Time is a platform for tracking your activities and sharing them with your friends.',
       },
       {
         name: 'theme-color',
@@ -79,7 +79,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: 'window.Buffer = window.Buffer || { from: () => ({}) };' }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: 'window.Buffer = window.Buffer || { from: () => ({}) };',
+          }}
+        />
         <HeadContent />
       </head>
       <body>

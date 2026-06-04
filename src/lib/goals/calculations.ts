@@ -1,7 +1,8 @@
-import type { ActivityTotals, ActivityGoal } from '@/types/strava'
+import type { ActivityGoal, ActivityTotals } from '@/types/strava'
 import type { TimeFrame } from '@/types/dashboard'
 import { getTimeFrameStartDate } from '@/lib/dashboard/timeframes'
-export {secondsToHours} from 'date-fns'
+
+export { secondsToHours } from 'date-fns'
 
 export interface ProgressMetric {
   current: number // Elapsed progress (in display units)
@@ -67,17 +68,12 @@ function calculateTimeFrameDays(
   const now = new Date()
 
   // Calculate total days in timeframe (ceil gives us the correct count for periods like Mon-Sun = 7 days)
-  const totalDays = Math.ceil(
-    (periodEnd.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
-  )
+  const totalDays = Math.ceil((periodEnd.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
 
   // Calculate days elapsed (from start to now, clamped to timeframe)
   // Any partial day counts as a day in progress
   const elapsedMs = Math.max(0, now.getTime() - startDate.getTime())
-  const daysElapsed = Math.min(
-    Math.ceil(elapsedMs / (1000 * 60 * 60 * 24)),
-    totalDays,
-  )
+  const daysElapsed = Math.min(Math.ceil(elapsedMs / (1000 * 60 * 60 * 24)), totalDays)
 
   // Days remaining = total days minus elapsed days
   // This ensures daysElapsed + daysRemaining = totalDays
@@ -103,15 +99,11 @@ function calculateProgress(
 ): ProgressMetric {
   const percentage = goal > 0 ? Math.min((current / goal) * 100, 100) : 0
   const remainder = Math.max(0, goal - current)
-  const { daysElapsed, daysRemaining, totalDays } = calculateTimeFrameDays(
-    timeFrame,
-    customRange,
-  )
+  const { daysElapsed, daysRemaining, totalDays } = calculateTimeFrameDays(timeFrame, customRange)
 
   // Calculate expected progress based on days elapsed
   // Expected = (goal / total days) * days elapsed
-  const expectedProgress =
-    totalDays > 0 ? (goal / totalDays) * daysElapsed : 0
+  const expectedProgress = totalDays > 0 ? (goal / totalDays) * daysElapsed : 0
 
   // Calculate how far behind/ahead of plan
   // Negative = behind, positive = ahead
@@ -163,13 +155,7 @@ export function calculateActivityProgress(
     // Convert meters to kilometers for distance calculations
     const currentKm = totals.distance / 1000
     const goalKm = goal.distance / 1000
-    progress.distance = calculateProgress(
-      currentKm,
-      goalKm,
-      'km',
-      timeFrame,
-      customRange,
-    )
+    progress.distance = calculateProgress(currentKm, goalKm, 'km', timeFrame, customRange)
   }
 
   if (goal.count !== undefined) {
@@ -196,13 +182,7 @@ export function calculateActivityProgress(
     // Convert seconds to hours for time calculations
     const currentHours = totals.moving_time / 3600
     const goalHours = goal.time / 3600
-    progress.time = calculateProgress(
-      currentHours,
-      goalHours,
-      'hours',
-      timeFrame,
-      customRange,
-    )
+    progress.time = calculateProgress(currentHours, goalHours, 'hours', timeFrame, customRange)
   }
 
   return progress

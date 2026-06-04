@@ -119,21 +119,13 @@ export const ACTIVITY_CONFIGS: Record<string, ActivityConfig> = {
 }
 
 // Helper to get activity config by Strava type
-export function getActivityConfigByStravaType(
-  stravaType: string,
-): ActivityConfig | undefined {
-  return Object.values(ACTIVITY_CONFIGS).find(
-    (config) => config.stravaType === stravaType,
-  )
+export function getActivityConfigByStravaType(stravaType: string): ActivityConfig | undefined {
+  return Object.values(ACTIVITY_CONFIGS).find((config) => config.stravaType === stravaType)
 }
 
 // Helper to get activity config by activity type
-export function getActivityConfigByType(
-  activityType: ActivityType,
-): ActivityConfig | undefined {
-  return Object.values(ACTIVITY_CONFIGS).find(
-    (config) => config.activityType === activityType,
-  )
+export function getActivityConfigByType(activityType: ActivityType): ActivityConfig | undefined {
+  return Object.values(ACTIVITY_CONFIGS).find((config) => config.activityType === activityType)
 }
 
 // Helper to convert ActivityType to Strava type string
@@ -144,15 +136,13 @@ export function activityTypeToStravaType(activityType: ActivityType): string {
 }
 
 // Helper to convert multiple ActivityTypes to Strava types
-export function activityTypesToStravaTypes(activityTypes: string[]): string[] {
+export function activityTypesToStravaTypes(activityTypes: Array<string>): Array<string> {
   return activityTypes.map((type) => activityTypeToStravaType(type as ActivityType))
 }
 
 // Helper to get all visible activity configs
 export function getVisibleActivityConfigs(
   visibility: Record<string, boolean>,
-): ActivityConfig[] {
-  return Object.values(ACTIVITY_CONFIGS).filter(
-    (config) => visibility[config.id],
-  )
+): Array<ActivityConfig> {
+  return Object.values(ACTIVITY_CONFIGS).filter((config) => visibility[config.id])
 }

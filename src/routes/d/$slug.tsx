@@ -13,13 +13,7 @@ import { getDashboardDataBySlug } from '@/lib/server/getDashboardData'
 import { DashboardView } from '@/components/dashboard/DashboardView'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Button } from '@/components/custom/Button/Button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export const Route = createFileRoute('/d/$slug')({
   component: PublicDashboardPage,
@@ -29,24 +23,11 @@ function PublicDashboardPage() {
   const { slug } = Route.useParams()
   const { user } = useAuth()
 
-  return (
-    <PublicDashboardContent slug={slug} userId={user?.id} />
-  )
+  return <PublicDashboardContent slug={slug} userId={user?.id} />
 }
 
-function PublicDashboardContent({
-  slug,
-  userId,
-}: {
-  slug: string
-  userId?: string
-}) {
-  const {
-    data,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+function PublicDashboardContent({ slug, userId }: { slug: string; userId?: string }) {
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['public-dashboard', slug],
     queryFn: () => getDashboardDataBySlug({ data: { slug, userId } }),
     staleTime: 5 * 60 * 1000,
@@ -84,9 +65,7 @@ function PublicDashboardContent({
           <CardTitle>Dashboard Not Found</CardTitle>
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            This dashboard doesn't exist or is not public.
-          </CardDescription>
+          <CardDescription>This dashboard doesn't exist or is not public.</CardDescription>
           <Button to="/" variant="primary" className="mt-4">
             Go Home
           </Button>
@@ -95,11 +74,5 @@ function PublicDashboardContent({
     )
   }
 
-  return (
-    <DashboardView
-      data={data}
-      userId={userId || ''}
-      onRefresh={() => refetch()}
-    />
-  )
+  return <DashboardView data={data} userId={userId || ''} onRefresh={() => refetch()} />
 }

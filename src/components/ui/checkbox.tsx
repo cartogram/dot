@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
-import { cn } from '@/lib/utils'
 import { IconCheck } from '@tabler/icons-react'
+import { cn } from '@/lib/utils'
 
 export interface CheckboxProps extends CheckboxPrimitive.Root.Props {
   label?: string

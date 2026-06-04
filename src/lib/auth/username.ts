@@ -46,7 +46,7 @@ export async function generateUniqueUsername(email: string): Promise<string> {
   let counter = 1
   let candidateUsername = `${baseUsername}${counter}`
 
-  while (true) {
+  while (counter <= 9999) {
     const exists = await prisma.user.findUnique({
       where: { username: candidateUsername },
       select: { id: true },
@@ -58,12 +58,9 @@ export async function generateUniqueUsername(email: string): Promise<string> {
 
     counter++
     candidateUsername = `${baseUsername}${counter}`
-
-    // Safety limit to prevent infinite loop
-    if (counter > 9999) {
-      throw new Error('Unable to generate unique username')
-    }
   }
+
+  throw new Error('Unable to generate unique username')
 }
 
 /**

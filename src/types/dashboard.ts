@@ -56,9 +56,12 @@ export const CardSizeSchema = z.enum(CARD_SIZES)
 export type DashboardCard = PrismaDashboardCard
 
 // Typed version with validated enums
-export interface TypedDashboardCard extends Omit<PrismaDashboardCard, 'type' | 'activityTypes' | 'metric' | 'timeFrame' | 'size'> {
+export interface TypedDashboardCard extends Omit<
+  PrismaDashboardCard,
+  'type' | 'activityTypes' | 'metric' | 'timeFrame' | 'size'
+> {
   type: CardType
-  activityTypes: ActivityType[]
+  activityTypes: Array<ActivityType>
   metric: Metric
   timeFrame: TimeFrame
   size: CardSize

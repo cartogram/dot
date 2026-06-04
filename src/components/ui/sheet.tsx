@@ -3,9 +3,9 @@
 import * as React from 'react'
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
 
+import { IconX } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/custom/Button/Button'
-import { IconX } from '@tabler/icons-react'
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
@@ -94,19 +94,10 @@ function SheetFooter({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
-  return (
-    <SheetPrimitive.Title
-      data-slot="sheet-title"
-      className={cn('text-foreground text-base font-medium', className)}
-      {...props}
-    />
-  )
+  return <SheetPrimitive.Title data-slot="sheet-title" className="heading--3" {...props} />
 }
 
-function SheetDescription({
-  className,
-  ...props
-}: SheetPrimitive.Description.Props) {
+function SheetDescription({ className, ...props }: SheetPrimitive.Description.Props) {
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"

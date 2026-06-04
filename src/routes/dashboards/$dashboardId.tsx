@@ -10,13 +10,7 @@ import { getAuthUser } from '@/lib/server/auth'
 import { getDashboardData } from '@/lib/server/getDashboardData'
 import { DashboardView } from '@/components/dashboard/DashboardView'
 import { Button } from '@/components/custom/Button/Button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 // QueryClient for mutations only (DashboardHeader uses useMutation)
 
@@ -81,7 +75,10 @@ function DashboardPage() {
     )
   }
 
-  const { data, userId } = loaderData as { data: Awaited<ReturnType<typeof getDashboardData>>; userId: string }
+  const { data, userId } = loaderData as {
+    data: Awaited<ReturnType<typeof getDashboardData>> | null | undefined
+    userId: string
+  }
 
   if (!data) {
     return (

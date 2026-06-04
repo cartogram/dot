@@ -1,19 +1,19 @@
-import type { StravaActivity } from '@/types/strava'
-import type { TimeFrame, Metric } from '@/types/dashboard'
-import { getTimeFrameStartDate } from './timeframes'
 import {
-  startOfWeek,
+  addDays,
+  differenceInDays,
+  endOfDay,
   endOfWeek,
-  subWeeks,
   format,
-  parseISO,
   isAfter,
   isBefore,
-  differenceInDays,
-  addDays,
+  parseISO,
   startOfDay,
-  endOfDay,
+  startOfWeek,
+  subWeeks,
 } from 'date-fns'
+import { getTimeFrameStartDate } from './timeframes'
+import type { StravaActivity } from '@/types/strava'
+import type { Metric, TimeFrame } from '@/types/dashboard'
 
 export interface BurnUpPoint {
   date: string
@@ -81,17 +81,17 @@ export function getTimeFramePeriodEnd(timeFrame: TimeFrame): Date {
  * Generates data points for the cumulative Burn-Up chart
  */
 export function getBurnUpData(
-  activities: StravaActivity[],
+  activities: Array<StravaActivity>,
   timeFrame: TimeFrame,
   goal: number | null | undefined,
-  metric: Metric
-): BurnUpPoint[] {
+  metric: Metric,
+): Array<BurnUpPoint> {
   const startDate = getTimeFrameStartDate(timeFrame)
   const endDate = getTimeFramePeriodEnd(timeFrame)
   const now = startOfDay(new Date())
 
   const totalDays = differenceInDays(endDate, startDate) + 1
-  const points: BurnUpPoint[] = []
+  const points: Array<BurnUpPoint> = []
 
   const targetGoal = goal || 0
 
@@ -99,8 +99,10 @@ export function getBurnUpData(
   const sortedActivities = [...activities]
     .filter((a) => {
       const date = parseISO(a.start_date)
-      return (date >= startDate || date.getTime() >= startDate.getTime()) && 
-             (date <= endDate || date.getTime() <= endDate.getTime())
+      return (
+        (date >= startDate || date.getTime() >= startDate.getTime()) &&
+        (date <= endDate || date.getTime() <= endDate.getTime())
+      )
     })
     .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
 
@@ -142,10 +144,10 @@ export function getBurnUpData(
  * Aggregates activities over the last 12 weeks (Monday-Sunday)
  */
 export function getWeeklyVolumeData(
-  activities: StravaActivity[],
-  metric: Metric
-): WeeklyVolumePoint[] {
-  const points: WeeklyVolumePoint[] = []
+  activities: Array<StravaActivity>,
+  metric: Metric,
+): Array<WeeklyVolumePoint> {
+  const points: Array<WeeklyVolumePoint> = []
   const now = new Date()
   const thisWeekStart = startOfWeek(now, { weekStartsOn: 1 })
 
@@ -162,7 +164,7 @@ export function getWeeklyVolumeData(
 
     const totalVolume = weekActivities.reduce(
       (sum, act) => sum + getActivityMetricValue(act, metric),
-      0
+      0,
     )
 
     points.push({
@@ -179,9 +181,9 @@ export function getWeeklyVolumeData(
  * Groups and sums progress by activity type to show contribution percentages
  */
 export function getActivityContribution(
-  activities: StravaActivity[],
-  metric: Metric
-): ContributionPoint[] {
+  activities: Array<StravaActivity>,
+  metric: Metric,
+): Array<ContributionPoint> {
   const totalsByType: Record<string, number> = {}
 
   activities.forEach((activity) => {
@@ -213,25 +215,25 @@ export function getActivityContribution(
  * Generates an array of all days in the current year YTD with activity values for the Heatmap
  */
 export function getHeatmapData(
-  activities: StravaActivity[],
-  metric: Metric = 'count'
-): HeatmapPoint[] {
-  const points: HeatmapPoint[] = []
+  activities: Array<StravaActivity>,
+  metric: Metric = 'count',
+): Array<HeatmapPoint> {
+  const points: Array<HeatmapPoint> = []
   const year = new Date().getFullYear()
   const startDate = new Date(year, 0, 1) // Jan 1
   const now = new Date()
   const endDate = new Date(year, 11, 31) // Dec 31
-  
+
   const totalDays = differenceInDays(endDate, startDate) + 1
 
   // Create a fast lookup map for activity metrics by date string (YYYY-MM-DD)
-  const activityMap: Record<string, { value: number; count: number }> = {}
+  const activityMap: Record<string, { value: number; count: number } | undefined> = {}
 
   activities.forEach((activity) => {
     const localDate = activity.start_date_local || activity.start_date
     const dateStr = localDate.split('T')[0] // YYYY-MM-DD
     const val = getActivityMetricValue(activity, metric)
-    
+
     if (!activityMap[dateStr]) {
       activityMap[dateStr] = { value: 0, count: 0 }
     }

@@ -4,13 +4,7 @@ import { updatePassword } from '@/lib/server/auth'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export function UpdatePasswordForm() {
   const navigate = useNavigate()
@@ -68,15 +62,11 @@ export function UpdatePasswordForm() {
                 disabled={isLoading}
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Must be at least 8 characters
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="confirmPassword">
-                Confirm Password
-              </FieldLabel>
+              <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
               <Input
                 id="confirmPassword"
                 type="password"

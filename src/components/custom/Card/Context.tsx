@@ -4,27 +4,21 @@ import React from 'react'
 /**
  * Creates a context and its provider component.
  *
- * @template ContextValueType - The type of the context value.
+ * @template TContextValue - The type of the context value.
  * @param {string} rootComponentName - The name of the root component.
  * @param {ContextValueType | undefined} defaultContext - The default context value.
  * @returns {[Provider, useContext]} - An array containing the provider component and the useContext function.
  */
-function createContext<ContextValueType extends object | null>(
+function createContext<TContextValue extends object | null>(
   rootComponentName: string,
-  defaultContext?: ContextValueType,
+  defaultContext?: TContextValue,
 ) {
-  const Context = React.createContext<ContextValueType | undefined>(
-    defaultContext,
-  )
+  const Context = React.createContext<TContextValue | undefined>(defaultContext)
 
-  function Provider(props: ContextValueType & { children: React.ReactNode }) {
+  function Provider(props: TContextValue & { children: React.ReactNode }) {
     const { children, ...context } = props
     // Only re-memoize when prop values change
-    const value = React.useMemo(
-      () => context,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      Object.values(context),
-    ) as ContextValueType
+    const value = React.useMemo(() => context, Object.values(context)) as TContextValue
     return <Context.Provider value={value}>{children}</Context.Provider>
   }
 
@@ -33,9 +27,7 @@ function createContext<ContextValueType extends object | null>(
     if (context) return context
     if (defaultContext !== undefined) return defaultContext
     // if a defaultContext wasn't specified, it's a required context.
-    throw new Error(
-      `\`${consumerName}\` must be used within \`${rootComponentName}\``,
-    )
+    throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``)
   }
 
   Provider.displayName = rootComponentName + 'Provider'

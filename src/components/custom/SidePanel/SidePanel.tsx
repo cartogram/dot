@@ -2,10 +2,10 @@ import * as React from 'react'
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetFooter,
-  SheetTitle,
   SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
 } from '@/components/ui/sheet'
 
 interface SidePanelProps {
@@ -31,24 +31,15 @@ export function SidePanel({
 }: SidePanelProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side={side}
-        className={className}
-      >
+      <SheetContent side={side} className={className}>
         <SheetHeader>
           <SheetTitle>{title}</SheetTitle>
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto py-4">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto py-4">{children}</div>
 
-        {footer && (
-          <SheetFooter>
-            {footer}
-          </SheetFooter>
-        )}
+        {footer && <SheetFooter>{footer}</SheetFooter>}
       </SheetContent>
     </Sheet>
   )

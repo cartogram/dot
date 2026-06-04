@@ -7,36 +7,28 @@
 import * as React from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { useNavigate, useRouter } from '@tanstack/react-router'
+import { DashboardSettingsSheet } from './DashboardSettingsSheet'
 import type { DashboardData } from '@/types/dashboards'
-import {
-  leaveDashboard,
-  deleteDashboard,
-  createInvite,
-} from '@/lib/server/dashboards'
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from '@/components/custom/Avatar/Avatar'
+import { createInvite, deleteDashboard, leaveDashboard } from '@/lib/server/dashboards'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Button } from '@/components/custom/Button/Button'
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/custom/Dialog/Dialog'
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/custom/Card'
-import { DashboardSettingsSheet } from './DashboardSettingsSheet'
 
 interface DashboardHeaderProps {
   data: DashboardData
@@ -63,8 +55,7 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
   const isOwner = currentUserRole === 'owner'
 
   const leaveMutation = useMutation({
-    mutationFn: () =>
-      leaveDashboard({ data: { dashboardId: dashboard.id, userId } }),
+    mutationFn: () => leaveDashboard({ data: { dashboardId: dashboard.id, userId } }),
     onSuccess: () => {
       // Invalidate router cache to refetch dashboards list on next visit
       router.invalidate()
@@ -73,8 +64,7 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
   })
 
   const deleteMutation = useMutation({
-    mutationFn: () =>
-      deleteDashboard({ data: { dashboardId: dashboard.id, userId } }),
+    mutationFn: () => deleteDashboard({ data: { dashboardId: dashboard.id, userId } }),
     onSuccess: () => {
       // Invalidate router cache to refetch dashboards list on next visit
       router.invalidate()
@@ -104,11 +94,7 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
   }
 
   const roleLabel =
-    currentUserRole === 'owner'
-      ? 'Owner'
-      : currentUserRole === 'editor'
-        ? 'Editor'
-        : 'Viewer'
+    currentUserRole === 'owner' ? 'Owner' : currentUserRole === 'editor' ? 'Editor' : 'Viewer'
 
   return (
     <Card state="active">
@@ -116,36 +102,23 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
         <div className="flex items-start justify-between">
           <div>
             <CardTitle>{dashboard.name}</CardTitle>
-           
           </div>
-          <div className="flex gap-2">
-            
-          </div>
+          <div className="flex gap-2"></div>
         </div>
       </CardHeader>
       <CardContent>
-      {dashboard.description && (
-              <CardDescription className="mt-1">
-                {dashboard.description}
-              </CardDescription>
-            )}
+        {dashboard.description && (
+          <CardDescription className="mt-1">{dashboard.description}</CardDescription>
+        )}
         <div className="space-y-4">
           <div className="flex gap-2">
-          {dashboard.isPublic && (
-              <Badge variant="secondary">Public</Badge>
-            )}
-            {dashboard.isDefault && (
-              <Badge variant="secondary">Default</Badge>
-            )}
-            <Badge variant={isOwner ? 'primary' : 'secondary'}>
-              {roleLabel}
-            </Badge>
+            {dashboard.isPublic && <Badge variant="secondary">Public</Badge>}
+            {dashboard.isDefault && <Badge variant="secondary">Default</Badge>}
+            <Badge variant={isOwner ? 'primary' : 'secondary'}>{roleLabel}</Badge>
           </div>
           {/* Profiles */}
           <div>
-            <h4 className="text-sm font-medium mb-2">
-              Profiles ({profiles.length})
-            </h4>
+            <h4 className="text-sm font-medium mb-2">Profiles ({profiles.length})</h4>
             <div className="flex flex-wrap gap-2">
               {profiles.map((profile) => {
                 const name = profile.athlete
@@ -154,25 +127,17 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
 
                 const initials = profile.athlete
                   ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
-                  : profile.profile.fullName?.[0] ||
-                    profile.profile.email[0].toUpperCase()
+                  : profile.profile.fullName?.[0] || profile.profile.email[0].toUpperCase()
 
                 return (
-                  <div
-                    key={profile.id}
-                    className="flex items-center gap-2"
-                  >
+                  <div key={profile.id} className="flex items-center gap-2">
                     <Avatar>
                       {profile.athlete?.profile ? (
-                        <AvatarImage
-                          src={profile.athlete.profile}
-                          alt={initials}
-                        />
+                        <AvatarImage src={profile.athlete.profile} alt={initials} />
                       ) : null}
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <span className="text-sm">{name}</span>
-
                   </div>
                 )
               })}
@@ -184,7 +149,7 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
             <div>
               <h4 className="text-sm font-medium mb-2">Public URL</h4>
               <code className="text-sm bg-muted px-2 py-1 rounded">
-                {window.location.origin}/d/{dashboard.slug}
+                {import.meta.env.VITE_APP_URL}/d/{dashboard.slug}
               </code>
             </div>
           )}
@@ -202,11 +167,7 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
           </Button>
         )}
         {!isOwner && currentUserRole && (
-          <Button
-            variant="secondary"
-            destructive
-            onClick={() => setShowLeaveConfirm(true)}
-          >
+          <Button variant="secondary" destructive onClick={() => setShowLeaveConfirm(true)}>
             Leave
           </Button>
         )}
@@ -218,8 +179,7 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
           <DialogHeader>
             <DialogTitle>Invite to Dashboard</DialogTitle>
             <DialogDescription>
-              Share this invite code with others to let them join your
-              dashboard.
+              Share this invite code with others to let them join your dashboard.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -256,15 +216,12 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
           <DialogHeader>
             <DialogTitle>Leave Dashboard?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to leave "{dashboard.name}"? You'll need a
-              new invite code to rejoin.
+              Are you sure you want to leave "{dashboard.name}"? You'll need a new invite code to
+              rejoin.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowLeaveConfirm(false)}
-            >
+            <Button variant="secondary" onClick={() => setShowLeaveConfirm(false)}>
               Cancel
             </Button>
             <Button
@@ -285,15 +242,12 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
           <DialogHeader>
             <DialogTitle>Delete Dashboard?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{dashboard.name}"? This action
-              cannot be undone and all profiles will be removed.
+              Are you sure you want to delete "{dashboard.name}"? This action cannot be undone and
+              all profiles will be removed.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteConfirm(false)}
-            >
+            <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
               Cancel
             </Button>
             <Button

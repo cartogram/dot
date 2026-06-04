@@ -5,13 +5,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export function SignupForm() {
   const navigate = useNavigate()
@@ -96,9 +90,7 @@ export function SignupForm() {
                 disabled={isLoading}
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Must be at least 8 characters
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
             </Field>
 
             {error && (
@@ -107,12 +99,7 @@ export function SignupForm() {
               </div>
             )}
 
-            <Button
-              variant="primary"
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
+            <Button variant="primary" type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Sign up'}
             </Button>
           </FieldGroup>

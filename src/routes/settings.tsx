@@ -1,20 +1,13 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
-import { useNavigate, Link } from '@tanstack/react-router'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
-import { exchangeCodeForTokens, saveStravaConnection, disconnectStrava } from '@/lib/server/oauth'
+import { disconnectStrava, exchangeCodeForTokens, saveStravaConnection } from '@/lib/server/oauth'
 import { updateProfile } from '@/lib/server/auth'
 import { getUserDashboards, updateDashboard } from '@/lib/server/dashboards'
 import { Button } from '@/components/custom/Button/Button'
 import { Badge } from '@/components/custom/Badge/Badge'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
@@ -24,14 +17,18 @@ function SettingsPage() {
   const { user, stravaDataSource, refreshStravaConnection } = useAuth()
 
   return (
-    <SettingsPageContent user={user} stravaDataSource={stravaDataSource} refreshStravaConnection={refreshStravaConnection} />
+    <SettingsPageContent
+      user={user}
+      stravaDataSource={stravaDataSource}
+      refreshStravaConnection={refreshStravaConnection}
+    />
   )
 }
 
 function SettingsPageContent({
   user,
   stravaDataSource,
-  refreshStravaConnection
+  refreshStravaConnection,
 }: {
   user: ReturnType<typeof useAuth>['user']
   stravaDataSource: ReturnType<typeof useAuth>['stravaDataSource']
@@ -78,8 +75,7 @@ function SettingsPageContent({
 
   // Mutation to toggle profile visibility
   const toggleProfileVisibilityMutation = useMutation({
-    mutationFn: (profilePublic: boolean) =>
-      updateProfile({ data: { profilePublic } }),
+    mutationFn: (profilePublic: boolean) => updateProfile({ data: { profilePublic } }),
     onSuccess: () => {
       // Refresh auth context to get updated user data
       window.location.reload()
@@ -134,9 +130,7 @@ function SettingsPageContent({
         navigate({ to: '/' })
       } catch (err) {
         console.error('Failed to connect Strava:', err)
-        setError(
-          err instanceof Error ? err.message : 'Failed to connect Strava',
-        )
+        setError(err instanceof Error ? err.message : 'Failed to connect Strava')
       } finally {
         setIsConnecting(false)
       }
@@ -167,9 +161,7 @@ function SettingsPageContent({
       await refreshStravaConnection()
     } catch (err) {
       console.error('Failed to disconnect Strava:', err)
-      setError(
-        err instanceof Error ? err.message : 'Failed to disconnect Strava',
-      )
+      setError(err instanceof Error ? err.message : 'Failed to disconnect Strava')
     }
   }
 
@@ -181,10 +173,7 @@ function SettingsPageContent({
             <CardTitle>Connect Strava</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button
-              onClick={() => navigate({ to: '/login' })}
-              className="w-full"
-            >
+            <Button onClick={() => navigate({ to: '/login' })} className="w-full">
               Go to Login
             </Button>
           </CardContent>
@@ -200,15 +189,9 @@ function SettingsPageContent({
           <CardTitle>Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="heading--3">
-            {user.email}
-          </p>
-          <p className="heading--4">
-            {user.fullName}
-          </p>
-          <p className="heading--4">
-            {user.id}
-          </p>
+          <p className="heading--3">{user.email}</p>
+          <p className="heading--4">{user.fullName}</p>
+          <p className="heading--4">{user.id}</p>
           <p className="heading--4">
             {user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt}
           </p>
@@ -255,16 +238,11 @@ function SettingsPageContent({
                 value={profileUrl}
                 className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
               />
-              <Button
-                onClick={handleCopyProfileLink}
-                variant="secondary"
-              >
+              <Button onClick={handleCopyProfileLink} variant="secondary">
                 {copied ? 'Copied!' : 'Copy Link'}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              @{user.username}
-            </p>
+            <p className="text-sm text-muted-foreground mt-2">@{user.username}</p>
           </div>
         </CardContent>
       </Card>
@@ -295,7 +273,8 @@ function SettingsPageContent({
                   >
                     <p className="font-medium">{dashboard.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {dashboard.profile_count} {dashboard.profile_count === 1 ? 'profile' : 'profiles'}
+                      {dashboard.profile_count}{' '}
+                      {dashboard.profile_count === 1 ? 'profile' : 'profiles'}
                     </p>
                   </Link>
                   <div className="flex items-center gap-2">
@@ -331,15 +310,16 @@ function SettingsPageContent({
                       </>
                     )}
                     <div className="flex gap-1">
-                      {dashboard.is_default && (
-                        <Badge variant="secondary">Default</Badge>
-                      )}
-                      {dashboard.is_public && (
-                        <Badge variant="secondary">Public</Badge>
-                      )}
-                      <Badge variant={dashboard.current_user_role === 'owner' ? 'primary' : 'secondary'}>
-                        {dashboard.current_user_role === 'owner' ? 'Owner' :
-                         dashboard.current_user_role === 'editor' ? 'Editor' : 'Viewer'}
+                      {dashboard.is_default && <Badge variant="secondary">Default</Badge>}
+                      {dashboard.is_public && <Badge variant="secondary">Public</Badge>}
+                      <Badge
+                        variant={dashboard.current_user_role === 'owner' ? 'primary' : 'secondary'}
+                      >
+                        {dashboard.current_user_role === 'owner'
+                          ? 'Owner'
+                          : dashboard.current_user_role === 'editor'
+                            ? 'Editor'
+                            : 'Viewer'}
                       </Badge>
                     </div>
                   </div>
@@ -361,29 +341,25 @@ function SettingsPageContent({
         </CardContent>
       </Card>
 
-    <Card state="active">
-      <CardHeader>
-        <CardTitle>Strava</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-         
-        {error && (
-          <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-            {error}
-          </div>
-        )}
+      <Card state="active">
+        <CardHeader>
+          <CardTitle>Strava</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded">
+              {error}
+            </div>
+          )}
 
-        {stravaDataSource ? (
-          <>
+          {stravaDataSource ? (
+            <>
               <p className="heading--3">
-                Connected as {(stravaDataSource.athleteData as any)?.firstname}{' '}
-                {(stravaDataSource.athleteData as any)?.lastname}
+                Connected as {stravaDataSource.athleteData?.firstname}{' '}
+                {stravaDataSource.athleteData?.lastname}
               </p>
-              <p className="heading--4">
-                Athlete ID: {stravaDataSource.athleteId?.toString()}
-              </p>
+              <p className="heading--4">Athlete ID: {stravaDataSource.athleteId?.toString()}</p>
 
-            
               <Button
                 onClick={handleDisconnectStrava}
                 variant="primary"
@@ -392,23 +368,23 @@ function SettingsPageContent({
               >
                 Disconnect
               </Button>
-          </>
-        ) : (
-          <Button
-            onClick={handleConnectStrava}
-            disabled={isConnecting}
-            className="w-full"
-            variant="primary"
-          >
-            {isConnecting ? 'Connecting...' : 'Connect with Strava'}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-     <Button to="/" variant="primary" >
-     Back to Dashboard
-    </Button>
-    {/* <div>
+            </>
+          ) : (
+            <Button
+              onClick={handleConnectStrava}
+              disabled={isConnecting}
+              className="w-full"
+              variant="primary"
+            >
+              {isConnecting ? 'Connecting...' : 'Connect with Strava'}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+      <Button to="/" variant="primary">
+        Back to Dashboard
+      </Button>
+      {/* <div>
       <pre>{JSON.stringify(user, null, 2)}</pre>
       <pre>{JSON.stringify(stravaDataSource, null, 2)}</pre>
     </div> */}

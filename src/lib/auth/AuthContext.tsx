@@ -7,9 +7,9 @@
 
 import * as React from 'react'
 import { useRouter } from '@tanstack/react-router'
+import type { AuthUser } from '@/lib/server/auth'
 import { getCurrentUserWithStrava, signOut } from '@/lib/server/auth'
 import { saveStravaConnection } from '@/lib/server/oauth'
-import type { AuthUser } from '@/lib/server/auth'
 
 interface StravaDataSource {
   id: string
@@ -43,14 +43,12 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [user, setUser] = React.useState<AuthUser | null>(null)
-  const [stravaDataSource, setStravaDataSource] =
-    React.useState<StravaDataSource | null>(null)
+  const [stravaDataSource, setStravaDataSource] = React.useState<StravaDataSource | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
 
   const refreshUser = React.useCallback(async () => {
     try {
-      const { user: currentUser, stravaDataSource: strava } =
-        await getCurrentUserWithStrava()
+      const { user: currentUser, stravaDataSource: strava } = await getCurrentUserWithStrava()
       setUser(currentUser)
       setStravaDataSource(strava)
       return currentUser

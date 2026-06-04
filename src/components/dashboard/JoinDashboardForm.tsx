@@ -11,13 +11,7 @@ import { joinDashboard } from '@/lib/server/dashboards'
 import { Input } from '@/components/custom/Input/Input'
 import { Button } from '@/components/custom/Button/Button'
 import { Label } from '@/components/custom/Label/Label'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 interface JoinDashboardFormProps {
   userId: string
@@ -30,8 +24,7 @@ export function JoinDashboardForm({ userId }: JoinDashboardFormProps) {
   const queryClient = useQueryClient()
 
   const joinMutation = useMutation({
-    mutationFn: (code: string) =>
-      joinDashboard({ data: { inviteCode: code, userId } }),
+    mutationFn: (code: string) => joinDashboard({ data: { inviteCode: code, userId } }),
     onSuccess: (dashboard) => {
       // Invalidate dashboards list
       queryClient.invalidateQueries({ queryKey: ['user-dashboards'] })
@@ -52,16 +45,13 @@ export function JoinDashboardForm({ userId }: JoinDashboardFormProps) {
   }
 
   return (
-    <Card >
+    <Card>
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle>Join a Dashboard</CardTitle>
-
         </CardHeader>
         <CardContent>
-          <CardDescription>
-            Enter an invite code to join an existing dashboard
-          </CardDescription>
+          <CardDescription>Enter an invite code to join an existing dashboard</CardDescription>
           <div className="space-y-4">
             <div className="space-y-2 flex flex-col gap-2">
               <Label htmlFor="invite-code">Invite Code</Label>

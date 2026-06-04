@@ -14,11 +14,11 @@ import { Button } from '@/components/custom/Button/Button'
 import { Label } from '@/components/custom/Label/Label'
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/custom/Card'
 
 interface CreateDashboardFormProps {
@@ -52,9 +52,7 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
       navigate({ to: `/dashboards/${dashboard.id}` })
     },
     onError: (err) => {
-      setError(
-        err instanceof Error ? err.message : 'Failed to create dashboard'
-      )
+      setError(err instanceof Error ? err.message : 'Failed to create dashboard')
     },
   })
 
@@ -71,7 +69,6 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle>Create a New Dashboard</CardTitle>
-
         </CardHeader>
         <CardContent>
           <CardDescription>
@@ -90,9 +87,7 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
               />
             </div>
             <div className="space-y-2 flex flex-col gap-2">
-              <Label htmlFor="dashboard-description">
-                Description (optional)
-              </Label>
+              <Label htmlFor="dashboard-description">Description (optional)</Label>
               <Textarea
                 id="dashboard-description"
                 placeholder="Track weekly running stats and goals..."
@@ -131,11 +126,7 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
           </div>
         </CardContent>
         <CardFooter>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => navigate({ to: '/dashboards' })}
-          >
+          <Button type="button" variant="secondary" onClick={() => navigate({ to: '/dashboards' })}>
             Cancel
           </Button>
           <Button

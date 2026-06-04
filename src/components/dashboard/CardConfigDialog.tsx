@@ -1,32 +1,17 @@
 import * as React from 'react'
+import type { ActivityType, DashboardCard, Metric, TimeFrame } from '@/types/dashboard'
 import { SidePanel } from '@/components/custom/SidePanel'
 import { Button } from '@/components/custom/Button/Button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Card,
-  CardTitle,
-  CardContent,
-  CardHeader,
-} from '@/components/custom/Card/Card'
-import type {
-  ActivityType,
-  Metric,
-  TimeFrame,
-  DashboardCard,
-} from '@/types/dashboard'
-import {
-  TIME_FRAMES,
-  METRIC_LABELS,
-  METRIC_UNITS,
-  TIME_FRAME_LABELS,
-} from '@/types/dashboard'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/custom/Card/Card'
+import { METRIC_LABELS, METRIC_UNITS, TIME_FRAMES, TIME_FRAME_LABELS } from '@/types/dashboard'
 import { ACTIVITY_CONFIGS } from '@/config/activities'
 import {
   addDashboardCard,
-  updateDashboardCard,
   deleteDashboardCard,
+  updateDashboardCard,
 } from '@/lib/server/dashboardConfig'
 
 interface CardConfigDialogProps {
@@ -49,16 +34,18 @@ export function CardConfigDialog({
   // Form state
   const [title, setTitle] = React.useState(existingCard?.title || '')
   const [timeFrame, setTimeFrame] = React.useState<TimeFrame>(
-    (existingCard?.timeFrame as TimeFrame) || 'week',
+    existingCard ? (existingCard.timeFrame as TimeFrame) : 'week',
   )
-  const [selectedActivities, setSelectedActivities] = React.useState<ActivityType[]>(
-    (existingCard?.activityTypes as ActivityType[]) || [],
+  const [selectedActivities, setSelectedActivities] = React.useState<Array<ActivityType>>(
+    existingCard ? (existingCard.activityTypes as Array<ActivityType>) : [],
   )
   const [metric, setMetric] = React.useState<Metric>(
-    (existingCard?.metric as Metric) || 'distance',
+    existingCard ? (existingCard.metric as Metric) : 'distance',
   )
   const [goal, setGoal] = React.useState<string>(
-    existingCard?.goal ? formatGoalForDisplay(existingCard.goal, existingCard.metric as Metric) : '',
+    existingCard?.goal
+      ? formatGoalForDisplay(existingCard.goal, existingCard.metric as Metric)
+      : '',
   )
 
   // Reset state when dialog opens
@@ -66,7 +53,7 @@ export function CardConfigDialog({
     if (open && existingCard) {
       setTitle(existingCard.title)
       setTimeFrame(existingCard.timeFrame as TimeFrame)
-      setSelectedActivities(existingCard.activityTypes as ActivityType[])
+      setSelectedActivities(existingCard.activityTypes as Array<ActivityType>)
       setMetric(existingCard.metric as Metric)
       setGoal(
         existingCard.goal
@@ -96,9 +83,7 @@ export function CardConfigDialog({
     const metrics = new Set<Metric>()
     selectedActivities.forEach((activityType) => {
       // Find the config for this activity type
-      const config = Object.values(ACTIVITY_CONFIGS).find(
-        (c) => c.activityType === activityType,
-      )
+      const config = Object.values(ACTIVITY_CONFIGS).find((c) => c.activityType === activityType)
       if (config) {
         if (config.metrics.distance) metrics.add('distance')
         if (config.metrics.count) metrics.add('count')
@@ -113,9 +98,8 @@ export function CardConfigDialog({
   React.useEffect(() => {
     if (selectedActivities.length > 0 && !availableMetrics.has(metric)) {
       // Pick the first available metric
-      const firstAvailable = Array.from(availableMetrics)[0]
-      if (firstAvailable) {
-        setMetric(firstAvailable)
+      if (availableMetrics.size > 0) {
+        setMetric(Array.from(availableMetrics)[0])
       }
     }
   }, [availableMetrics, metric, selectedActivities.length])
@@ -202,11 +186,7 @@ export function CardConfigDialog({
         footer={
           <div className="flex flex-1 gap-2 justify-between w-full">
             {isEditMode && (
-              <Button
-                variant="secondary"
-                destructive
-                onClick={handleDelete}
-              >
+              <Button variant="secondary" destructive onClick={handleDelete}>
                 Delete Card
               </Button>
             )}
@@ -284,10 +264,7 @@ export function CardConfigDialog({
                     <FieldLabel>Metric to Track</FieldLabel>
                     <div className="space-y-2 mt-2">
                       {Array.from(availableMetrics).map((m) => (
-                        <label
-                          key={m}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
+                        <label key={m} className="flex items-center gap-2 cursor-pointer">
                           <input
                             type="radio"
                             name="metric"
@@ -303,9 +280,7 @@ export function CardConfigDialog({
                   </div>
 
                   <Field>
-                    <FieldLabel htmlFor="goal">
-                      Goal ({METRIC_UNITS[metric]})
-                    </FieldLabel>
+                    <FieldLabel htmlFor="goal">Goal ({METRIC_UNITS[metric]})</FieldLabel>
                     <Input
                       id="goal"
                       type="number"

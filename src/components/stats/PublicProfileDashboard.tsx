@@ -7,21 +7,12 @@
 
 import * as React from 'react'
 import type { DashboardCard, Metric } from '@/types/dashboard'
-import type { StravaStats, StravaActivity, ActivityTotals } from '@/types/strava'
+import type { ActivityTotals, StravaActivity, StravaStats } from '@/types/strava'
 import { activityTypesToStravaTypes } from '@/config/activities'
-import {
-  filterActivitiesByTimeFrame,
-  getTimeFrameDescription,
-} from '@/lib/dashboard/timeframes'
+import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dashboard/timeframes'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
 
 interface PublicProfileData {
@@ -41,9 +32,9 @@ interface PublicProfileData {
     country: string | null
     profile: string | null
   } | null
-  cards: DashboardCard[]
+  cards: Array<DashboardCard>
   stats: StravaStats | null
-  activities: StravaActivity[]
+  activities: Array<StravaActivity>
   error?: string
 }
 
@@ -51,9 +42,7 @@ interface PublicProfileDashboardProps {
   profileData: PublicProfileData
 }
 
-export function PublicProfileDashboard({
-  profileData,
-}: PublicProfileDashboardProps) {
+export function PublicProfileDashboard({ profileData }: PublicProfileDashboardProps) {
   const { profile, athlete, cards, stats, activities, error } = profileData
 
   // Get display name
@@ -73,18 +62,12 @@ export function PublicProfileDashboard({
         <CardHeader>
           <div className="flex items-center gap-4">
             {athlete?.profile && (
-              <img
-                src={athlete.profile}
-                alt={displayName}
-                className="w-16 h-16 rounded-full"
-              />
+              <img src={athlete.profile} alt={displayName} className="w-16 h-16 rounded-full" />
             )}
             <div>
               <CardTitle>{displayName}</CardTitle>
               <p className="text-sm text-muted-foreground">@{profile.username}</p>
-              {location && (
-                <CardDescription className="mt-1">{location}</CardDescription>
-              )}
+              {location && <CardDescription className="mt-1">{location}</CardDescription>}
             </div>
           </div>
         </CardHeader>
@@ -120,9 +103,7 @@ export function PublicProfileDashboard({
             <CardTitle>No Dashboard Cards</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription>
-              This user hasn't set up their dashboard yet.
-            </CardDescription>
+            <CardDescription>This user hasn't set up their dashboard yet.</CardDescription>
           </CardContent>
         </Card>
       )}
@@ -143,14 +124,11 @@ export function PublicProfileDashboard({
  */
 interface ReadOnlyDashboardCardProps {
   config: DashboardCard
-  allActivities: StravaActivity[]
+  allActivities: Array<StravaActivity>
   stats?: StravaStats | null
 }
 
-function ReadOnlyDashboardCard({
-  config,
-  allActivities,
-}: ReadOnlyDashboardCardProps) {
+function ReadOnlyDashboardCard({ config, allActivities }: ReadOnlyDashboardCardProps) {
   // Convert ActivityType enums to Strava type strings
   const stravaTypes = React.useMemo(
     () => activityTypesToStravaTypes(config.activityTypes),
@@ -164,8 +142,6 @@ function ReadOnlyDashboardCard({
 
   // Aggregate activities based on selected activity types
   const totals = React.useMemo<ActivityTotals | null>(() => {
-    if (!filteredActivities) return null
-
     if (stravaTypes.length === 0) return null
 
     // Filter activities that match any of the types
@@ -175,12 +151,12 @@ function ReadOnlyDashboardCard({
 
     // Aggregate them together
     return relevantActivities.reduce(
-      (totals, activity) => ({
-        count: totals.count + 1,
-        distance: totals.distance + activity.distance,
-        moving_time: totals.moving_time + activity.moving_time,
-        elapsed_time: totals.elapsed_time + activity.elapsed_time,
-        elevation_gain: totals.elevation_gain + activity.total_elevation_gain,
+      (acc, activity) => ({
+        count: acc.count + 1,
+        distance: acc.distance + activity.distance,
+        moving_time: acc.moving_time + activity.moving_time,
+        elapsed_time: acc.elapsed_time + activity.elapsed_time,
+        elevation_gain: acc.elevation_gain + activity.total_elevation_gain,
       }),
       {
         count: 0,

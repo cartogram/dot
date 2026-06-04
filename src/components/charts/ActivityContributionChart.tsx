@@ -1,17 +1,11 @@
-import {
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-} from 'recharts'
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { ContributionPoint } from '@/lib/dashboard/chartData'
 import type { Metric } from '@/types/dashboard'
 import { METRIC_UNITS } from '@/types/dashboard'
 import './charts.css'
 
 interface ActivityContributionChartProps {
-  data: ContributionPoint[]
+  data: Array<ContributionPoint>
   metric: Metric
 }
 
@@ -23,10 +17,7 @@ const COLORS = [
   'var(--chart-5)',
 ]
 
-export function ActivityContributionChart({
-  data,
-  metric,
-}: ActivityContributionChartProps) {
+export function ActivityContributionChart({ data, metric }: ActivityContributionChartProps) {
   const unit = METRIC_UNITS[metric]
 
   // Custom tooltip renderer using CSS classes
@@ -37,13 +28,15 @@ export function ActivityContributionChart({
       const name = payload[0].name
 
       return (
-        <div className="Chart-tooltip">
-          <div className="Chart-tooltip-title">{name}</div>
-          <div className="Chart-tooltip-row">
+        <div className="Chart__Tooltip">
+          <div className="Chart__TooltipTitle">{name}</div>
+          <div className="Chart__TooltipRow">
             <span style={{ color: 'var(--muted-foreground)' }}>Total:</span>
-            <span style={{ fontWeight: 600 }}>{val} {unit}</span>
+            <span style={{ fontWeight: 600 }}>
+              {val} {unit}
+            </span>
           </div>
-          <div className="Chart-tooltip-row">
+          <div className="Chart__TooltipRow">
             <span style={{ color: 'var(--muted-foreground)' }}>Share:</span>
             <span style={{ fontWeight: 600 }}>{pct}%</span>
           </div>
@@ -54,9 +47,9 @@ export function ActivityContributionChart({
   }
 
   return (
-    <div className="Chart-contribution-layout">
+    <div className="Chart__ContributionLayout">
       {/* Donut Chart */}
-      <div className="Chart-contribution-pie">
+      <div className="Chart__ContributionPie">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Tooltip content={<CustomTooltip />} />
@@ -70,9 +63,9 @@ export function ActivityContributionChart({
               dataKey="value"
             >
               {data.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={COLORS[index % COLORS.length]} 
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
                   stroke="var(--card)"
                   strokeWidth={2}
                 />
@@ -83,25 +76,17 @@ export function ActivityContributionChart({
       </div>
 
       {/* Legend - custom list utilizing external stylesheet */}
-      <div className="Chart-legend">
+      <div className="Chart__Legend">
         {data.map((item, index) => {
           const color = COLORS[index % COLORS.length]
           return (
-            <div key={item.name} className="Chart-legend-item">
-              <div className="Chart-legend-label">
-                <span 
-                  className="Chart-legend-dot"
-                  style={{ backgroundColor: color }} 
-                />
-                <span className="Chart-legend-text">
-                  {item.name}
-                </span>
+            <div key={item.name} className="Chart__LegendItem">
+              <div className="Chart__LegendLabel">
+                <span className="Chart__LegendDot" style={{ backgroundColor: color }} />
+                <span className="Chart__LegendText">{item.name}</span>
               </div>
-              <div className="Chart-legend-value">
-                <span className="Chart-legend-number">
-                  {item.value}
-                </span>
-                ({item.percentage}%)
+              <div className="Chart__LegendValue">
+                <span className="Chart__LegendNumber">{item.value}</span>({item.percentage}%)
               </div>
             </div>
           )

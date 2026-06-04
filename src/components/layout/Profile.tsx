@@ -14,9 +14,8 @@ export function Profile() {
       <div className="Profile__Section">
         {/* <span className="heading--3 Dash">{user.email}</span> */}
         <Badge variant="secondary">
-          {user.createdAt instanceof Date ? user.createdAt.toDateString() : new Date(user.createdAt).toDateString()}
+          {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
         </Badge>
-        {/* <span className="heading--4">{user.id}</span> */}
       </div>
     </div>
   )

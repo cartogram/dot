@@ -1,9 +1,17 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import { playwright } from '@vitest/browser-playwright'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@/lib/server/getUserStats': fileURLToPath(
+        new URL('./src/test/mocks/getUserStats.stub.ts', import.meta.url),
+      ),
+    },
+  },
   plugins: [
     react(),
     viteTsConfigPaths({

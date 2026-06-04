@@ -3,6 +3,7 @@
 ## Overview
 
 Migrate from Supabase (auth + database) to:
+
 - **Prisma** for database ORM
 - **TanStack Start's built-in `useSession`** for session management
 - **Custom password hashing** (scrypt with per-user salt for security)
@@ -13,42 +14,47 @@ Migrate from Supabase (auth + database) to:
 ## Current Supabase Dependencies
 
 ### Auth
+
 - `@supabase/supabase-js` - Auth client
 - `@supabase/ssr` - Cookie-based session management
 - Supabase Auth (email/password login)
 - Supabase triggers for profile creation
 
 ### Database
+
 - Supabase PostgreSQL with RLS
 - Tables: `profiles`, `data_sources`, `dashboards`, `dashboard_profiles`, `dashboard_invites`
 - RLS policies for authorization
 
 ### Files Using Supabase
-| File | Usage |
-|------|-------|
-| `src/lib/supabase/client.ts` | Browser client |
-| `src/lib/supabase/server.ts` | Server client (service role) |
-| `src/lib/auth/SimpleAuthContext.tsx` | Auth state management |
-| `src/components/auth/LoginForm.tsx` | Login UI |
-| `src/routes/settings.tsx` | OAuth callback, data_sources |
-| `src/lib/server/dashboards.ts` | Dashboard CRUD |
-| `src/lib/server/getDashboardData.ts` | Fetch dashboard data |
-| `src/lib/server/getUserStats.ts` | Fetch user stats |
-| `src/lib/server/auth.ts` | Auth helper for routes |
-| `src/lib/supabase/dashboard.ts` | Dashboard config |
-| `src/lib/supabase/dashboardStorage.ts` | Dashboard storage |
+
+| File                                   | Usage                        |
+| -------------------------------------- | ---------------------------- |
+| `src/lib/supabase/client.ts`           | Browser client               |
+| `src/lib/supabase/server.ts`           | Server client (service role) |
+| `src/lib/auth/SimpleAuthContext.tsx`   | Auth state management        |
+| `src/components/auth/LoginForm.tsx`    | Login UI                     |
+| `src/routes/settings.tsx`              | OAuth callback, data_sources |
+| `src/lib/server/dashboards.ts`         | Dashboard CRUD               |
+| `src/lib/server/getDashboardData.ts`   | Fetch dashboard data         |
+| `src/lib/server/getUserStats.ts`       | Fetch user stats             |
+| `src/lib/server/auth.ts`               | Auth helper for routes       |
+| `src/lib/supabase/dashboard.ts`        | Dashboard config             |
+| `src/lib/supabase/dashboardStorage.ts` | Dashboard storage            |
 
 ---
 
 ## Target Architecture
 
 ### Auth System
+
 - **TanStack Start `useSession`** - Built-in encrypted cookie sessions
 - **Password hashing** - scrypt with per-user salt (secure)
 - **No Session table** - Sessions stored in encrypted cookies
 - **Route protection** - `beforeLoad` + route context
 
 ### Database
+
 - **Prisma ORM** - Type-safe queries
 - **Single client** - No edge client needed (useSession handles sessions)
 - **No RLS** - Authorization handled in application code
@@ -252,7 +258,7 @@ export async function hashPassword(password: string, salt: string): Promise<stri
 export async function comparePasswords(
   password: string,
   salt: string,
-  hashedPassword: string
+  hashedPassword: string,
 ): Promise<boolean> {
   const hash = await hashPassword(password, salt)
   const hashBuffer = Buffer.from(hash, 'hex')
@@ -370,78 +376,75 @@ export const signIn = createServerFn({ method: 'POST' })
 // SIGN OUT
 // =====================================================
 
-export const signOut = createServerFn({ method: 'POST' })
-  .handler(async () => {
-    const session = await useAppSession()
-    await session.clear()
-    throw redirect({ to: '/login' })
-  })
+export const signOut = createServerFn({ method: 'POST' }).handler(async () => {
+  const session = await useAppSession()
+  await session.clear()
+  throw redirect({ to: '/login' })
+})
 
 // =====================================================
 // GET CURRENT USER
 // =====================================================
 
-export const getCurrentUser = createServerFn({ method: 'GET' })
-  .handler(async () => {
-    const session = await useAppSession()
+export const getCurrentUser = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await useAppSession()
 
-    if (!session.data.userId) {
-      return null
-    }
+  if (!session.data.userId) {
+    return null
+  }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.data.userId },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
-
-    return user
+  const user = await prisma.user.findUnique({
+    where: { id: session.data.userId },
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   })
+
+  return user
+})
 
 // =====================================================
 // GET USER WITH STRAVA DATA
 // =====================================================
 
-export const getCurrentUserWithStrava = createServerFn({ method: 'GET' })
-  .handler(async () => {
-    const session = await useAppSession()
+export const getCurrentUserWithStrava = createServerFn({ method: 'GET' }).handler(async () => {
+  const session = await useAppSession()
 
-    if (!session.data.userId) {
-      return { user: null, stravaDataSource: null }
-    }
+  if (!session.data.userId) {
+    return { user: null, stravaDataSource: null }
+  }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.data.userId },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    })
-
-    if (!user) {
-      return { user: null, stravaDataSource: null }
-    }
-
-    const stravaDataSource = await prisma.dataSource.findFirst({
-      where: {
-        userId: user.id,
-        provider: 'strava',
-        isActive: true,
-      },
-    })
-
-    return { user, stravaDataSource }
+  const user = await prisma.user.findUnique({
+    where: { id: session.data.userId },
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      role: true,
+      createdAt: true,
+      updatedAt: true,
+    },
   })
+
+  if (!user) {
+    return { user: null, stravaDataSource: null }
+  }
+
+  const stravaDataSource = await prisma.dataSource.findFirst({
+    where: {
+      userId: user.id,
+      provider: 'strava',
+      isActive: true,
+    },
+  })
+
+  return { user, stravaDataSource }
+})
 ```
 
 ---
@@ -605,15 +608,13 @@ All server functions need to be updated to use Prisma instead of Supabase.
 ### Key Changes Pattern
 
 **Before (Supabase):**
+
 ```typescript
-const { data, error } = await supabase
-  .from('dashboards')
-  .select('*')
-  .eq('id', dashboardId)
-  .single()
+const { data, error } = await supabase.from('dashboards').select('*').eq('id', dashboardId).single()
 ```
 
 **After (Prisma):**
+
 ```typescript
 const dashboard = await prisma.dashboard.findUnique({
   where: { id: dashboardId },
@@ -622,13 +623,13 @@ const dashboard = await prisma.dashboard.findUnique({
 
 ### Files to Update
 
-| File | Changes |
-|------|---------|
-| `src/lib/server/dashboards.ts` | Replace Supabase queries with Prisma |
-| `src/lib/server/getDashboardData.ts` | Replace Supabase queries with Prisma |
-| `src/lib/server/getUserStats.ts` | Replace Supabase queries with Prisma |
-| `src/lib/server/oauth.ts` | Keep OAuth logic, update DB calls to Prisma |
-| `src/lib/server/strava.ts` | Update token storage to use Prisma |
+| File                                 | Changes                                     |
+| ------------------------------------ | ------------------------------------------- |
+| `src/lib/server/dashboards.ts`       | Replace Supabase queries with Prisma        |
+| `src/lib/server/getDashboardData.ts` | Replace Supabase queries with Prisma        |
+| `src/lib/server/getUserStats.ts`     | Replace Supabase queries with Prisma        |
+| `src/lib/server/oauth.ts`            | Keep OAuth logic, update DB calls to Prisma |
+| `src/lib/server/strava.ts`           | Update token storage to use Prisma          |
 
 ---
 
@@ -636,46 +637,47 @@ const dashboard = await prisma.dashboard.findUnique({
 
 ### 6.1 Files to Create
 
-| File | Purpose |
-|------|---------|
-| `prisma/schema.prisma` | Database schema |
-| `src/lib/db/client.ts` | Prisma client |
-| `src/lib/auth/session.ts` | TanStack useSession wrapper |
-| `src/lib/auth/password.ts` | Password utilities |
-| `src/lib/server/auth.ts` | Auth server functions |
+| File                       | Purpose                     |
+| -------------------------- | --------------------------- |
+| `prisma/schema.prisma`     | Database schema             |
+| `src/lib/db/client.ts`     | Prisma client               |
+| `src/lib/auth/session.ts`  | TanStack useSession wrapper |
+| `src/lib/auth/password.ts` | Password utilities          |
+| `src/lib/server/auth.ts`   | Auth server functions       |
 
 ### 6.2 Files to Update
 
-| File | Changes |
-|------|---------|
-| `src/routes/__root.tsx` | Add beforeLoad to fetch user |
-| `src/routes/login.tsx` | Use new auth, redirect if logged in |
-| `src/routes/logout.tsx` | Use signOut server function |
-| `src/routes/signup.tsx` | Use new auth |
-| `src/routes/settings.tsx` | Update to use Prisma |
-| `src/routes/dashboards/*.tsx` | Update auth checks |
-| `src/components/auth/LoginForm.tsx` | Use new signIn function |
-| `src/lib/server/dashboards.ts` | Use Prisma |
-| `src/lib/server/getDashboardData.ts` | Use Prisma |
-| `src/lib/server/getUserStats.ts` | Use Prisma |
+| File                                 | Changes                             |
+| ------------------------------------ | ----------------------------------- |
+| `src/routes/__root.tsx`              | Add beforeLoad to fetch user        |
+| `src/routes/login.tsx`               | Use new auth, redirect if logged in |
+| `src/routes/logout.tsx`              | Use signOut server function         |
+| `src/routes/signup.tsx`              | Use new auth                        |
+| `src/routes/settings.tsx`            | Update to use Prisma                |
+| `src/routes/dashboards/*.tsx`        | Update auth checks                  |
+| `src/components/auth/LoginForm.tsx`  | Use new signIn function             |
+| `src/lib/server/dashboards.ts`       | Use Prisma                          |
+| `src/lib/server/getDashboardData.ts` | Use Prisma                          |
+| `src/lib/server/getUserStats.ts`     | Use Prisma                          |
 
 ### 6.3 Files to Delete
 
-| File | Reason |
-|------|--------|
-| `src/lib/supabase/client.ts` | Replaced by Prisma |
-| `src/lib/supabase/server.ts` | Replaced by Prisma |
-| `src/lib/supabase/types.ts` | Replaced by Prisma types |
-| `src/lib/supabase/dashboard.ts` | Merged into server functions |
-| `src/lib/supabase/dashboardStorage.ts` | Merged into server functions |
-| `src/lib/auth/SimpleAuthContext.tsx` | No longer needed (use route context) |
-| `supabase/` directory | No longer needed |
+| File                                   | Reason                               |
+| -------------------------------------- | ------------------------------------ |
+| `src/lib/supabase/client.ts`           | Replaced by Prisma                   |
+| `src/lib/supabase/server.ts`           | Replaced by Prisma                   |
+| `src/lib/supabase/types.ts`            | Replaced by Prisma types             |
+| `src/lib/supabase/dashboard.ts`        | Merged into server functions         |
+| `src/lib/supabase/dashboardStorage.ts` | Merged into server functions         |
+| `src/lib/auth/SimpleAuthContext.tsx`   | No longer needed (use route context) |
+| `supabase/` directory                  | No longer needed                     |
 
 ---
 
 ## Phase 7: Environment Variables
 
 ### Remove
+
 ```
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
@@ -683,12 +685,14 @@ VITE_SUPABASE_SERVICE_ROLE_KEY
 ```
 
 ### Add
+
 ```
 DATABASE_URL=postgresql://...
 SESSION_SECRET=your-secret-at-least-32-characters-long
 ```
 
 ### Keep
+
 ```
 VITE_STRAVA_CLIENT_ID
 STRAVA_CLIENT_SECRET
@@ -755,22 +759,22 @@ SELECT * FROM public.dashboard_invites;
 
 ## Key Differences from Fondfolio
 
-| Aspect | This Plan | Fondfolio |
-|--------|-----------|-----------|
-| Session storage | Encrypted cookie (useSession) | Database table |
-| Session hook | `useSession` from TanStack | Custom implementation |
-| Edge client | Not needed | Required for middleware |
-| Password security | Same (scrypt + salt) | Same |
-| Route protection | beforeLoad + context | Middleware + server checks |
+| Aspect            | This Plan                     | Fondfolio                  |
+| ----------------- | ----------------------------- | -------------------------- |
+| Session storage   | Encrypted cookie (useSession) | Database table             |
+| Session hook      | `useSession` from TanStack    | Custom implementation      |
+| Edge client       | Not needed                    | Required for middleware    |
+| Password security | Same (scrypt + salt)          | Same                       |
+| Route protection  | beforeLoad + context          | Middleware + server checks |
 
 ---
 
 ## Risks & Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Data loss during migration | Full backup before migration |
-| Auth downtime | Maintenance window, notify users |
-| Password reset needed | Send reset emails to all users |
-| Strava OAuth still works | Keep same OAuth flow, update DB calls |
-| Session secret exposure | Store in environment variables only |
+| Risk                       | Mitigation                            |
+| -------------------------- | ------------------------------------- |
+| Data loss during migration | Full backup before migration          |
+| Auth downtime              | Maintenance window, notify users      |
+| Password reset needed      | Send reset emails to all users        |
+| Strava OAuth still works   | Keep same OAuth flow, update DB calls |
+| Session secret exposure    | Store in environment variables only   |

@@ -25,7 +25,5 @@ export const Route = createFileRoute('/dashboards/new')({
 function NewDashboardPage() {
   const { user } = Route.useRouteContext()
 
-  return (
-    <CreateDashboardForm userId={user.id} />
-  )
+  return <CreateDashboardForm userId={user.id} />
 }

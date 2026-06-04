@@ -1,4 +1,4 @@
-import type { YearlyGoals, LegacyYearlyGoals } from '@/types/strava'
+import type { LegacyYearlyGoals, YearlyGoals } from '@/types/strava'
 
 const GOALS_STORAGE_KEY = 'yearly_goals'
 
@@ -45,9 +45,7 @@ function isLegacyFormat(goals: any): goals is LegacyYearlyGoals {
     'runs' in goals ||
     'swims' in goals ||
     (goals.visibility &&
-      ('rides' in goals.visibility ||
-        'runs' in goals.visibility ||
-        'swims' in goals.visibility))
+      ('rides' in goals.visibility || 'runs' in goals.visibility || 'swims' in goals.visibility))
   )
 }
 
@@ -75,12 +73,18 @@ export function getStoredGoals(): YearlyGoals {
     }
 
     // Ensure combined field exists (for backward compatibility)
-    const goals = parsed as YearlyGoals
+    const goals = parsed as Partial<YearlyGoals>
     if (!goals.combined) {
       goals.combined = {}
     }
+    if (!goals.activities) {
+      goals.activities = {}
+    }
+    if (!goals.visibility) {
+      goals.visibility = {}
+    }
 
-    return goals
+    return goals as YearlyGoals
   } catch {
     return { activities: {}, visibility: {}, combined: {} }
   }

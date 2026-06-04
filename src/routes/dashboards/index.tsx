@@ -13,13 +13,7 @@ import { DashboardListCard } from '@/components/dashboard/DashboardListCard'
 import { JoinDashboardForm } from '@/components/dashboard/JoinDashboardForm'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Button } from '@/components/custom/Button/Button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/custom/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { getCurrentUser } from '@/lib/server/auth'
 
 export const Route = createFileRoute('/dashboards/')({
@@ -35,9 +29,7 @@ export const Route = createFileRoute('/dashboards/')({
 
 function DashboardsPage() {
   const { user } = Route.useRouteContext()
-  return (
-    <DashboardsContent userId={user.id} />
-  )
+  return <DashboardsContent userId={user.id} />
 }
 
 function DashboardsContent({ userId }: { userId: string }) {
@@ -63,9 +55,7 @@ function DashboardsContent({ userId }: { userId: string }) {
         </CardHeader>
         <CardContent>
           <CardDescription>
-            {error instanceof Error
-              ? error.message
-              : 'Failed to load dashboards'}
+            {error instanceof Error ? error.message : 'Failed to load dashboards'}
           </CardDescription>
         </CardContent>
       </Card>
@@ -102,14 +92,12 @@ function DashboardsContent({ userId }: { userId: string }) {
           </CardHeader>
           <CardContent>
             <CardDescription>
-              Create a dashboard to track and share your activities, or join an
-              existing dashboard using an invite code.
+              Create a dashboard to track and share your activities, or join an existing dashboard
+              using an invite code.
             </CardDescription>
           </CardContent>
         </Card>
       )}
-
-
 
       {/* Back to Home */}
       <div className="flex justify-center">

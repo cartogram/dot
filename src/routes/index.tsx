@@ -18,8 +18,6 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
-
-
   // User is authenticated - show dashboard
   console.log('[Index Route] User authenticated - showing dashboard')
   return (

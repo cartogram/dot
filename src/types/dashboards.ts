@@ -61,7 +61,7 @@ export interface DashboardProfileWithUser extends DashboardProfile {
 // DASHBOARD WITH PROFILES (for list view)
 // =====================================================
 export interface DashboardWithProfiles extends Dashboard {
-  profiles: DashboardProfileWithUser[]
+  profiles: Array<DashboardProfileWithUser>
   profileCount: number
   currentUserRole: DashboardRole
 }
@@ -81,17 +81,17 @@ export interface ProfileActivities {
     lastname: string | null
     profile: string | null
   } | null
-  activities: StravaActivity[]
+  activities: Array<StravaActivity>
   error?: string
 }
 
 export interface DashboardData {
   dashboard: Dashboard
-  profiles: DashboardProfileWithUser[]
+  profiles: Array<DashboardProfileWithUser>
   currentUserRole: DashboardRole | null // null if viewing public dashboard without membership
-  cards: DashboardCard[]
-  profileActivities: ProfileActivities[]
-  combinedActivities: StravaActivity[]
+  cards: Array<DashboardCard>
+  profileActivities: Array<ProfileActivities>
+  combinedActivities: Array<StravaActivity>
   canEdit: boolean
   error?: string
 }

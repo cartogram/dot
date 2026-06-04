@@ -58,10 +58,10 @@ export function getTimeFrameEndDate(
  * Filter activities by time frame
  */
 export function filterActivitiesByTimeFrame(
-  activities: StravaActivity[] | undefined,
+  activities: Array<StravaActivity> | undefined,
   timeFrame: TimeFrame,
   customRange?: { start: string; end: string },
-): StravaActivity[] {
+): Array<StravaActivity> {
   if (!activities) return []
 
   const startDate = getTimeFrameStartDate(timeFrame, customRange)
@@ -72,10 +72,7 @@ export function filterActivitiesByTimeFrame(
       const activityDate = new Date(activity.start_date)
       return activityDate >= startDate && activityDate <= endDate
     })
-    .sort(
-      (a, b) =>
-        new Date(b.start_date).getTime() - new Date(a.start_date).getTime(),
-    )
+    .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime())
 }
 
 /**

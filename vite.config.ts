@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -7,18 +8,22 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const clientDbMock = fileURLToPath(new URL('./src/lib/db/client.client.ts', import.meta.url))
+
+// Swap `@/lib/db/client` for the browser-safe mock on non-SSR builds.
+// Node-only packages (pg, @prisma/adapter-pg) must never reach the browser —
+// the runtime pg classes extend EventEmitter from Node's `events` module,
+// which Vite stubs in the browser, producing "Class extends value undefined".
 const clientDbAliasPlugin = () => ({
   name: 'client-db-alias',
   enforce: 'pre' as const,
-  resolveId(source: string, importer: string | undefined, options: { ssr?: boolean }) {
-    const isDbClient = source === '@/lib/db/client' || 
-                       source.endsWith('/src/lib/db/client.ts') || 
-                       source.endsWith('/src/lib/db/client')
-    if (isDbClient && !options?.ssr) {
-      return '/Users/matt/src/Cartogram/distance-over-time/src/lib/db/client.client.ts'
+  resolveId(source: string, _importer: string | undefined, options: { ssr?: boolean }) {
+    if (options.ssr) return null
+    if (source === '@/lib/db/client' || source.endsWith('/lib/db/client')) {
+      return clientDbMock
     }
     return null
-  }
+  },
 })
 
 const config = defineConfig({
@@ -57,6 +62,12 @@ const config = defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    // Belt-and-braces: keep Node-only packages out of the client prebundle
+    // entirely, so a misrouted import surfaces as a clear resolution error
+    // instead of a cryptic "Class extends undefined" at runtime.
+    exclude: ['pg', '@prisma/adapter-pg', '@prisma/client'],
+  },
 })
 
 export default config

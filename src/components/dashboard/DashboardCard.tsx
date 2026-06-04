@@ -1,28 +1,25 @@
 import * as React from 'react'
+import { CardConfigDialog } from './CardConfigDialog'
 import type { DashboardCard as DashboardCardType, Metric, TimeFrame } from '@/types/dashboard'
-import type { StravaActivity, ActivityTotals } from '@/types/strava'
+import type { ActivityTotals, StravaActivity } from '@/types/strava'
 import { activityTypesToStravaTypes } from '@/config/activities'
-import {
-  filterActivitiesByTimeFrame,
-  getTimeFrameDescription,
-} from '@/lib/dashboard/timeframes'
+import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dashboard/timeframes'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { Spinner } from '@/components/ui/spinner'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
-import { CardConfigDialog } from './CardConfigDialog'
 import {
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
 } from '@/components/custom/Card'
 
 interface DashboardCardProps {
   config: DashboardCardType
   dashboardId: string
-  allActivities: StravaActivity[] | undefined
+  allActivities: Array<StravaActivity> | undefined
   isLoading: boolean
   onUpdate: () => void
 }
@@ -53,16 +50,16 @@ export function DashboardCard({
 
   // Aggregate activities based on selected activity types
   const totals = React.useMemo<ActivityTotals | null>(() => {
-    if (isLoading || !filteredCardActivities) return null
+    if (isLoading) return null
 
     // Aggregate them together
     return filteredCardActivities.reduce(
-      (totals, activity) => ({
-        count: totals.count + 1,
-        distance: totals.distance + activity.distance,
-        moving_time: totals.moving_time + activity.moving_time,
-        elapsed_time: totals.elapsed_time + activity.elapsed_time,
-        elevation_gain: totals.elevation_gain + activity.total_elevation_gain,
+      (acc, activity) => ({
+        count: acc.count + 1,
+        distance: acc.distance + activity.distance,
+        moving_time: acc.moving_time + activity.moving_time,
+        elapsed_time: acc.elapsed_time + activity.elapsed_time,
+        elevation_gain: acc.elevation_gain + activity.total_elevation_gain,
       }),
       {
         count: 0,
@@ -111,11 +108,7 @@ export function DashboardCard({
           </CardDescription>
         </CardContent>
         <CardFooter>
-          <CardConfigDialog
-            dashboardId={dashboardId}
-            existingCard={config}
-            onSave={onUpdate}
-          />
+          <CardConfigDialog dashboardId={dashboardId} existingCard={config} onSave={onUpdate} />
         </CardFooter>
       </Card>
     )
@@ -125,11 +118,7 @@ export function DashboardCard({
   return (
     <ActivityStatsCard
       actions={
-        <CardConfigDialog
-          dashboardId={dashboardId}
-          existingCard={config}
-          onSave={onUpdate}
-        />
+        <CardConfigDialog dashboardId={dashboardId} existingCard={config} onSave={onUpdate} />
       }
       types={stravaTypes}
       title={config.title}

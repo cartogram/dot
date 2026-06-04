@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 /**
  * Hash a password using scrypt
@@ -6,10 +6,7 @@ import crypto from 'crypto'
  * scrypt is a memory-hard key derivation function that's resistant to
  * hardware brute-force attacks. We use 64-byte output for security.
  */
-export async function hashPassword(
-  password: string,
-  salt: string,
-): Promise<string> {
+export async function hashPassword(password: string, salt: string): Promise<string> {
   const normalizedPassword = password.normalize('NFC')
   return new Promise((resolve, reject) => {
     crypto.scrypt(normalizedPassword, salt, 64, (err, derivedKey) => {

@@ -30,6 +30,7 @@ npx shadcn@latest add [component-name]
 ## Environment Variables
 
 Required in `.env.local`:
+
 - `DATABASE_URL` — PostgreSQL connection string
 - `SESSION_SECRET` — min 32 chars; used to encrypt session cookies
 - `VITE_STRAVA_CLIENT_ID` — public, exposed to client via `import.meta.env`
@@ -112,6 +113,7 @@ The custom `Button` component accepts a `to` prop for router links.
 ### Testing
 
 Two test environments:
+
 - **jsdom** (`*.test.ts` / `*.test.tsx`) — unit tests, run with `pnpm test`
 - **Browser (Playwright/Chromium)** (`*.browser.test.tsx`) — integration tests, run with `pnpm test:browser`; this is what CI runs
 

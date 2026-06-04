@@ -7,11 +7,11 @@
 
 import { config } from 'dotenv'
 
+import { Pool } from 'pg'
+
 // Load env from .env.local first, then .env
 config({ path: '.env.local' })
 config({ path: '.env' })
-
-import { Pool } from 'pg'
 
 if (!process.env.DATABASE_URL) {
   console.error('DATABASE_URL not set')
@@ -41,7 +41,7 @@ async function main() {
 }
 
 main()
-  .catch(async (error) => {
+  .catch((error) => {
     if (error.code === '42P01') {
       console.log('Some tables do not exist yet. Run `pnpm prisma db push` first.')
     } else {

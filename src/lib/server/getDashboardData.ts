@@ -7,16 +7,12 @@
 
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { prisma } from '@/lib/db/client'
-import { refreshTokenIfNeeded, fetchActivities } from '@/lib/server/strava'
 import type { StravaActivity } from '@/types/strava'
 import type { DataSource } from '@prisma/client'
 import type { DashboardCard } from '@/types/dashboard'
-import type {
-  DashboardData,
-  DashboardProfileWithUser,
-  ProfileActivities,
-} from '@/types/dashboards'
+import type { DashboardData, DashboardProfileWithUser, ProfileActivities } from '@/types/dashboards'
+import { fetchActivities, refreshTokenIfNeeded } from '@/lib/server/strava'
+import { prisma } from '@/lib/db/client'
 
 const DashboardIdSchema = z.object({
   dashboardId: z.string().uuid(),
@@ -32,7 +28,7 @@ const DashboardSlugSchema = z.object({
  * Fetch activities for a single profile
  */
 async function fetchProfileActivities(
-  profile: DashboardProfileWithUser
+  profile: DashboardProfileWithUser,
 ): Promise<ProfileActivities> {
   // Get the profile's Strava data source
   const dataSource = await prisma.dataSource.findFirst({
@@ -85,14 +81,10 @@ async function fetchProfileActivities(
       activities,
     }
   } catch (error) {
-    console.error(
-      `Error fetching activities for profile ${profile.profileId}:`,
-      error
-    )
+    console.error(`Error fetching activities for profile ${profile.profileId}:`, error)
     return {
       ...baseResult,
-      error:
-        error instanceof Error ? error.message : 'Failed to fetch activities',
+      error: error instanceof Error ? error.message : 'Failed to fetch activities',
     }
   }
 }
@@ -101,8 +93,8 @@ async function fetchProfileActivities(
  * Build profile objects with user info
  */
 async function buildDashboardProfiles(
-  profiles: any[]
-): Promise<DashboardProfileWithUser[]> {
+  profiles: Array<any>,
+): Promise<Array<DashboardProfileWithUser>> {
   const profileIds = profiles.map((p: any) => p.profileId)
 
   // Fetch user profiles
@@ -122,9 +114,7 @@ async function buildDashboardProfiles(
   })
 
   const profileMap = new Map(userProfiles.map((p) => [p.id, p]))
-  const athleteMap = new Map(
-    dataSources.map((ds) => [ds.userId, ds.athleteData])
-  )
+  const athleteMap = new Map(dataSources.map((ds) => [ds.userId, ds.athleteData]))
 
   return profiles.map((p: any): DashboardProfileWithUser => {
     const userProfile = profileMap.get(p.profileId)
@@ -208,11 +198,11 @@ export const getDashboardData = createServerFn({ method: 'GET' })
     const dashboardProfiles = await buildDashboardProfiles(profiles)
 
     // 5. Extract cards from the included relation
-    const cards: DashboardCard[] = dashboard.cards
+    const cards: Array<DashboardCard> = dashboard.cards
 
     // 6. Fetch activities for all profiles in parallel
     const profileActivitiesPromises = dashboardProfiles.map((profile) =>
-      fetchProfileActivities(profile)
+      fetchProfileActivities(profile),
     )
 
     const profileActivities = await Promise.all(profileActivitiesPromises)
@@ -288,11 +278,11 @@ export const getDashboardDataBySlug = createServerFn({ method: 'GET' })
     const dashboardProfiles = await buildDashboardProfiles(profiles)
 
     // 5. Extract cards from the included relation
-    const cards: DashboardCard[] = dashboard.cards
+    const cards: Array<DashboardCard> = dashboard.cards
 
     // 6. Fetch activities for all profiles in parallel
     const profileActivitiesPromises = dashboardProfiles.map((profile) =>
-      fetchProfileActivities(profile)
+      fetchProfileActivities(profile),
     )
 
     const profileActivities = await Promise.all(profileActivitiesPromises)

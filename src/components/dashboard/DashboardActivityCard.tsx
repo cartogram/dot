@@ -6,29 +6,20 @@
  */
 
 import * as React from 'react'
+import { CardConfigDialog } from './CardConfigDialog'
 import type { DashboardCard, Metric, TimeFrame } from '@/types/dashboard'
-import type { StravaActivity, ActivityTotals } from '@/types/strava'
+import type { ActivityTotals, StravaActivity } from '@/types/strava'
 import type { ProfileActivities } from '@/types/dashboards'
 import { activityTypesToStravaTypes } from '@/config/activities'
-import {
-  filterActivitiesByTimeFrame,
-  getTimeFrameDescription,
-} from '@/lib/dashboard/timeframes'
+import { filterActivitiesByTimeFrame, getTimeFrameDescription } from '@/lib/dashboard/timeframes'
 import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/custom/Card'
-import { CardConfigDialog } from './CardConfigDialog'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 interface DashboardActivityCardProps {
   config: DashboardCard
-  combinedActivities: StravaActivity[]
-  profileActivities: ProfileActivities[]
+  combinedActivities: Array<StravaActivity>
+  profileActivities: Array<ProfileActivities>
   canEdit?: boolean
   dashboardId?: string
   onSave?: () => void
@@ -49,7 +40,7 @@ export function DashboardActivityCard({
 
   // Filter activities that match the card's activity types
   const cardActivities = React.useMemo(() => {
-    if (!combinedActivities || stravaTypes.length === 0) return []
+    if (stravaTypes.length === 0) return []
     return combinedActivities.filter((activity) => stravaTypes.includes(activity.type))
   }, [combinedActivities, stravaTypes])
 
@@ -60,16 +51,14 @@ export function DashboardActivityCard({
 
   // Aggregate activities based on selected activity types
   const totals = React.useMemo<ActivityTotals | null>(() => {
-    if (!filteredCardActivities) return null
-
     // Aggregate them together
     return filteredCardActivities.reduce(
-      (totals, activity) => ({
-        count: totals.count + 1,
-        distance: totals.distance + activity.distance,
-        moving_time: totals.moving_time + activity.moving_time,
-        elapsed_time: totals.elapsed_time + activity.elapsed_time,
-        elevation_gain: totals.elevation_gain + activity.total_elevation_gain,
+      (acc, activity) => ({
+        count: acc.count + 1,
+        distance: acc.distance + activity.distance,
+        moving_time: acc.moving_time + activity.moving_time,
+        elapsed_time: acc.elapsed_time + activity.elapsed_time,
+        elevation_gain: acc.elevation_gain + activity.total_elevation_gain,
       }),
       {
         count: 0,
@@ -92,13 +81,10 @@ export function DashboardActivityCard({
   }, [totals, config.goal, config.metric, config.timeFrame])
 
   // Edit action for canEdit mode
-  const editAction = canEdit && dashboardId ? (
-    <CardConfigDialog
-      dashboardId={dashboardId}
-      existingCard={config}
-      onSave={onSave}
-    />
-  ) : null
+  const editAction =
+    canEdit && dashboardId ? (
+      <CardConfigDialog dashboardId={dashboardId} existingCard={config} onSave={onSave} />
+    ) : null
 
   // No data state
   if (!totals || totals.count === 0) {

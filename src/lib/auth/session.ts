@@ -11,9 +11,7 @@ export interface SessionUser {
 const SESSION_SECRET = process.env.SESSION_SECRET
 
 if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
-  console.warn(
-    'SESSION_SECRET must be at least 32 characters. Auth will not work correctly.',
-  )
+  console.warn('SESSION_SECRET must be at least 32 characters. Auth will not work correctly.')
 }
 
 /**
