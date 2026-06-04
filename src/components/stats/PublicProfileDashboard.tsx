@@ -14,6 +14,9 @@ import { calculateActivityProgress } from '@/lib/goals/calculations'
 import { ActivityStatsCard } from '@/components/stats/ActivityStatsCard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
+import { Badge } from '@/components/custom/Badge/Badge'
+import { Grid } from '@/components/custom/Grid/Grid'
 
 interface PublicProfileData {
   profile: {
@@ -55,22 +58,35 @@ export function PublicProfileDashboard({ profileData }: PublicProfileDashboardPr
     ? [athlete.city, athlete.state, athlete.country].filter(Boolean).join(', ')
     : null
 
+  const initials = athlete
+    ? `${athlete.firstname?.[0] || ''}${athlete.lastname?.[0] || ''}`
+    : profile.fullName?.[0] || profile.username[0].toUpperCase()
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 flex flex-col gap-4">
       {/* Profile Header */}
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            {athlete?.profile && (
-              <img src={athlete.profile} alt={displayName} className="w-16 h-16 rounded-full" />
-            )}
-            <div>
-              <CardTitle>{displayName}</CardTitle>
-              <p className="text-sm text-muted-foreground">@{profile.username}</p>
-              {location && <CardDescription className="mt-1">{location}</CardDescription>}
+          <CardTitle>@{profile.username}</CardTitle>
+
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+
+            {location && <Badge variant="secondary">{location}</Badge>}
+          </div>
+
+          <div>
+            <div className="flex flex-col gap-4 items-center">
+              <Avatar size="lg">
+                {athlete?.profile ? <AvatarImage src={athlete.profile} alt={initials} /> : null}
+                <AvatarFallback>{initials}</AvatarFallback>
+              </Avatar>
+              <span className="heading--2">{displayName}</span>
+              <Badge variant="primary">Public Profile</Badge>
             </div>
           </div>
-        </CardHeader>
+        </CardContent>
       </Card>
 
       {/* Error Message */}
@@ -87,7 +103,7 @@ export function PublicProfileDashboard({ profileData }: PublicProfileDashboardPr
 
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Grid>
           {cards.map((card) => (
             <ReadOnlyDashboardCard
               key={card.id}
@@ -96,7 +112,7 @@ export function PublicProfileDashboard({ profileData }: PublicProfileDashboardPr
               stats={stats}
             />
           ))}
-        </div>
+        </Grid>
       ) : (
         <Card>
           <CardHeader>

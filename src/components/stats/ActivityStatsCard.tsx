@@ -211,7 +211,7 @@ export function ActivityStatsCard({
         )}
       </CardContent>
 
-      <CardFooter>{actions && actions}</CardFooter>
+      {actions && <CardFooter>{actions}</CardFooter>}
     </Card>
   )
 }

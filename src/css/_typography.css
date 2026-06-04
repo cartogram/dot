@@ -45,7 +45,6 @@ h1 {
   text-wrap: balance;
   font-size: 3em;
   font-weight: 100;
-  font-family: var(--font-geist-mono);
 }
 
 .heading--2,
@@ -53,14 +52,13 @@ h2 {
   line-height: 1.1;
   text-wrap: balance;
   font-size: 2em;
-  font-weight: 100;
-  font-family: var(--font-geist-mono);
+  font-weight: 200;
+  letter-spacing: 1px;
 }
 
 .heading--3,
 h3 {
   text-transform: uppercase;
-  font-family: var(--font-geist-mono);
   font-size: 11px;
   letter-spacing: 1px;
   line-height: 2;
@@ -70,10 +68,8 @@ h3 {
 .heading--4,
 h4 {
   text-transform: uppercase;
-  font-family: var(--font-geist-mono);
   font-size: 11px;
   letter-spacing: 1px;
-  line-height: 2;
   display: block;
 }
 

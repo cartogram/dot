@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { disconnectStrava, exchangeCodeForTokens, saveStravaConnection } from '@/lib/server/oauth'
 import { updateProfile } from '@/lib/server/auth'
 import { getUserDashboards, updateDashboard } from '@/lib/server/dashboards'
-import { Button } from '@/components/custom/Button/Button'
+import { Button, buttonVariants } from '@/components/custom/Button/Button'
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
@@ -187,15 +187,33 @@ function SettingsPageContent({
           <CardTitle>Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="heading--3">{user.email}</p>
-          <p className="heading--4">{user.fullName}</p>
-          <p className="heading--4">{user.id}</p>
-          <p className="heading--4">
-            {user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt}
-          </p>
-          <p className="heading--4">
-            {user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt}
-          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p>Email</p>
+              <p className="heading--4">{user.email}</p>
+            </div>
+            <div>
+              <p>Full Name</p>
+              <p className="heading--4">{user.fullName}</p>
+            </div>
+
+            <div>
+              <p>Created At</p>
+              <p className="heading--4">
+                {user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt}
+              </p>
+            </div>
+            <div>
+              <p>Updated At</p>
+              <p className="heading--4">
+                {user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt}
+              </p>
+            </div>
+          </div>
+          <div>
+            <p>ID</p>
+            <p className="heading--4">{user.id}</p>
+          </div>
         </CardContent>
       </Card>
 
@@ -239,6 +257,13 @@ function SettingsPageContent({
               <Button onClick={handleCopyProfileLink} variant="secondary">
                 {copied ? 'Copied!' : 'Copy Link'}
               </Button>
+              <Link
+                to="/$username"
+                params={{ username: user.username }}
+                className={buttonVariants({ variant: 'secondary' })}
+              >
+                View
+              </Link>
             </div>
             <p className="text-sm text-muted-foreground mt-2">@{user.username}</p>
           </div>
@@ -264,19 +289,26 @@ function SettingsPageContent({
                   key={dashboard.id}
                   className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-muted transition-colors"
                 >
+
                   <Link
                     to="/dashboards/$dashboardId"
                     params={{ dashboardId: dashboard.id }}
                     className="flex-1"
                   >
-                    <p className="font-medium">{dashboard.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {dashboard.profile_count}{' '}
-                      {dashboard.profile_count === 1 ? 'profile' : 'profiles'}
+
+                    <p className="font-medium">{dashboard.name}
+
+
                     </p>
+                    <p className="text-sm text-muted-foreground">
+                      {dashboard.profileCount}{' '}
+                      {dashboard.profileCount === 1 ? 'profile' : 'profiles'}
+                    </p>
+
                   </Link>
+
                   <div className="flex items-center gap-2">
-                    {dashboard.current_user_role === 'owner' && (
+                    {dashboard.currentUserRole === 'owner' && (
                       <>
                         <Button
                           variant="secondary"
@@ -285,14 +317,14 @@ function SettingsPageContent({
                             e.preventDefault()
                             toggleVisibilityMutation.mutate({
                               dashboardId: dashboard.id,
-                              isPublic: !dashboard.is_public,
+                              isPublic: !dashboard.isPublic,
                             })
                           }}
                           disabled={toggleVisibilityMutation.isPending}
                         >
-                          {dashboard.is_public ? 'Make Private' : 'Make Public'}
+                          {dashboard.isPublic ? 'Make Private' : 'Make Public'}
                         </Button>
-                        {!dashboard.is_default && (
+                        {!dashboard.isDefault && (
                           <Button
                             variant="secondary"
                             size="small"
@@ -307,20 +339,9 @@ function SettingsPageContent({
                         )}
                       </>
                     )}
-                    <div className="flex gap-1">
-                      {dashboard.is_default && <Badge variant="secondary">Default</Badge>}
-                      {dashboard.is_public && <Badge variant="secondary">Public</Badge>}
-                      <Badge
-                        variant={dashboard.current_user_role === 'owner' ? 'primary' : 'secondary'}
-                      >
-                        {dashboard.current_user_role === 'owner'
-                          ? 'Owner'
-                          : dashboard.current_user_role === 'editor'
-                            ? 'Editor'
-                            : 'Viewer'}
-                      </Badge>
-                    </div>
+
                   </div>
+
                 </div>
               ))}
             </div>
@@ -328,7 +349,7 @@ function SettingsPageContent({
             <p className="text-sm text-muted-foreground">You don't have any dashboards yet.</p>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center">
             <Button to="/dashboards" variant="secondary">
               View All Dashboards
             </Button>

@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { IconChevronDown } from '@tabler/icons-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 import type { AuthUser } from '@/lib/server/auth'
@@ -15,7 +15,7 @@ import { useAuth } from '@/lib/auth/AuthContext'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback } from '@/components/custom/Avatar/Avatar'
 import { getUserDashboards } from '@/lib/server/dashboards'
-import { IconMoon, IconSignOut, IconSun } from '@/components/custom/Icons/Icons'
+import { IconMoon, IconSun } from '@/components/custom/Icons/Icons'
 
 import './styles/user-menu.css'
 
@@ -26,45 +26,6 @@ function getUserInitials(fullName: string | null | undefined) {
       .map((name) => name[0])
       .join('')
     : ''
-}
-
-// Custom Cosmos Icons
-function IconMenu({ className, ...props }: React.ComponentProps<'svg'>) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      strokeLinecap="round"
-      className={className}
-      {...props}
-    >
-      <line x1="5" y1="9" x2="19" y2="9" />
-      <line x1="5" y1="15" x2="19" y2="15" />
-    </svg>
-  )
-}
-
-function IconClose({ className, ...props }: React.ComponentProps<'svg'>) {
-  return (
-    <svg
-      width="22"
-      height="22"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      strokeLinecap="round"
-      className={className}
-      {...props}
-    >
-      <line x1="6" y1="6" x2="18" y2="18" />
-      <line x1="18" y1="6" x2="6" y2="18" />
-    </svg>
-  )
 }
 
 function IconSystem({ className, ...props }: React.ComponentProps<'svg'>) {
@@ -92,12 +53,6 @@ interface UserMenuProps {
   user: AuthUser
 }
 
-const links = [
-  { label: 'Home', href: '/' },
-  { label: 'My Dashboards', href: '/dashboards' },
-  { label: 'Settings', href: '/settings' },
-]
-
 export function UserMenu({ user }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const { theme, setTheme } = useTheme()
@@ -115,50 +70,52 @@ export function UserMenu({ user }: UserMenuProps) {
           <Avatar size="md">
             <AvatarFallback>{getUserInitials(user.fullName)}</AvatarFallback>
           </Avatar>
-          <span className="UserMenu__Username">{user.fullName || user.username}</span>
-          {isOpen ? <IconClose /> : <IconMenu />}
+          <IconChevronDown className="size-4 opacity-60" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="UserMenu__Dropdown" align="end">
-          {links.map((link) => (
-            <DropdownMenuItem
-              key={link.href}
-              className="UserMenu__Item"
-              render={<Link to={link.href} />}
-            >
-              <span>{link.label}</span>
-            </DropdownMenuItem>
-          ))}
+          <DropdownMenuItem
+            className="UserMenu__Item UserMenu__Username"
+            render={<Link to="/$username" params={{ username: user.username }} />}
+          >
+            <span className='heading--4'>@{user.username}</span>
+          </DropdownMenuItem>
+          <div className="UserMenu__Separator" />
 
-          {dashboards && dashboards.length > 0 && (
-            <>
-              <div className="UserMenu__Separator" />
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="">Dashboards</DropdownMenuLabel>
-                {dashboards.map((dashboard) => (
-                  <DropdownMenuItem
-                    key={dashboard.id}
-                    className="UserMenu__Item"
-                    render={
-                      <Link to="/dashboards/$dashboardId" params={{ dashboardId: dashboard.id }} />
-                    }
-                  >
-                    <span>{dashboard.name}</span>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuGroup>
-            </>
-          )}
+          <DropdownMenuGroup>
+
+            {dashboards &&
+              dashboards.map((dashboard) => (
+                <DropdownMenuItem
+                  key={dashboard.id}
+                  className="UserMenu__Item"
+                  render={
+                    <Link to="/dashboards/$dashboardId" params={{ dashboardId: dashboard.id }} />
+                  }
+                >
+                  <span>{dashboard.name}</span>
+                </DropdownMenuItem>
+              ))}
+          </DropdownMenuGroup>
 
           <div className="UserMenu__Separator" />
 
           <DropdownMenuItem
-            className="UserMenu__Item text-destructive hover:bg-destructive/10"
+            className="UserMenu__Item"
+            render={<Link to="/$username" params={{ username: user.username }} />}
+          >
+            Profile
+          </DropdownMenuItem>
+
+          <DropdownMenuItem className="UserMenu__Item" render={<Link to="/settings" />}>
+            Settings
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            className="UserMenu__Item "
             onClick={logout}
           >
-            <span>Logout</span>
-            <span className="UserMenu__Item-Icon">
-              <IconSignOut />
-            </span>
+            Logout
+
           </DropdownMenuItem>
 
           <div className="ThemeSelectorRow">
