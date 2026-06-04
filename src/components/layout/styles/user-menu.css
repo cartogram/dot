@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 0.25em;
-  padding: 0.35em 0.75em;
+  padding: 0.35em 0.5em 0.35em 0.75em;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: var(--font-sans);
@@ -19,6 +19,7 @@
   text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
+  border: 1px solid;
 }
 
 .UserMenu__Username {
