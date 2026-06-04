@@ -23,6 +23,20 @@ interface BurnUpChartProps {
 export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
   const unit = METRIC_UNITS[metric]
 
+  // Trim the x-range to today + a small lookahead, so the y-axis fits the
+  // actual values plus near-future target — not the goal at end-of-period,
+  // which otherwise squashes the actual line into a near-flat baseline.
+  const visibleData = React.useMemo(() => {
+    if (data.length === 0) return data
+    const lastActualIdx = data.findLastIndex((p) => p.actual !== undefined)
+    if (lastActualIdx < 0) return data
+    const lookahead = Math.min(
+      Math.max(Math.round(data.length * 0.1), 7),
+      data.length - 1 - lastActualIdx,
+    )
+    return data.slice(0, lastActualIdx + 1 + lookahead)
+  }, [data])
+
   // Custom tooltip renderer using standardized CSS classes
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -57,15 +71,15 @@ export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
 
   // Calculate ticks for XAxis to prevent overcrowding (especially for year/ytd view)
   const interval = React.useMemo(() => {
-    if (data.length > 100) return 30 // Month ticks for year
-    if (data.length > 30) return 7 // Weekly ticks for month
+    if (visibleData.length > 100) return 30 // Month ticks for year
+    if (visibleData.length > 30) return 7 // Weekly ticks for month
     return 0 // All ticks for week
-  }, [data.length])
+  }, [visibleData.length])
 
   return (
     <div className="Chart__Wrapper">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+        <ComposedChart data={visibleData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.25} />

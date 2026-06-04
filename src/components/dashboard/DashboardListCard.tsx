@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/custom/Card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
+import { AvatarGroup, type AvatarGroupItem } from '@/components/custom/Avatar/AvatarGroup'
 import { Badge } from '@/components/custom/Badge/Badge'
 
 interface DashboardListCardProps {
@@ -60,35 +60,18 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
   )
 }
 
-/**
- * Display stacked avatars for dashboard profiles
- */
 function ProfileAvatars({ profiles }: { profiles: DashboardWithProfiles['profiles'] }) {
-  // Show max 5 avatars
-  const displayProfiles = profiles.slice(0, 5)
-  const remainingCount = profiles.length - 5
+  const items: AvatarGroupItem[] = profiles.map((profile) => {
+    const initials = profile.athlete
+      ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
+      : profile.profile.fullName?.[0] || profile.profile.email[0].toUpperCase()
+    return {
+      id: profile.id,
+      src: profile.athlete?.profile ?? null,
+      fallback: initials,
+      alt: profile.profile.fullName ?? profile.profile.email,
+    }
+  })
 
-  return (
-    <div className="flex -space-x-2">
-      {displayProfiles.map((profile) => {
-        const initials = profile.athlete
-          ? `${profile.athlete.firstname?.[0] || ''}${profile.athlete.lastname?.[0] || ''}`
-          : profile.profile.fullName?.[0] || profile.profile.email[0].toUpperCase()
-
-        return (
-          <Avatar key={profile.id}>
-            {profile.athlete?.profile ? (
-              <AvatarImage src={profile.athlete.profile} alt={initials} />
-            ) : null}
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-        )
-      })}
-      {remainingCount > 0 && (
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-medium">
-          +{remainingCount}
-        </div>
-      )}
-    </div>
-  )
+  return <AvatarGroup items={items} max={5} size="md" />
 }

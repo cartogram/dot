@@ -70,7 +70,7 @@ function SettingsPageContent({
   })
 
   const profileUrl = user
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${user.username}`
+    ? `${import.meta.env.VITE_APP_URL}/${user.username}`
     : ''
 
   // Mutation to toggle profile visibility
