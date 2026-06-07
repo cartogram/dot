@@ -13,11 +13,6 @@ describe('cn utility', () => {
     expect(result).toBe('foo baz')
   })
 
-  it('should merge Tailwind classes correctly', () => {
-    const result = cn('px-2 py-1', 'px-4')
-    expect(result).toBe('py-1 px-4')
-  })
-
   it('should handle objects', () => {
     const result = cn({ foo: true, bar: false, baz: true })
     expect(result).toBe('foo baz')

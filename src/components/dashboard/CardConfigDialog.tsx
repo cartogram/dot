@@ -14,6 +14,8 @@ import {
   updateDashboardCard,
 } from '@/lib/server/dashboardConfig'
 
+import './card-config-dialog.css'
+
 interface CardConfigDialogProps {
   dashboardId: string
   existingCard?: DashboardCard
@@ -182,15 +184,15 @@ export function CardConfigDialog({
         open={open}
         onOpenChange={setOpen}
         title={isEditMode ? 'Edit Activity' : 'Add Activity'}
-        className="data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:md:max-w-1/2"
+        className="CardConfigDialog__Panel"
         footer={
-          <div className="flex flex-1 gap-2 justify-between w-full">
+          <div className="CardConfigDialog__Footer">
             {isEditMode && (
               <Button variant="secondary" destructive onClick={handleDelete}>
                 Delete Card
               </Button>
             )}
-            <div className="flex gap-2 ml-auto">
+            <div className="CardConfigDialog__FooterActions">
               <Button variant="secondary" onClick={handleCancel}>
                 Cancel
               </Button>
@@ -225,7 +227,7 @@ export function CardConfigDialog({
                   id="time-frame"
                   value={timeFrame}
                   onChange={(e) => setTimeFrame(e.target.value as TimeFrame)}
-                  className="border-input bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 rounded-4xl border px-3 py-2 text-sm transition-colors focus-visible:ring-[3px] h-9 w-full outline-none"
+                  className="CardConfigDialog__Select"
                 >
                   {TIME_FRAMES.map((value) => (
                     <option key={value} value={value}>
@@ -259,21 +261,20 @@ export function CardConfigDialog({
           {selectedActivities.length > 0 && (
             <Card>
               <CardContent>
-                <div className="space-y-4">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
                     <FieldLabel>Metric to Track</FieldLabel>
-                    <div className="space-y-2 mt-2">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
                       {Array.from(availableMetrics).map((m) => (
-                        <label key={m} className="flex items-center gap-2 cursor-pointer">
+                        <label key={m} className="CardConfigDialog__Radio">
                           <input
                             type="radio"
                             name="metric"
                             value={m}
                             checked={metric === m}
                             onChange={() => setMetric(m)}
-                            className="h-4 w-4"
                           />
-                          <span className="text-sm">{METRIC_LABELS[m]}</span>
+                          <span>{METRIC_LABELS[m]}</span>
                         </label>
                       ))}
                     </div>

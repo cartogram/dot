@@ -18,7 +18,7 @@ export function DefaultCatchBoundary({ error }: ErrorComponentProps) {
       </CardHeader>
       <CardContent>
         <CardDescription>{error.message}</CardDescription>
-        <Button to="/" variant="primary" className="w-full">
+        <Button to="/" variant="primary" className="u-w-full">
           Go to Dashboard
         </Button>
       </CardContent>

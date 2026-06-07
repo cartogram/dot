@@ -70,7 +70,7 @@ export function UserMenu({ user }: UserMenuProps) {
           <Avatar size="md">
             <AvatarFallback>{getUserInitials(user.fullName)}</AvatarFallback>
           </Avatar>
-          <IconChevronDown className="size-4 opacity-60" />
+          <IconChevronDown style={{ width: '1rem', height: '1rem', opacity: 0.6 }} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="UserMenu__Dropdown" align="end">
           <DropdownMenuItem
@@ -130,7 +130,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 onClick={() => setTheme('light')}
                 title="Light Theme"
               >
-                <IconSun className="size-4" />
+                <IconSun style={{ width: "1rem", height: "1rem" }} />
               </button>
               <button
                 type="button"
@@ -141,7 +141,7 @@ export function UserMenu({ user }: UserMenuProps) {
                 onClick={() => setTheme('dark')}
                 title="Dark Theme"
               >
-                <IconMoon className="size-4" />
+                <IconMoon style={{ width: "1rem", height: "1rem" }} />
               </button>
               <button
                 type="button"

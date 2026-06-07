@@ -1,0 +1,43 @@
+.DashboardSettingsSheet__Panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .DashboardSettingsSheet__Panel {
+    max-width: 50%;
+  }
+}
+
+.DashboardSettingsSheet__Footer {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.DashboardSettingsSheet__Hint {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, var(--color-secondary));
+  margin-left: 1.5rem;
+}
+
+.DashboardSettingsSheet__Stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  text-align: center;
+  background-color: color-mix(in srgb, var(--muted, currentColor) 50%, transparent);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.DashboardSettingsSheet__StatValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.DashboardSettingsSheet__StatLabel {
+  font-size: 0.75rem;
+  color: var(--muted-foreground, var(--color-secondary));
+}

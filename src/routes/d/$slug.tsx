@@ -50,7 +50,7 @@ function PublicDashboardContent({ slug, userId }: { slug: string; userId?: strin
               ? error.message
               : 'This dashboard does not exist or is not public.'}
           </CardDescription>
-          <Button to="/" variant="primary" className="mt-4">
+          <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
             Go Home
           </Button>
         </CardContent>
@@ -66,7 +66,7 @@ function PublicDashboardContent({ slug, userId }: { slug: string; userId?: strin
         </CardHeader>
         <CardContent>
           <CardDescription>This dashboard doesn't exist or is not public.</CardDescription>
-          <Button to="/" variant="primary" className="mt-4">
+          <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
             Go Home
           </Button>
         </CardContent>

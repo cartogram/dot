@@ -12,6 +12,8 @@ import { Input } from '@/components/custom/Input/Input'
 import { Button } from '@/components/custom/Button/Button'
 import { Label } from '@/components/custom/Label/Label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import { Stack } from '@/components/custom/Stack/Stack'
+import { Row } from '@/components/custom/Row/Row'
 
 interface JoinDashboardFormProps {
   userId: string
@@ -52,10 +54,10 @@ export function JoinDashboardForm({ userId }: JoinDashboardFormProps) {
         </CardHeader>
         <CardContent>
           <CardDescription>Enter an invite code to join an existing dashboard</CardDescription>
-          <div className="space-y-4">
-            <div className="space-y-2 flex flex-col gap-2">
+          <Stack gap="medium">
+            <Stack gap="small">
               <Label htmlFor="invite-code">Invite Code</Label>
-              <div className="flex gap-2">
+              <Row gap="small">
                 <Input
                   id="invite-code"
                   placeholder="ABCD1234"
@@ -71,10 +73,10 @@ export function JoinDashboardForm({ userId }: JoinDashboardFormProps) {
                 >
                   {joinMutation.isPending ? 'Joining...' : 'Join'}
                 </Button>
-              </div>
-            </div>
-            {error && <p className="text-sm text-red-500">{error}</p>}
-          </div>
+              </Row>
+            </Stack>
+            {error && <p className="AuthForm__Error" style={{ background: 'transparent', border: 0, padding: 0 }}>{error}</p>}
+          </Stack>
         </CardContent>
       </form>
     </Card>

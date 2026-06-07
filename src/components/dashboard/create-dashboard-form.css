@@ -1,0 +1,19 @@
+.CreateDashboardForm__Checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.CreateDashboardForm__Checkbox input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--border, currentColor);
+}
+
+.CreateDashboardForm__Error {
+  font-size: 0.875rem;
+  color: rgb(239 68 68);
+}

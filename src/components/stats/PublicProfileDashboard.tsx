@@ -17,6 +17,8 @@ import { Button } from '@/components/custom/Button/Button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Grid } from '@/components/custom/Grid/Grid'
+import { Stack } from '@/components/custom/Stack/Stack'
+import { Row } from '@/components/custom/Row/Row'
 
 interface PublicProfileData {
   profile: {
@@ -63,29 +65,26 @@ export function PublicProfileDashboard({ profileData }: PublicProfileDashboardPr
     : profile.fullName?.[0] || profile.username[0].toUpperCase()
 
   return (
-    <div className="space-y-6 flex flex-col gap-4">
+    <Stack gap="large">
       {/* Profile Header */}
       <Card>
         <CardHeader>
           <CardTitle>@{profile.username}</CardTitle>
-
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-
-            {location && <Badge variant="secondary">{location}</Badge>}
-          </div>
-
-          <div>
-            <div className="flex flex-col gap-4 items-center">
+        <CardContent>
+          <Stack gap="medium">
+            <Row gap="small">
+              {location && <Badge variant="secondary">{location}</Badge>}
+            </Row>
+            <Stack gap="medium" align="center">
               <Avatar size="lg">
                 {athlete?.profile ? <AvatarImage src={athlete.profile} alt={initials} /> : null}
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <span className="heading--2">{displayName}</span>
               <Badge variant="primary">Public Profile</Badge>
-            </div>
-          </div>
+            </Stack>
+          </Stack>
         </CardContent>
       </Card>
 
@@ -125,12 +124,12 @@ export function PublicProfileDashboard({ profileData }: PublicProfileDashboardPr
       )}
 
       {/* Back Button */}
-      <div className="flex justify-center">
+      <Row justify="center">
         <Button to="/" variant="secondary">
           Back to Your Dashboard
         </Button>
-      </div>
-    </div>
+      </Row>
+    </Stack>
   )
 }
 

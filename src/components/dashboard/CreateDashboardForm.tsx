@@ -20,6 +20,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/custom/Card'
+import { Stack } from '@/components/custom/Stack/Stack'
+
+import './create-dashboard-form.css'
 
 interface CreateDashboardFormProps {
   userId: string
@@ -74,8 +77,8 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
           <CardDescription>
             Create a dashboard to track and share activities with others
           </CardDescription>
-          <div className="space-y-4 flex flex-col gap-4">
-            <div className="space-y-2 flex flex-col gap-2">
+          <Stack gap="medium">
+            <Stack gap="small">
               <Label htmlFor="dashboard-name">Dashboard Name *</Label>
               <Input
                 id="dashboard-name"
@@ -85,8 +88,8 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
                 maxLength={100}
                 required
               />
-            </div>
-            <div className="space-y-2 flex flex-col gap-2">
+            </Stack>
+            <Stack gap="small">
               <Label htmlFor="dashboard-description">Description (optional)</Label>
               <Textarea
                 id="dashboard-description"
@@ -96,34 +99,30 @@ export function CreateDashboardForm({ userId }: CreateDashboardFormProps) {
                 maxLength={500}
                 rows={3}
               />
-            </div>
+            </Stack>
 
             {/* Options */}
-            <div className="space-y-3 pt-2">
-              <label className="flex items-center gap-3 cursor-pointer">
+            <Stack gap="small" style={{ paddingTop: '0.5rem' }}>
+              <label className="CreateDashboardForm__Checkbox">
                 <input
                   type="checkbox"
                   checked={isDefault}
                   onChange={(e) => setIsDefault(e.target.checked)}
-                  className="h-4 w-4 rounded border-border"
                 />
-                <span className="text-sm">Set as my default dashboard</span>
+                <span>Set as my default dashboard</span>
               </label>
-              <label className="flex items-center gap-3 cursor-pointer">
+              <label className="CreateDashboardForm__Checkbox">
                 <input
                   type="checkbox"
                   checked={isPublic}
                   onChange={(e) => setIsPublic(e.target.checked)}
-                  className="h-4 w-4 rounded border-border"
                 />
-                <span className="text-sm">
-                  Make this dashboard public (anyone with the link can view)
-                </span>
+                <span>Make this dashboard public (anyone with the link can view)</span>
               </label>
-            </div>
+            </Stack>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
-          </div>
+            {error && <p className="CreateDashboardForm__Error">{error}</p>}
+          </Stack>
         </CardContent>
         <CardFooter>
           <Button type="button" variant="secondary" onClick={() => navigate({ to: '/dashboards' })}>

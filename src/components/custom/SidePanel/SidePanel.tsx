@@ -8,6 +8,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 
+import './side-panel.css'
+
 interface SidePanelProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -37,7 +39,7 @@ export function SidePanel({
           {description && <SheetDescription>{description}</SheetDescription>}
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto py-4">{children}</div>
+        <div className="SidePanel__Body">{children}</div>
 
         {footer && <SheetFooter>{footer}</SheetFooter>}
       </SheetContent>

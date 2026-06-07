@@ -5,6 +5,8 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
+import './auth-form.css'
+
 export function ResetPasswordForm() {
   const [email, setEmail] = React.useState('')
   const [isLoading, setIsLoading] = React.useState(false)
@@ -36,7 +38,7 @@ export function ResetPasswordForm() {
       <CardContent>
         <CardDescription>Enter your email and we'll send you a reset link</CardDescription>
         <form onSubmit={handleResetPassword}>
-          <FieldGroup className="space-y-4">
+          <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
@@ -50,27 +52,23 @@ export function ResetPasswordForm() {
               />
             </Field>
 
-            {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-                {error}
-              </div>
-            )}
+            {error && <div className="AuthForm__Error">{error}</div>}
 
             {success && (
-              <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded">
+              <div className="AuthForm__Success">
                 If an account exists with that email, you'll receive a password reset link.
               </div>
             )}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="AuthForm__Submit" disabled={isLoading}>
               {isLoading ? 'Sending...' : 'Send reset link'}
             </Button>
           </FieldGroup>
         </form>
 
-        <div className="mt-4 text-center text-sm">
+        <div className="AuthForm__Footer">
           Remember your password?{' '}
-          <a href="/login" className="text-primary hover:underline">
+          <a href="/login" className="AuthForm__Link">
             Log in
           </a>
         </div>

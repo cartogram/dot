@@ -68,7 +68,7 @@ function ProfileContent({ userId }: { userId: string }) {
         </CardHeader>
         <CardContent>
           <CardDescription>Please log in to view this profile.</CardDescription>
-          <Button to="/login" variant="primary" className="mt-4">
+          <Button to="/login" variant="primary" style={{ marginTop: "1rem" }}>
             Log In
           </Button>
         </CardContent>
@@ -92,7 +92,7 @@ function ProfileContent({ userId }: { userId: string }) {
               ? error.message
               : 'This user does not exist or their profile is not available.'}
           </CardDescription>
-          <Button to="/" variant="primary" className="mt-4">
+          <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
             Back to Your Dashboard
           </Button>
         </CardContent>

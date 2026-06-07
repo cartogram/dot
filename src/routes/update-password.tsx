@@ -8,7 +8,15 @@ export const Route = createFileRoute('/update-password')({
 
 function UpdatePasswordPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div
+      style={{
+        display: 'flex',
+        minHeight: '100dvh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '0 1rem',
+      }}
+    >
       <UpdatePasswordForm />
     </div>
   )

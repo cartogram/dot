@@ -1,0 +1,33 @@
+.DashboardHeader__TopRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.DashboardHeader__Section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.DashboardHeader__SectionLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.DashboardHeader__Profile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.DashboardHeader__ProfileName {
+  font-size: 0.875rem;
+}
+
+.DashboardHeader__UrlCode {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background-color: var(--muted, rgb(0 0 0 / 0.08));
+}

@@ -1,0 +1,117 @@
+.SettingsPage {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.SettingsPage__Centre {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.SettingsPage__CardWide {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.SettingsPage__Grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.SettingsPage__SectionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.SettingsPage__Row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.SettingsPage__UrlBlock {
+  border-top: 1px solid var(--border, currentColor);
+  padding-top: 1rem;
+}
+
+.SettingsPage__UrlBlockLabel {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.SettingsPage__UrlInputRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.SettingsPage__UrlInput {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background-color: var(--muted, rgb(0 0 0 / 0.05));
+  border-radius: 0.375rem;
+  border: 1px solid var(--border, currentColor);
+}
+
+.SettingsPage__Hint {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, var(--color-secondary));
+  margin-top: 0.5rem;
+}
+
+.SettingsPage__DashboardRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border, currentColor);
+  transition: background-color 100ms;
+}
+
+.SettingsPage__DashboardRow:hover {
+  background-color: var(--muted, rgb(0 0 0 / 0.05));
+}
+
+.SettingsPage__DashboardLink {
+  flex: 1;
+}
+
+.SettingsPage__DashboardName {
+  font-weight: 500;
+}
+
+.SettingsPage__DashboardSub {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.SettingsPage__DashboardActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.SettingsPage__FooterActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.SettingsPage__Error {
+  font-size: 0.875rem;
+  color: rgb(220 38 38);
+  background-color: rgb(254 242 242);
+  border: 1px solid rgb(254 202 202);
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}

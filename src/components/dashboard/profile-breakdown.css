@@ -1,0 +1,35 @@
+.ProfileBreakdown__Row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 0.5rem;
+  border-bottom: 1px solid var(--muted, rgb(0 0 0 / 0.08));
+}
+
+.ProfileBreakdown__Row:last-child {
+  border-bottom: none;
+}
+
+.ProfileBreakdown__Identity {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ProfileBreakdown__Name {
+  font-weight: 500;
+}
+
+.ProfileBreakdown__Sub {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.ProfileBreakdown__Stats {
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+.ProfileBreakdown__StatsSub {
+  color: var(--muted-foreground, var(--color-secondary));
+}

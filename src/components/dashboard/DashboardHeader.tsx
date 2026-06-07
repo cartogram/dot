@@ -29,6 +29,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/custom/Card'
+import { Stack } from '@/components/custom/Stack/Stack'
+import { Row } from '@/components/custom/Row/Row'
+
+import './dashboard-header.css'
 
 interface DashboardHeaderProps {
   data: DashboardData
@@ -76,27 +80,22 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
   return (
     <Card state="active">
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle>{dashboard.name}</CardTitle>
-          </div>
-          <div className="flex gap-2"></div>
+        <div className="DashboardHeader__TopRow">
+          <CardTitle>{dashboard.name}</CardTitle>
         </div>
       </CardHeader>
       <CardContent>
-        {dashboard.description && (
-          <CardDescription className="mt-1">{dashboard.description}</CardDescription>
-        )}
-        <div className="space-y-4">
-          <div className="flex gap-2">
+        {dashboard.description && <CardDescription>{dashboard.description}</CardDescription>}
+        <Stack gap="medium">
+          <Row gap="small" wrap>
             {dashboard.isPublic && <Badge variant="secondary">Public</Badge>}
             {dashboard.isDefault && <Badge variant="secondary">Default</Badge>}
             <Badge variant={isOwner ? 'primary' : 'secondary'}>{roleLabel}</Badge>
-          </div>
+          </Row>
           {/* Profiles */}
-          <div>
-            <h4 className="text-sm font-medium mb-2">Profiles ({profiles.length})</h4>
-            <div className="flex flex-wrap gap-2">
+          <div className="DashboardHeader__Section">
+            <h4 className="DashboardHeader__SectionLabel">Profiles ({profiles.length})</h4>
+            <Row gap="small" wrap>
               {profiles.map((profile) => {
                 const name = profile.athlete
                   ? `${profile.athlete.firstname || ''} ${profile.athlete.lastname || ''}`.trim()
@@ -107,30 +106,30 @@ export function DashboardHeader({ data, userId, onRefresh, stats }: DashboardHea
                   : profile.profile.fullName?.[0] || profile.profile.email[0].toUpperCase()
 
                 return (
-                  <div key={profile.id} className="flex items-center gap-2">
+                  <div key={profile.id} className="DashboardHeader__Profile">
                     <Avatar>
                       {profile.athlete?.profile ? (
                         <AvatarImage src={profile.athlete.profile} alt={initials} />
                       ) : null}
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
-                    <span className="text-sm">{name}</span>
+                    <span className="DashboardHeader__ProfileName">{name}</span>
                   </div>
                 )
               })}
-            </div>
+            </Row>
           </div>
 
           {/* Public URL */}
           {dashboard.isPublic && dashboard.slug && (
-            <div>
-              <h4 className="text-sm font-medium mb-2">Public URL</h4>
-              <code className="text-sm bg-muted px-2 py-1 rounded">
+            <div className="DashboardHeader__Section">
+              <h4 className="DashboardHeader__SectionLabel">Public URL</h4>
+              <code className="DashboardHeader__UrlCode">
                 {import.meta.env.VITE_APP_URL}/d/{dashboard.slug}
               </code>
             </div>
           )}
-        </div>
+        </Stack>
       </CardContent>
       <CardFooter>
         {isOwner && (

@@ -1,0 +1,61 @@
+/* Minimal utility classes for the small set of one-off styling needs
+ * that don't deserve a dedicated component class. Prefer Stack/Row/Grid
+ * primitives or component-local BEM classes over these. */
+
+.u-text-sm {
+  font-size: var(--text-size-sm);
+}
+
+.u-text-xs {
+  font-size: var(--text-size-xs);
+}
+
+.u-text-center {
+  text-align: center;
+}
+
+.u-text-muted {
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.u-font-medium {
+  font-weight: var(--text-weight-medium);
+}
+
+.u-font-semibold {
+  font-weight: var(--text-weight-semibold);
+}
+
+.u-w-full {
+  width: 100%;
+}
+
+.u-max-w-md {
+  max-width: 28rem;
+}
+
+.u-max-w-lg {
+  max-width: 32rem;
+}
+
+.u-mx-auto {
+  margin-inline: auto;
+}
+
+.u-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

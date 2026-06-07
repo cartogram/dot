@@ -67,7 +67,7 @@ function DashboardPage() {
         </CardHeader>
         <CardContent>
           <CardDescription>{loaderData.error}</CardDescription>
-          <Button to="/dashboards" variant="primary" className="mt-4">
+          <Button to="/dashboards" variant="primary" style={{ marginTop: '1rem' }}>
             Back to Dashboards
           </Button>
         </CardContent>
@@ -90,7 +90,7 @@ function DashboardPage() {
           <CardDescription>
             This dashboard doesn't exist or you don't have access to it.
           </CardDescription>
-          <Button to="/dashboards" variant="primary" className="mt-4">
+          <Button to="/dashboards" variant="primary" style={{ marginTop: '1rem' }}>
             Back to Dashboards
           </Button>
         </CardContent>
@@ -123,7 +123,7 @@ function DashboardError({ error }: { error: Error }) {
             ? 'Please log in to view this dashboard.'
             : error.message || 'An unexpected error occurred'}
         </CardDescription>
-        <div className="flex gap-2 mt-4">
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
           <Button to="/login" variant="primary">
             Log In
           </Button>

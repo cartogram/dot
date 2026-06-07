@@ -17,6 +17,7 @@ import {
 } from '@/components/custom/Card'
 import { AvatarGroup } from '@/components/custom/Avatar/AvatarGroup'
 import { Badge } from '@/components/custom/Badge/Badge'
+import { Row } from '@/components/custom/Row/Row'
 
 interface DashboardListCardProps {
   dashboard: DashboardWithProfiles
@@ -36,23 +37,21 @@ export function DashboardListCard({ dashboard }: DashboardListCardProps) {
     <Link to="/dashboards/$dashboardId" params={{ dashboardId: dashboard.id }}>
       <Card state="active">
         <CardHeader>
-          <CardTitle className="truncate">{dashboard.name}</CardTitle>
+          <CardTitle className="u-truncate">{dashboard.name}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-1.5 flex-shrink-0">
+          <Row gap="xsmall" wrap>
             {dashboard.isDefault && <Badge variant="secondary">Default</Badge>}
             {dashboard.isPublic && <Badge variant="secondary">Public</Badge>}
             <Badge variant="secondary">{roleLabel}</Badge>
-          </div>
-          {dashboard.description && (
-            <CardDescription className="line-clamp-2">{dashboard.description}</CardDescription>
-          )}
-          <div className="mt-4">
+          </Row>
+          {dashboard.description && <CardDescription>{dashboard.description}</CardDescription>}
+          <div style={{ marginTop: '1rem' }}>
             <ProfileAvatars profiles={dashboard.profiles} />
           </div>
         </CardContent>
         <CardFooter>
-          <span className="text-sm text-muted-foreground">
+          <span className="u-text-sm u-text-muted">
             {dashboard.profileCount} {dashboard.profileCount === 1 ? 'profile' : 'profiles'}
           </span>
         </CardFooter>

@@ -7,6 +7,8 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
+import './auth-form.css'
+
 export function SignupForm() {
   const navigate = useNavigate()
   const { refreshUser } = useAuth()
@@ -51,7 +53,7 @@ export function SignupForm() {
       <CardContent>
         <CardDescription>Enter your information to get started</CardDescription>
         <form onSubmit={handleSignup}>
-          <FieldGroup className="space-y-4">
+          <FieldGroup>
             <Field>
               <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
               <Input
@@ -90,24 +92,20 @@ export function SignupForm() {
                 disabled={isLoading}
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
+              <p className="u-text-xs u-text-muted">Must be at least 8 characters</p>
             </Field>
 
-            {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-                {error}
-              </div>
-            )}
+            {error && <div className="AuthForm__Error">{error}</div>}
 
-            <Button variant="primary" type="submit" className="w-full" disabled={isLoading}>
+            <Button variant="primary" type="submit" className="AuthForm__Submit" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Sign up'}
             </Button>
           </FieldGroup>
         </form>
 
-        <div className="mt-4 text-center text-sm">
+        <div className="AuthForm__Footer">
           Already have an account?{' '}
-          <a href="/login" className="text-primary hover:underline">
+          <a href="/login" className="AuthForm__Link">
             Log in
           </a>
         </div>

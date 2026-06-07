@@ -8,6 +8,9 @@ import * as React from 'react'
 import type { ProfileActivities } from '@/types/dashboards'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/custom/Avatar/Avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/custom/Card'
+import { Stack } from '@/components/custom/Stack/Stack'
+
+import './profile-breakdown.css'
 
 interface ProfileBreakdownProps {
   profileActivities: Array<ProfileActivities>
@@ -56,7 +59,7 @@ export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
         <CardTitle>Profile Breakdown</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <Stack gap="medium">
           {sortedProfiles.map((profile) => {
             const name = profile.athlete
               ? `${profile.athlete.firstname || ''} ${profile.athlete.lastname || ''}`.trim()
@@ -67,11 +70,8 @@ export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
               : profile.profile.fullName?.[0] || '?'
 
             return (
-              <div
-                key={profile.userId}
-                className="flex items-center justify-between py-2 border-b border-muted last:border-0"
-              >
-                <div className="flex items-center gap-3">
+              <div key={profile.userId} className="ProfileBreakdown__Row">
+                <div className="ProfileBreakdown__Identity">
                   <Avatar>
                     {profile.athlete?.profile ? (
                       <AvatarImage src={profile.athlete.profile} alt={initials} />
@@ -79,26 +79,26 @@ export function ProfileBreakdown({ profileActivities }: ProfileBreakdownProps) {
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-medium">{name}</div>
+                    <div className="ProfileBreakdown__Name">{name}</div>
                     {profile.error ? (
-                      <div className="text-sm text-muted-foreground">{profile.error}</div>
+                      <div className="ProfileBreakdown__Sub">{profile.error}</div>
                     ) : (
-                      <div className="text-sm text-muted-foreground">
+                      <div className="ProfileBreakdown__Sub">
                         {profile.stats.count} activities
                       </div>
                     )}
                   </div>
                 </div>
                 {!profile.error && profile.stats.count > 0 && (
-                  <div className="text-right text-sm">
+                  <div className="ProfileBreakdown__Stats">
                     <div>{formatDistance(profile.stats.distance)}</div>
-                    <div className="text-muted-foreground">{formatTime(profile.stats.time)}</div>
+                    <div className="ProfileBreakdown__StatsSub">{formatTime(profile.stats.time)}</div>
                   </div>
                 )}
               </div>
             )
           })}
-        </div>
+        </Stack>
       </CardContent>
     </Card>
   )

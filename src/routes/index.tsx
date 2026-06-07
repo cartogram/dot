@@ -3,6 +3,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { StatsDashboard } from '@/components/stats/StatsDashboard'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Profile } from '@/components/layout/Profile'
+import { Stack } from '@/components/custom/Stack/Stack'
 
 import { getCurrentUser } from '@/lib/server/auth'
 
@@ -22,10 +23,10 @@ function App() {
   console.log('[Index Route] User authenticated - showing dashboard')
   return (
     <React.Suspense fallback={<DashboardSkeleton />}>
-      <div className="flex flex-col gap-4">
+      <Stack gap="medium">
         <Profile />
         <StatsDashboard />
-      </div>
+      </Stack>
     </React.Suspense>
   )
 }

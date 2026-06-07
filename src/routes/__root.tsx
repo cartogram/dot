@@ -124,8 +124,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function Footer() {
   return (
-    <footer className="flex items-center justify-center ">
-      <p className="heading--4">made by <a href="https://cartogram.ca">Cartogram</a></p>
-    </footer >
+    <footer style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <p className="heading--4">
+        made by <a href="https://cartogram.ca">Cartogram</a>
+      </p>
+    </footer>
   )
 }

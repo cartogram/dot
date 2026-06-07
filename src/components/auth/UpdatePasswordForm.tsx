@@ -6,6 +6,8 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
+import './auth-form.css'
+
 export function UpdatePasswordForm() {
   const navigate = useNavigate()
   const [password, setPassword] = React.useState('')
@@ -32,7 +34,6 @@ export function UpdatePasswordForm() {
         return
       }
 
-      // Redirect to dashboard on success
       navigate({ to: '/' })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update password')
@@ -49,7 +50,7 @@ export function UpdatePasswordForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleUpdatePassword}>
-          <FieldGroup className="space-y-4">
+          <FieldGroup>
             <Field>
               <FieldLabel htmlFor="password">New Password</FieldLabel>
               <Input
@@ -62,7 +63,7 @@ export function UpdatePasswordForm() {
                 disabled={isLoading}
                 minLength={8}
               />
-              <p className="text-xs text-muted-foreground mt-1">Must be at least 8 characters</p>
+              <p className="u-text-xs u-text-muted">Must be at least 8 characters</p>
             </Field>
 
             <Field>
@@ -79,13 +80,9 @@ export function UpdatePasswordForm() {
               />
             </Field>
 
-            {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-                {error}
-              </div>
-            )}
+            {error && <div className="AuthForm__Error">{error}</div>}
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="AuthForm__Submit" disabled={isLoading}>
               {isLoading ? 'Updating...' : 'Update password'}
             </Button>
           </FieldGroup>

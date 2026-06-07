@@ -49,7 +49,7 @@ function ProfileContent({ username }: { username: string }) {
           <CardDescription>
             {error instanceof Error ? error.message : 'Failed to load profile.'}
           </CardDescription>
-          <Button to="/" variant="primary" className="mt-4">
+          <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
             Go Home
           </Button>
         </CardContent>
@@ -66,7 +66,7 @@ function ProfileContent({ username }: { username: string }) {
         </CardHeader>
         <CardContent>
           <CardDescription>The user @{username} does not exist.</CardDescription>
-          <Button to="/" variant="primary" className="mt-4">
+          <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
             Go Home
           </Button>
         </CardContent>
@@ -85,7 +85,7 @@ function ProfileContent({ username }: { username: string }) {
           <CardDescription>
             @{profileData.username} has chosen to keep their profile private.
           </CardDescription>
-          <Button to="/" variant="primary" className="mt-4">
+          <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
             Go Home
           </Button>
         </CardContent>
@@ -106,7 +106,7 @@ function ProfileContent({ username }: { username: string }) {
       </CardHeader>
       <CardContent>
         <CardDescription>Unable to load this profile.</CardDescription>
-        <Button to="/" variant="primary" className="mt-4">
+        <Button to="/" variant="primary" style={{ marginTop: "1rem" }}>
           Go Home
         </Button>
       </CardContent>

@@ -1,0 +1,53 @@
+.CardConfigDialog__Panel {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .CardConfigDialog__Panel {
+    max-width: 50%;
+  }
+}
+
+.CardConfigDialog__Footer {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.CardConfigDialog__FooterActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.CardConfigDialog__Select {
+  height: 2.25rem;
+  width: 100%;
+  border-radius: 1.5rem;
+  border: 1px solid var(--border, var(--color-primary));
+  background-color: var(--color-secondary);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 100ms;
+}
+
+.CardConfigDialog__Select:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+.CardConfigDialog__Radio {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.CardConfigDialog__Radio input[type='radio'] {
+  width: 1rem;
+  height: 1rem;
+}

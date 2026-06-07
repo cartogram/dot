@@ -97,7 +97,7 @@ export function DashboardActivityCard({
           <CardDescription>
             No activities for {getTimeFrameDescription(config.timeFrame as TimeFrame).toLowerCase()}
           </CardDescription>
-          {editAction && <div className="mt-4">{editAction}</div>}
+          {editAction && <div style={{ marginTop: "1rem" }}>{editAction}</div>}
         </CardContent>
       </Card>
     )

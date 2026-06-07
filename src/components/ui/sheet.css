@@ -1,0 +1,125 @@
+.Sheet__Overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgb(0 0 0 / 0.8);
+  transition: opacity 100ms ease-in-out;
+}
+
+.Sheet__Overlay[data-starting-style],
+.Sheet__Overlay[data-ending-style] {
+  opacity: 0;
+}
+
+@supports (backdrop-filter: blur(2px)) {
+  .Sheet__Overlay {
+    backdrop-filter: blur(2px);
+  }
+}
+
+.Sheet__Content {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--background, var(--color-background));
+  background-clip: padding-box;
+  font-size: 0.875rem;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+}
+
+.Sheet__Content[data-side='right'] {
+  inset-block: 0;
+  right: 0;
+  height: 100%;
+  width: 75%;
+  border-left: 1px solid var(--border, transparent);
+}
+
+.Sheet__Content[data-side='left'] {
+  inset-block: 0;
+  left: 0;
+  height: 100%;
+  width: 75%;
+  border-right: 1px solid var(--border, transparent);
+}
+
+.Sheet__Content[data-side='top'] {
+  inset-inline: 0;
+  top: 0;
+  height: auto;
+  border-bottom: 1px solid var(--border, transparent);
+}
+
+.Sheet__Content[data-side='bottom'] {
+  inset-inline: 0;
+  bottom: 0;
+  height: auto;
+  border-top: 1px solid var(--border, transparent);
+}
+
+@media (min-width: 640px) {
+  .Sheet__Content[data-side='left'],
+  .Sheet__Content[data-side='right'] {
+    max-width: 24rem;
+  }
+}
+
+.Sheet__Content[data-starting-style][data-side='right'],
+.Sheet__Content[data-ending-style][data-side='right'] {
+  transform: translateX(2.5rem);
+  opacity: 0;
+}
+
+.Sheet__Content[data-starting-style][data-side='left'],
+.Sheet__Content[data-ending-style][data-side='left'] {
+  transform: translateX(-2.5rem);
+  opacity: 0;
+}
+
+.Sheet__Content[data-starting-style][data-side='top'],
+.Sheet__Content[data-ending-style][data-side='top'] {
+  transform: translateY(-2.5rem);
+  opacity: 0;
+}
+
+.Sheet__Content[data-starting-style][data-side='bottom'],
+.Sheet__Content[data-ending-style][data-side='bottom'] {
+  transform: translateY(2.5rem);
+  opacity: 0;
+}
+
+.Sheet__Close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.Sheet__Header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1.5rem;
+}
+
+.Sheet__Footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  margin-top: auto;
+}
+
+.Sheet__Title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.Sheet__Description {
+  color: var(--muted-foreground, var(--color-secondary));
+  font-size: 0.875rem;
+}

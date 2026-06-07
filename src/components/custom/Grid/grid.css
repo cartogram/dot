@@ -1,14 +1,55 @@
 .Grid {
-  --min-width: 300px;
-  --gap: 10px;
-  --column-gap: 1em;
+  --grid-min-width: 300px;
+  --grid-gap: 1rem;
 
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--min-width), 1fr));
-  gap: var(--column-gap);
+  gap: var(--grid-gap);
 }
 
-.Grid > * {
-  margin-top: var(--gap);
-  margin-bottom: var(--gap);
+/* Default "auto" — fill rows with min-width columns */
+.Grid--columns-auto {
+  grid-template-columns: repeat(auto-fill, minmax(var(--grid-min-width), 1fr));
+}
+
+.Grid--columns-1 {
+  grid-template-columns: 1fr;
+}
+
+.Grid--columns-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.Grid--columns-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.Grid--columns-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+  .Grid--columns-2,
+  .Grid--columns-3,
+  .Grid--columns-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.Grid--gap-none {
+  --grid-gap: 0;
+}
+.Grid--gap-xsmall {
+  --grid-gap: 0.25rem;
+}
+.Grid--gap-small {
+  --grid-gap: 0.5rem;
+}
+.Grid--gap-medium {
+  --grid-gap: 1rem;
+}
+.Grid--gap-large {
+  --grid-gap: 1.5rem;
+}
+.Grid--gap-xlarge {
+  --grid-gap: 2.5rem;
 }

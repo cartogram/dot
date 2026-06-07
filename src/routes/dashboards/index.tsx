@@ -14,6 +14,8 @@ import { JoinDashboardForm } from '@/components/dashboard/JoinDashboardForm'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Button } from '@/components/custom/Button/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
+import { Stack } from '@/components/custom/Stack/Stack'
+import { Row } from '@/components/custom/Row/Row'
 import { getCurrentUser } from '@/lib/server/auth'
 
 export const Route = createFileRoute('/dashboards/')({
@@ -63,7 +65,7 @@ function DashboardsContent({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-6 ">
+    <Stack gap="large">
       {/* Header */}
       <Card>
         <CardHeader>
@@ -100,11 +102,11 @@ function DashboardsContent({ userId }: { userId: string }) {
       )}
 
       {/* Back to Home */}
-      <div className="flex justify-center">
+      <Row justify="center">
         <Button to="/" variant="secondary">
           Back to Home
         </Button>
-      </div>
-    </div>
+      </Row>
+    </Stack>
   )
 }

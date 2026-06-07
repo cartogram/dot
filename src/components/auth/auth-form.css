@@ -1,0 +1,38 @@
+.AuthForm__Error {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(220 38 38);
+  background-color: rgb(254 242 242);
+  border: 1px solid rgb(254 202 202);
+  border-radius: 0.375rem;
+}
+
+.AuthForm__Success {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: rgb(22 163 74);
+  background-color: rgb(240 253 244);
+  border: 1px solid rgb(187 247 208);
+  border-radius: 0.375rem;
+}
+
+.AuthForm__Submit {
+  width: 100%;
+}
+
+.AuthForm__Footer {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.AuthForm__Link {
+  color: var(--color-primary);
+}
+
+.AuthForm__Link:hover {
+  text-decoration: underline;
+}

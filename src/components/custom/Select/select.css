@@ -1,0 +1,126 @@
+.Select__Trigger {
+  display: flex;
+  width: 100%;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-radius: 0.5em;
+  border: 1px solid var(--color-primary);
+  background-color: var(--color-secondary);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  cursor: pointer;
+}
+
+.Select__Trigger:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.Select__Trigger:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.Select__Trigger:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.Select__Trigger > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.Select__TriggerIcon {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.5;
+}
+
+.Select__ScrollButton {
+  display: flex;
+  cursor: default;
+  align-items: center;
+  justify-content: center;
+  padding-block: 0.25rem;
+}
+
+.Select__Content {
+  position: relative;
+  z-index: 50;
+  max-height: 24rem;
+  min-width: 8rem;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border, var(--color-primary));
+  background-color: var(--popover, var(--color-background));
+  color: var(--popover-foreground, var(--color-primary));
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.Select__Viewport {
+  padding: 0.25rem;
+}
+
+.Select__Viewport--popper {
+  height: var(--radix-select-trigger-height);
+  width: 100%;
+  min-width: var(--radix-select-trigger-width);
+}
+
+.Select__Label {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.Select__Item {
+  position: relative;
+  display: flex;
+  width: 100%;
+  cursor: default;
+  user-select: none;
+  align-items: center;
+  border-radius: 0.125rem;
+  padding: 0.375rem 2rem 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.Select__Item:focus {
+  background-color: var(--accent, rgb(0 0 0 / 0.05));
+  color: var(--accent-foreground, currentColor);
+}
+
+.Select__Item[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.Select__ItemIndicator {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  width: 0.875rem;
+  height: 0.875rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.Select__ItemIndicator svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.Select__Separator {
+  height: 1px;
+  margin: 0.25rem -0.25rem;
+  background-color: var(--muted, rgb(0 0 0 / 0.08));
+}

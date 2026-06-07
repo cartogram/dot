@@ -13,6 +13,7 @@ import { Route as UpdatePasswordRouteImport } from './routes/update-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PlaygroundRouteImport } from './routes/playground'
 import { Route as LogoutRouteImport } from './routes/logout'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as UsernameRouteImport } from './routes/$username'
@@ -41,6 +42,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlaygroundRoute = PlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogoutRoute = LogoutRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/$username': typeof UsernameRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/playground': typeof PlaygroundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/$username': typeof UsernameRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/playground': typeof PlaygroundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/$username': typeof UsernameRoute
   '/login': typeof LoginRoute
   '/logout': typeof LogoutRoute
+  '/playground': typeof PlaygroundRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/login'
     | '/logout'
+    | '/playground'
     | '/reset-password'
     | '/settings'
     | '/signup'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/login'
     | '/logout'
+    | '/playground'
     | '/reset-password'
     | '/settings'
     | '/signup'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/login'
     | '/logout'
+    | '/playground'
     | '/reset-password'
     | '/settings'
     | '/signup'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   UsernameRoute: typeof UsernameRoute
   LoginRoute: typeof LoginRoute
   LogoutRoute: typeof LogoutRoute
+  PlaygroundRoute: typeof PlaygroundRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/playground': {
+      id: '/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof PlaygroundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/logout': {
@@ -300,6 +320,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsernameRoute: UsernameRoute,
   LoginRoute: LoginRoute,
   LogoutRoute: LogoutRoute,
+  PlaygroundRoute: PlaygroundRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,

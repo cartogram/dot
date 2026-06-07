@@ -9,6 +9,8 @@ import { Button, buttonVariants } from '@/components/custom/Button/Button'
 import { Badge } from '@/components/custom/Badge/Badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
+import './settings.css'
+
 export const Route = createFileRoute('/settings')({
   component: SettingsPage,
 })
@@ -165,13 +167,13 @@ function SettingsPageContent({
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <Card className="w-full max-w-md">
+      <div className="SettingsPage__Centre">
+        <Card className="SettingsPage__CardWide">
           <CardHeader>
             <CardTitle>Connect Strava</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate({ to: '/login' })} className="w-full">
+            <Button onClick={() => navigate({ to: '/login' })} className="u-w-full">
               Go to Login
             </Button>
           </CardContent>
@@ -181,13 +183,13 @@ function SettingsPageContent({
   }
 
   return (
-    <div className="flex flex-col gap-4 justify-center items-center">
+    <div className="SettingsPage">
       <Card>
         <CardHeader>
           <CardTitle>Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="SettingsPage__Grid2">
             <div>
               <p>Email</p>
               <p className="heading--4">{user.email}</p>
@@ -222,10 +224,10 @@ function SettingsPageContent({
         <CardHeader>
           <CardTitle>Public Profile</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
+        <CardContent className="SettingsPage__SectionContent">
+          <div className="SettingsPage__Row">
             <div>
-              <p className="font-medium">Profile Visibility</p>
+              <p className="u-font-medium">Profile Visibility</p>
               <CardDescription>
                 {user.profilePublic
                   ? 'Your profile is visible to anyone with your link.'
@@ -245,14 +247,14 @@ function SettingsPageContent({
             </Button>
           </div>
 
-          <div className="border-t border-border pt-4">
-            <p className="font-medium mb-2">Your Profile URL</p>
-            <div className="flex items-center gap-2">
+          <div className="SettingsPage__UrlBlock">
+            <p className="SettingsPage__UrlBlockLabel">Your Profile URL</p>
+            <div className="SettingsPage__UrlInputRow">
               <input
                 type="text"
                 readOnly
                 value={profileUrl}
-                className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
+                className="SettingsPage__UrlInput"
               />
               <Button onClick={handleCopyProfileLink} variant="secondary">
                 {copied ? 'Copied!' : 'Copy Link'}
@@ -265,7 +267,7 @@ function SettingsPageContent({
                 View
               </Link>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">@{user.username}</p>
+            <p className="SettingsPage__Hint">@{user.username}</p>
           </div>
         </CardContent>
       </Card>
@@ -275,39 +277,30 @@ function SettingsPageContent({
         <CardHeader>
           <CardTitle>Dashboards</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="SettingsPage__SectionContent">
           <CardDescription>
             Create and manage dashboards to track and share activity stats.
           </CardDescription>
 
           {dashboardsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading dashboards...</p>
+            <p className="u-text-sm u-text-muted">Loading dashboards...</p>
           ) : dashboards && dashboards.length > 0 ? (
-            <div className="space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {dashboards.map((dashboard) => (
-                <div
-                  key={dashboard.id}
-                  className="flex items-center justify-between p-3 rounded-md border border-border hover:bg-muted transition-colors"
-                >
-
+                <div key={dashboard.id} className="SettingsPage__DashboardRow">
                   <Link
                     to="/dashboards/$dashboardId"
                     params={{ dashboardId: dashboard.id }}
-                    className="flex-1"
+                    className="SettingsPage__DashboardLink"
                   >
-
-                    <p className="font-medium">{dashboard.name}
-
-
-                    </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="SettingsPage__DashboardName">{dashboard.name}</p>
+                    <p className="SettingsPage__DashboardSub">
                       {dashboard.profileCount}{' '}
                       {dashboard.profileCount === 1 ? 'profile' : 'profiles'}
                     </p>
-
                   </Link>
 
-                  <div className="flex items-center gap-2">
+                  <div className="SettingsPage__DashboardActions">
                     {dashboard.currentUserRole === 'owner' && (
                       <>
                         <Button
@@ -346,10 +339,10 @@ function SettingsPageContent({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground">You don't have any dashboards yet.</p>
+            <p className="u-text-sm u-text-muted">You don't have any dashboards yet.</p>
           )}
 
-          <div className="flex gap-2 justify-center">
+          <div className="SettingsPage__FooterActions">
             <Button to="/dashboards" variant="secondary">
               View All Dashboards
             </Button>
@@ -364,12 +357,8 @@ function SettingsPageContent({
         <CardHeader>
           <CardTitle>Strava</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-              {error}
-            </div>
-          )}
+        <CardContent className="SettingsPage__SectionContent">
+          {error && <div className="SettingsPage__Error">{error}</div>}
 
           {stravaDataSource ? (
             <>
@@ -383,7 +372,7 @@ function SettingsPageContent({
                 onClick={handleDisconnectStrava}
                 variant="primary"
                 destructive
-                className="flex-1"
+                style={{ flex: 1 }}
               >
                 Disconnect
               </Button>
@@ -392,7 +381,7 @@ function SettingsPageContent({
             <Button
               onClick={handleConnectStrava}
               disabled={isConnecting}
-              className="w-full"
+              className="u-w-full"
               variant="primary"
             >
               {isConnecting ? 'Connecting...' : 'Connect with Strava'}

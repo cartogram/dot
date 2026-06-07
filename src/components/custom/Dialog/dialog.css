@@ -1,0 +1,91 @@
+.Dialog__Overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background-color: rgb(0 0 0 / 0.8);
+  transition: opacity 100ms;
+}
+
+.Dialog__Overlay[data-starting-style],
+.Dialog__Overlay[data-ending-style] {
+  opacity: 0;
+}
+
+@supports (backdrop-filter: blur(2px)) {
+  .Dialog__Overlay {
+    backdrop-filter: blur(2px);
+  }
+}
+
+.Dialog__Content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 50;
+  display: grid;
+  width: 100%;
+  max-width: 32rem;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border, transparent);
+  background-color: var(--background, var(--color-background));
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  transform: translate(-50%, -50%);
+  transition: opacity 200ms, transform 200ms;
+}
+
+.Dialog__Content[data-starting-style],
+.Dialog__Content[data-ending-style] {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
+@media (min-width: 640px) {
+  .Dialog__Content {
+    border-radius: 0.5rem;
+  }
+}
+
+.Dialog__Close {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
+
+.Dialog__Header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .Dialog__Header {
+    text-align: left;
+  }
+}
+
+.Dialog__Footer {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+@media (min-width: 640px) {
+  .Dialog__Footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}
+
+.Dialog__Title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+.Dialog__Description {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, var(--color-secondary));
+}

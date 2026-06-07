@@ -1,0 +1,35 @@
+.ActivityStatsCard__Toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.ActivityStatsCard__Types {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ActivityStatsCard__Summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.ActivityStatsCard__Stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.ActivityStatsCard__StatLabel {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.ActivityStatsCard__StatValueMuted {
+  font-weight: 500;
+}

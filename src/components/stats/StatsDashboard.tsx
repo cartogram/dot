@@ -8,6 +8,9 @@ import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
 import { DashboardSkeleton } from '@/components/dashboard/DashboardSkeleton'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Button } from '@/components/custom/Button/Button'
+import { Stack } from '@/components/custom/Stack/Stack'
+import { Row } from '@/components/custom/Row/Row'
+import { Grid } from '@/components/custom/Grid/Grid'
 
 export function StatsDashboard() {
   const { user, stravaDataSource } = useAuth()
@@ -112,7 +115,7 @@ export function StatsDashboard() {
         </CardDescription>
         {isAuthError && (
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="u-text-sm u-text-muted">
               Your Strava authentication has expired. Please refresh the page to log in again.
             </p>
           </CardContent>
@@ -122,10 +125,10 @@ export function StatsDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <Stack gap="large">
       {/* Dashboard Grid */}
       {cards.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Grid columns="3" gap="large">
           {cards.map((card) => (
             <DashboardCard
               key={card.id}
@@ -136,7 +139,7 @@ export function StatsDashboard() {
               onUpdate={handleRefresh}
             />
           ))}
-        </div>
+        </Grid>
       ) : (
         <Card>
           <CardHeader>
@@ -144,7 +147,7 @@ export function StatsDashboard() {
           </CardHeader>
           <CardContent>
             <CardDescription>Get started by adding your first activity card</CardDescription>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="u-text-sm u-text-muted">
               Click "Add Card" above to create a custom activity card with your preferred time
               frame, metrics, and goals.
             </p>
@@ -153,10 +156,10 @@ export function StatsDashboard() {
         </Card>
       )}
       {dashboardId && (
-        <div className="col-span-3 flex justify-center">
+        <Row justify="center">
           <CardConfigDialog dashboardId={dashboardId} onSave={handleRefresh} />
-        </div>
+        </Row>
       )}
-    </div>
+    </Stack>
   )
 }

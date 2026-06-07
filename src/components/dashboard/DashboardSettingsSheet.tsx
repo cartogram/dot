@@ -10,6 +10,8 @@ import { Input } from '@/components/custom/Input/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 
+import './dashboard-settings-sheet.css'
+
 interface DashboardSettingsSheetProps {
   dashboard: DashboardData['dashboard']
   userId: string
@@ -93,9 +95,9 @@ export function DashboardSettingsSheet({
       open={open}
       onOpenChange={onOpenChange}
       title="Dashboard Settings"
-      className="data-[side=right]:w-full data-[side=right]:max-w-full data-[side=right]:md:max-w-1/2"
+      className="DashboardSettingsSheet__Panel"
       footer={
-        <div className="flex gap-2 justify-end w-full">
+        <div className="DashboardSettingsSheet__Footer">
           <Button
             variant="secondary"
             onClick={handleCancel}
@@ -120,7 +122,7 @@ export function DashboardSettingsSheet({
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
               <FieldLabel htmlFor="dashboard-name">Dashboard Name</FieldLabel>
               <Input
                 id="dashboard-name"
@@ -129,14 +131,14 @@ export function DashboardSettingsSheet({
                 disabled={updateSettingsMutation.isPending}
               />
 
-              <div className="space-y-4 pt-2">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '0.5rem' }}>
                 <Checkbox
                   checked={editedIsPublic}
                   onCheckedChange={() => setEditedIsPublic(!editedIsPublic)}
                   disabled={updateSettingsMutation.isPending}
                   label="Make Public"
                 />
-                <p className="text-sm text-muted-foreground ml-6">
+                <p className="DashboardSettingsSheet__Hint">
                   Public dashboards can be viewed by anyone with the link.
                 </p>
 
@@ -146,7 +148,7 @@ export function DashboardSettingsSheet({
                   disabled={updateSettingsMutation.isPending}
                   label="Set as Default"
                 />
-                <p className="text-sm text-muted-foreground ml-6">
+                <p className="DashboardSettingsSheet__Hint">
                   Your default dashboard is shown on your public profile.
                 </p>
               </div>
@@ -161,22 +163,22 @@ export function DashboardSettingsSheet({
               <CardTitle>Dashboard Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3 text-center bg-muted/50 rounded-lg p-3">
+              <div className="DashboardSettingsSheet__Stats">
                 <div>
-                  <div className="text-xl font-bold">{stats.profileCount}</div>
-                  <div className="text-xs text-muted-foreground">Profiles</div>
+                  <div className="DashboardSettingsSheet__StatValue">{stats.profileCount}</div>
+                  <div className="DashboardSettingsSheet__StatLabel">Profiles</div>
                 </div>
                 <div>
-                  <div className="text-xl font-bold">{stats.profilesWithData}</div>
-                  <div className="text-xs text-muted-foreground">With Strava</div>
+                  <div className="DashboardSettingsSheet__StatValue">{stats.profilesWithData}</div>
+                  <div className="DashboardSettingsSheet__StatLabel">With Strava</div>
                 </div>
                 <div>
-                  <div className="text-xl font-bold">{stats.totalActivities}</div>
-                  <div className="text-xs text-muted-foreground">Activities</div>
+                  <div className="DashboardSettingsSheet__StatValue">{stats.totalActivities}</div>
+                  <div className="DashboardSettingsSheet__StatLabel">Activities</div>
                 </div>
                 <div>
-                  <div className="text-xl font-bold">{stats.cardCount}</div>
-                  <div className="text-xs text-muted-foreground">Cards</div>
+                  <div className="DashboardSettingsSheet__StatValue">{stats.cardCount}</div>
+                  <div className="DashboardSettingsSheet__StatLabel">Cards</div>
                 </div>
               </div>
             </CardContent>
@@ -189,7 +191,7 @@ export function DashboardSettingsSheet({
             <CardTitle>Danger Zone</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription className="mb-4">
+            <CardDescription style={{ marginBottom: '1rem' }}>
               Permanently delete this dashboard and all its cards.
             </CardDescription>
             <Button

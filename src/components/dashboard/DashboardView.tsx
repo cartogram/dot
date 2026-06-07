@@ -16,6 +16,8 @@ import { Input } from '@/components/custom/Input/Input'
 import { Button } from '@/components/custom/Button/Button'
 import { Label } from '@/components/custom/Label/Label'
 import { Grid } from '@/components/custom/Grid/Grid'
+import { Stack } from '@/components/custom/Stack/Stack'
+import { Row } from '@/components/custom/Row/Row'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
 interface DashboardViewProps {
@@ -34,7 +36,7 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
   const profilesWithErrors = profileActivities.filter((pa) => pa.error).length
 
   return (
-    <div className="gap-6 flex flex-col">
+    <Stack gap="large">
       {/* Dashboard Header */}
       <DashboardHeader
         data={data}
@@ -76,9 +78,9 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
         </Card>
       )}
       {data.canEdit && (
-        <div className="flex justify-center">
+        <Row justify="center">
           <CardConfigDialog dashboardId={data.dashboard.id} onSave={onRefresh} />
-        </div>
+        </Row>
       )}
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
@@ -107,9 +109,9 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
                 : "The dashboard hasn't been set up yet. An editor can add cards."}
             </CardDescription>
             {data.canEdit && (
-              <div className="mt-4">
+              <Stack gap="medium" style={{ marginTop: '1rem' }}>
                 <CardConfigDialog dashboardId={data.dashboard.id} onSave={onRefresh} />
-              </div>
+              </Stack>
             )}
           </CardContent>
         </Card>
@@ -120,7 +122,7 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
 
       {/* Invite Athletes Card */}
       {data.canEdit && <InviteAthletesCard dashboardId={data.dashboard.id} userId={userId} />}
-    </div>
+    </Stack>
   )
 }
 
@@ -168,30 +170,32 @@ function InviteAthletesCard({ dashboardId, userId }: InviteAthletesCardProps) {
         <CardDescription>
           Share this invite code with other athletes to let them join this dashboard.
         </CardDescription>
-        <div className="space-y-4">
-          <div className="space-y-2 flex flex-col gap-2">
-            <Label htmlFor="invite-code">Invite Code</Label>
-            <div className="flex gap-2">
-              <Input
-                id="invite-code"
-                readOnly
-                placeholder={inviteMutation.isPending ? 'Generating...' : 'ABCD1234'}
-                value={inviteCode || ''}
-                maxLength={8}
-                style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
-                className="font-mono text-center tracking-wider"
-              />
-              <Button
-                variant="secondary"
-                onClick={copyInviteCode}
-                disabled={!inviteCode}
-                className="shrink-0"
-              >
-                {copied ? 'Copied' : 'Copy'}
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Stack gap="small">
+          <Label htmlFor="invite-code">Invite Code</Label>
+          <Row gap="small">
+            <Input
+              id="invite-code"
+              readOnly
+              placeholder={inviteMutation.isPending ? 'Generating...' : 'ABCD1234'}
+              value={inviteCode || ''}
+              maxLength={8}
+              style={{
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontFamily: 'ui-monospace, monospace',
+                textAlign: 'center',
+              }}
+            />
+            <Button
+              variant="secondary"
+              onClick={copyInviteCode}
+              disabled={!inviteCode}
+              style={{ flexShrink: 0 }}
+            >
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+          </Row>
+        </Stack>
       </CardContent>
     </Card>
   )

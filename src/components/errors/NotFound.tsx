@@ -15,7 +15,7 @@ export function NotFound({ children }: { children?: any }) {
       </CardHeader>
       <CardContent>
         <CardDescription>The page you are looking for does not exist.</CardDescription>
-        <Button to="/" variant="primary" className="w-full">
+        <Button to="/" variant="primary" className="u-w-full">
           Go to Dashboard
         </Button>
       </CardContent>

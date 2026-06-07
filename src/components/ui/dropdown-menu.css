@@ -1,0 +1,141 @@
+.DropdownMenu__Trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.DropdownMenu__Positioner {
+  isolation: isolate;
+  z-index: 50;
+  outline: none;
+}
+
+.DropdownMenu__Content {
+  min-width: 12rem;
+  max-height: var(--available-height);
+  width: var(--anchor-width);
+  transform-origin: var(--transform-origin);
+  overflow-x: hidden;
+  overflow-y: auto;
+  outline: none;
+  z-index: 50;
+  padding: 0.25rem;
+  border-radius: 1rem;
+  background-color: var(--popover, var(--color-background));
+  color: var(--popover-foreground, currentColor);
+  box-shadow:
+    0 0 0 1px var(--border, rgb(0 0 0 / 0.05)),
+    0 25px 50px -12px rgb(0 0 0 / 0.25);
+  transition: opacity 100ms ease, transform 100ms ease;
+}
+
+.DropdownMenu__Content[data-starting-style],
+.DropdownMenu__Content[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+.DropdownMenu__SubContent {
+  min-width: 9rem;
+  width: auto;
+  border-radius: 1rem;
+  padding: 0.25rem;
+}
+
+.DropdownMenu__Label {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.DropdownMenu__Item,
+.DropdownMenu__SubTrigger,
+.DropdownMenu__CheckboxItem,
+.DropdownMenu__RadioItem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  cursor: default;
+  user-select: none;
+  outline: none;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  border-radius: 0.75rem;
+}
+
+.DropdownMenu__Item[data-inset],
+.DropdownMenu__SubTrigger[data-inset] {
+  padding-left: 2rem;
+}
+
+.DropdownMenu__Item:focus,
+.DropdownMenu__SubTrigger:focus,
+.DropdownMenu__SubTrigger[data-open],
+.DropdownMenu__CheckboxItem:focus,
+.DropdownMenu__RadioItem:focus {
+  background-color: var(--accent, rgb(0 0 0 / 0.05));
+  color: var(--accent-foreground, currentColor);
+}
+
+.DropdownMenu__Item[data-disabled],
+.DropdownMenu__CheckboxItem[data-disabled],
+.DropdownMenu__RadioItem[data-disabled] {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.DropdownMenu__Item[data-variant='destructive'] {
+  color: var(--destructive, var(--color-primary));
+}
+
+.DropdownMenu__Item[data-variant='destructive']:focus {
+  background-color: rgb(220 38 38 / 0.1);
+  color: var(--destructive, var(--color-primary));
+}
+
+.DropdownMenu__CheckboxItem,
+.DropdownMenu__RadioItem {
+  padding-right: 2rem;
+}
+
+.DropdownMenu__CheckIndicator {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.DropdownMenu__SubArrow {
+  margin-left: auto;
+  width: 1rem;
+  height: 1rem;
+}
+
+.DropdownMenu__Separator {
+  height: 1px;
+  margin: 0.25rem -0.25rem;
+  background-color: var(--border, rgb(0 0 0 / 0.1));
+}
+
+.DropdownMenu__Shortcut {
+  margin-left: auto;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.DropdownMenu__Item svg,
+.DropdownMenu__SubTrigger svg,
+.DropdownMenu__CheckboxItem svg,
+.DropdownMenu__RadioItem svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  pointer-events: none;
+}

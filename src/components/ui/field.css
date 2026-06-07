@@ -1,0 +1,147 @@
+.FieldSet {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.FieldLegend {
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.FieldLegend[data-variant='label'] {
+  font-size: 0.875rem;
+}
+
+.FieldGroup {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1.75rem;
+  container-type: inline-size;
+  container-name: field-group;
+}
+
+.Field {
+  display: flex;
+  width: 100%;
+  gap: 0.75rem;
+}
+
+.Field--orientation-vertical {
+  flex-direction: column;
+}
+
+.Field--orientation-vertical > * {
+  width: 100%;
+}
+
+.Field--orientation-vertical > .sr-only {
+  width: auto;
+}
+
+.Field--orientation-horizontal {
+  flex-direction: row;
+  align-items: center;
+}
+
+.Field--orientation-responsive {
+  flex-direction: column;
+}
+
+.Field--orientation-responsive > * {
+  width: 100%;
+}
+
+@container field-group (min-width: 28rem) {
+  .Field--orientation-responsive {
+    flex-direction: row;
+    align-items: center;
+  }
+  .Field--orientation-responsive > * {
+    width: auto;
+  }
+}
+
+.Field[data-invalid='true'] {
+  color: var(--destructive, var(--color-primary));
+}
+
+.FieldContent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.25rem;
+  line-height: 1.3;
+}
+
+.FieldLabel {
+  display: flex;
+  width: fit-content;
+  gap: 0.5rem;
+  line-height: 1.3;
+}
+
+.FieldTitle {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.FieldDescription {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.FieldDescription > a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.FieldDescription > a:hover {
+  color: var(--color-primary);
+}
+
+.FieldSeparator {
+  position: relative;
+  height: 1.25rem;
+  font-size: 0.875rem;
+  margin-block: -0.5rem;
+}
+
+.FieldSeparator__Line {
+  position: absolute;
+  inset: 0;
+  top: 50%;
+}
+
+.FieldSeparator__Content {
+  position: relative;
+  display: block;
+  width: fit-content;
+  margin-inline: auto;
+  padding-inline: 0.5rem;
+  background-color: var(--background, var(--color-background));
+  color: var(--muted-foreground, var(--color-secondary));
+}
+
+.FieldError {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--destructive, var(--color-primary));
+}
+
+.FieldError__List {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-left: 1rem;
+  list-style: disc;
+}

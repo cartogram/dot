@@ -36,6 +36,7 @@ import { WeeklyVolumeChart } from '@/components/charts/WeeklyVolumeChart'
 import { ActivityContributionChart } from '@/components/charts/ActivityContributionChart'
 import { ConsistencyHeatmap } from '@/components/charts/ConsistencyHeatmap'
 import '@/components/charts/charts.css'
+import './activity-stats-card.css'
 
 interface ActivityStatsCardProps {
   types: Array<string>
@@ -107,8 +108,8 @@ export function ActivityStatsCard({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-2">
+        <div className="ActivityStatsCard__Toolbar">
+          <div className="ActivityStatsCard__Types">
             {types.map((type) => (
               <Badge key={type} variant="secondary">
                 {type}
@@ -164,7 +165,7 @@ export function ActivityStatsCard({
 
         {/* Dynamic Rendering of Tab Content */}
         {activeTab === 'summary' && primaryProgress && (
-          <div className="space-y-8">
+          <div className="ActivityStatsCard__Summary">
             {/* Progress Bar */}
             <Progress
               value={primaryProgress.percentage}
@@ -172,24 +173,24 @@ export function ActivityStatsCard({
             />
 
             {/* Goal Details */}
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="ActivityStatsCard__Stats">
               <div>
-                <div className="text-muted-foreground text-xs mb-1">Time Frame</div>
-                <div className="font-medium">{timeFrameDescription}</div>
+                <div className="ActivityStatsCard__StatLabel">Time Frame</div>
+                <div className="ActivityStatsCard__StatValueMuted">{timeFrameDescription}</div>
               </div>
               <div>
-                <div className="text-muted-foreground text-xs mb-1">Remainder</div>
+                <div className="ActivityStatsCard__StatLabel">Remainder</div>
                 <div className="heading--4">
                   {formatRemainder(primaryProgress)}{' '}
                   {primaryProgress.unit !== 'hours' && primaryProgress.unit}
                 </div>
               </div>
               <div>
-                <div className="text-muted-foreground text-xs mb-1">Under/Over</div>
+                <div className="ActivityStatsCard__StatLabel">Under/Over</div>
                 <div className="heading--4">{formatBehindPlan(primaryProgress)}</div>
               </div>
               <div>
-                <div className="text-muted-foreground text-xs mb-1">Daily Pace</div>
+                <div className="ActivityStatsCard__StatLabel">Daily Pace</div>
                 <div className="heading--4">{formatDailyPace(primaryProgress)}</div>
               </div>
             </div>

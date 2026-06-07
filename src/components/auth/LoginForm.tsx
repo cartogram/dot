@@ -7,6 +7,8 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/custom/Input/Input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/custom/Card'
 
+import './auth-form.css'
+
 export function LoginForm() {
   const navigate = useNavigate()
   const { refreshUser } = useAuth()
@@ -76,27 +78,23 @@ export function LoginForm() {
               />
             </Field>
 
-            {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded">
-                {error}
-              </div>
-            )}
+            {error && <div className="AuthForm__Error">{error}</div>}
 
-            <Button variant="primary" type="submit" className="w-full" disabled={isLoading}>
+            <Button variant="primary" type="submit" className="AuthForm__Submit" disabled={isLoading}>
               {isLoading ? 'Logging in...' : 'Log in'}
             </Button>
           </FieldGroup>
         </form>
 
-        <div className="mt-4 space-y-2 text-center text-sm">
+        <div className="AuthForm__Footer">
           <div>
-            <a href="/reset-password" className="text-primary hover:underline">
+            <a href="/reset-password" className="AuthForm__Link">
               Forgot your password?
             </a>
           </div>
           <div>
             Don't have an account?{' '}
-            <a href="/signup" className="text-primary hover:underline">
+            <a href="/signup" className="AuthForm__Link">
               Sign up
             </a>
           </div>
