@@ -44,17 +44,17 @@ Required in `.env.local`:
 - **TanStack Router** — file-based routing with type-safe params
 - **TanStack Query** — data fetching/caching on the client
 - **Prisma 7** with `@prisma/adapter-pg` (pg pool adapter) — PostgreSQL ORM
-- **Tailwind CSS 4** + custom CSS variables (in `src/css/`)
+- **Vanilla CSS** + custom CSS variables (in `src/css/`) and custom BEM classes
 - **shadcn/ui** (base: `@base-ui/react`, not Radix) + custom components in `src/components/custom/`
 
 ### Styling Conventions
 
-- **Page-level Layouts, Spacing & Grids**: Use Tailwind CSS 4 utility classes (e.g. `flex`, `grid`, `gap-*`, `mb-*`, `space-y-*`, `justify-*`).
+- **Page-level Layouts, Spacing & Grids**: Use custom CSS layouts (Flexbox/Grid) and minimal custom utility classes (prefixed with `u-` in `src/css/_utilities.css`).
 - **Component-level Styling**: Use Vanilla CSS co-located with the component (e.g., `button.css`, `card.css`, `charts.css`) following a BEM-like modifier convention. Link variables using CSS custom properties (like `var(--color-primary)`, `var(--card)`) for theme-aware properties. Avoid inline styles or Tailwind utilities inside custom component templates.
 
 ### Auth
 
-Authentication is entirely custom (no Supabase auth despite the `supabase/` directory existing for local DB tooling). It uses:
+Authentication is entirely custom (no Supabase auth). It uses:
 
 1. **TanStack Start sessions** — encrypted cookie via `useSession()` from `@tanstack/react-start/server`, wrapping it in `useAppSession()` (`src/lib/auth/session.ts`). No session DB table.
 2. **scrypt password hashing** — in `src/lib/auth/password.ts`
@@ -119,4 +119,4 @@ Two test environments:
 
 ### Database Migrations
 
-Schema lives in `prisma/schema.prisma`. SQL migration history is also in `supabase/migrations/` (for reference). Use `pnpm db:push` for schema sync in development, Prisma migrations for production changes.
+Schema lives in `prisma/schema.prisma`. Use `pnpm db:push` for schema sync in development, Prisma migrations for production changes.
