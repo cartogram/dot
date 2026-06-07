@@ -97,7 +97,8 @@ export function BurnUpChart({ data, metric, goal }: BurnUpChartProps) {
             dataKey="date"
             tickLine={false}
             axisLine={false}
-            interval={interval}
+            interval={0}
+            tickFormatter={(date) => (date.endsWith(' 1') ? date.split(' ')[0] : '')}
             tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }}
           />
           <YAxis

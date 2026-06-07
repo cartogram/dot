@@ -9,7 +9,7 @@ import './dashboard-skeleton.css'
 export function DashboardSkeleton() {
   return (
     <Stack gap="large">
-      <Grid columns="3" gap="large">
+      <Grid columns="2" gap="large">
         {[1, 2, 3].map((i) => (
           <Card key={i} state="loading" className="u-animate-pulse">
             <CardHeader>

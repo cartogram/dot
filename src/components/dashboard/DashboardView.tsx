@@ -84,7 +84,7 @@ export function DashboardView({ data, userId, onRefresh }: DashboardViewProps) {
       )}
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
-        <Grid>
+        <Grid columns="2" gap="large">
           {cards.map((card) => (
             <DashboardActivityCard
               key={card.id}

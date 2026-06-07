@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   top: 0;
-  width: calc(var(--site-width) + 10em);
+  width: var(--site-width);
   max-width: 100%;
   padding: 1em;
   pointer-events: none;

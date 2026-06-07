@@ -102,7 +102,7 @@ export function PublicProfileDashboard({ profileData }: PublicProfileDashboardPr
 
       {/* Dashboard Cards */}
       {cards.length > 0 ? (
-        <Grid>
+        <Grid columns="2" gap="large">
           {cards.map((card) => (
             <ReadOnlyDashboardCard
               key={card.id}

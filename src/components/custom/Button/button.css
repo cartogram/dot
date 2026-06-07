@@ -58,10 +58,10 @@
 .Button--destructive,
 .Button--destructive:hover,
 .Button--destructive:focus {
-  color: var(--color-destructive);
+  color: var(--destructive);
 
   &.Button--primary {
-    background: var(--color-destructive);
+    background: var(--destructive);
     color: var(--color-secondary);
   }
 }

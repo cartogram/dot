@@ -9,13 +9,17 @@ interface ActivityContributionChartProps {
   metric: Metric
 }
 
-const COLORS = [
+const CHART_COLORS = [
   'var(--chart-1)',
   'var(--chart-2)',
   'var(--chart-3)',
   'var(--chart-4)',
   'var(--chart-5)',
 ]
+
+function getActivityColor(index: number): string {
+  return CHART_COLORS[index % CHART_COLORS.length]
+}
 
 export function ActivityContributionChart({ data, metric }: ActivityContributionChartProps) {
   const unit = METRIC_UNITS[metric]
@@ -65,7 +69,7 @@ export function ActivityContributionChart({ data, metric }: ActivityContribution
               {data.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
+                  fill={getActivityColor(index)}
                   stroke="var(--card)"
                   strokeWidth={2}
                 />
@@ -78,7 +82,7 @@ export function ActivityContributionChart({ data, metric }: ActivityContribution
       {/* Legend - custom list utilizing external stylesheet */}
       <div className="Chart__Legend">
         {data.map((item, index) => {
-          const color = COLORS[index % COLORS.length]
+          const color = getActivityColor(index)
           return (
             <div key={item.name} className="Chart__LegendItem">
               <div className="Chart__LegendLabel">

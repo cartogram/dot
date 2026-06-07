@@ -11,7 +11,7 @@
   --color-secondary: var(--dot-color-light);
   --color-primary-light: color(from var(--color-primary) xyz x y z / 0.05);
   --color-primary: #c60e83;
-  --site-width: 1400px;
+  --site-width: 1000px;
   --background-texture: url('/noise.png');
   --unit: 4px;
 
@@ -36,6 +36,13 @@
   --input: color-mix(in srgb, var(--color-primary) 15%, transparent);
   --ring: color-mix(in srgb, var(--color-primary) 50%, transparent);
   --radius: 0.5em;
+
+  /* Chart Segment Colors - Shades of Primary */
+  --chart-1: var(--color-primary);
+  --chart-2: color-mix(in srgb, var(--color-primary) 80%, var(--color-background));
+  --chart-3: color-mix(in srgb, var(--color-primary) 60%, var(--color-background));
+  --chart-4: color-mix(in srgb, var(--color-primary) 40%, var(--color-background));
+  --chart-5: color-mix(in srgb, var(--color-primary) 20%, var(--color-background));
 }
 
 .dark {
@@ -43,6 +50,13 @@
   --color-secondary: var(--dot-color-dark);
   --color-primary: #70dec9;
   --background-texture: '';
+
+  /* Chart Segment Colors - Shades of Primary */
+  --chart-1: var(--color-primary);
+  --chart-2: color-mix(in srgb, var(--color-primary) 80%, var(--color-background));
+  --chart-3: color-mix(in srgb, var(--color-primary) 60%, var(--color-background));
+  --chart-4: color-mix(in srgb, var(--color-primary) 40%, var(--color-background));
+  --chart-5: color-mix(in srgb, var(--color-primary) 20%, var(--color-background));
 }
 
 html {

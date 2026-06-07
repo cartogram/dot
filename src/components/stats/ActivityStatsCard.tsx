@@ -11,6 +11,7 @@ import {
   formatRemainder,
 } from '@/lib/goals/calculations'
 import { getTimeFrameDescription } from '@/lib/dashboard/timeframes'
+import { cn } from '@/lib/utils'
 import {
   Card,
   CardContent,
@@ -71,9 +72,7 @@ export function ActivityStatsCard({
   metric,
   goal,
 }: ActivityStatsCardProps) {
-  const [activeTab, setActiveTab] = React.useState<
-    'summary' | 'trend' | 'weekly' | 'heatmap' | 'breakdown'
-  >('summary')
+  const [activeTab, setActiveTab] = React.useState<'main' | 'breakdown'>('main')
 
   // Determine primary progress metric (prefer distance > time > count)
   const primaryProgress =
@@ -81,11 +80,24 @@ export function ActivityStatsCard({
 
   const timeFrameDescription = getTimeFrameDescription(timeFrame, customDateRange)
 
+  // Convert goal from database units to display units for chart rendering
+  const displayGoal = React.useMemo(() => {
+    if (goal === null || goal === undefined || !metric) return goal
+    switch (metric) {
+      case 'distance':
+        return goal / 1000
+      case 'time':
+        return goal / 3600
+      default:
+        return goal
+    }
+  }, [goal, metric])
+
   // Compute visualization datasets
   const burnUpData = React.useMemo(() => {
     if (cardActivities.length === 0 || !metric) return []
-    return getBurnUpData(cardActivities, timeFrame, goal, metric)
-  }, [cardActivities, timeFrame, goal, metric])
+    return getBurnUpData(cardActivities, timeFrame, displayGoal, metric)
+  }, [cardActivities, timeFrame, displayGoal, metric])
 
   const weeklyData = React.useMemo(() => {
     if (cardActivities.length === 0 || !metric) return []
@@ -96,6 +108,8 @@ export function ActivityStatsCard({
     if (filteredActivities.length === 0 || !metric) return []
     return getActivityContribution(filteredActivities, metric)
   }, [filteredActivities, metric])
+
+
 
   const heatmapData = React.useMemo(() => {
     if (cardActivities.length === 0) return []
@@ -119,52 +133,7 @@ export function ActivityStatsCard({
           <Badge>{totals.count} Activities</Badge>
         </div>
 
-        {/* Tab Switcher - styled using native variables and CSS, no Tailwind */}
-        {cardActivities.length > 0 && (
-          <div className="Chart__Tabs">
-            <button
-              onClick={() => setActiveTab('summary')}
-              className={`Chart__Tab ${activeTab === 'summary' ? 'Chart__Tab--active' : ''}`}
-            >
-              Summary
-            </button>
-
-            {goal && (
-              <button
-                onClick={() => setActiveTab('trend')}
-                className={`Chart__Tab ${activeTab === 'trend' ? 'Chart__Tab--active' : ''}`}
-              >
-                Trend
-              </button>
-            )}
-
-            <button
-              onClick={() => setActiveTab('weekly')}
-              className={`Chart__Tab ${activeTab === 'weekly' ? 'Chart__Tab--active' : ''}`}
-            >
-              Weekly
-            </button>
-
-            <button
-              onClick={() => setActiveTab('heatmap')}
-              className={`Chart__Tab ${activeTab === 'heatmap' ? 'Chart__Tab--active' : ''}`}
-            >
-              Heatmap
-            </button>
-
-            {types.length > 1 && (
-              <button
-                onClick={() => setActiveTab('breakdown')}
-                className={`Chart__Tab ${activeTab === 'breakdown' ? 'Chart__Tab--active' : ''}`}
-              >
-                Breakdown
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Dynamic Rendering of Tab Content */}
-        {activeTab === 'summary' && primaryProgress && (
+        {primaryProgress && (
           <div className="ActivityStatsCard__Summary">
             {/* Progress Bar */}
             <Progress
@@ -197,18 +166,44 @@ export function ActivityStatsCard({
           </div>
         )}
 
-        {activeTab === 'trend' && metric && (
-          <BurnUpChart data={burnUpData} metric={metric} goal={goal} />
+        {/* Tab switcher for multi-activity cards */}
+        {types.length > 1 && cardActivities.length > 0 && (
+          <div className="Chart__Tabs" style={{ marginTop: '1.5rem' }}>
+            <button
+              className={cn('Chart__Tab', activeTab === 'main' && 'Chart__Tab--active')}
+              onClick={() => setActiveTab('main')}
+            >
+              {timeFrame === 'week' ? 'Volume' : timeFrame === 'month' ? 'Consistency' : 'Trend'}
+            </button>
+            <button
+              className={cn('Chart__Tab', activeTab === 'breakdown' && 'Chart__Tab--active')}
+              onClick={() => setActiveTab('breakdown')}
+            >
+              Breakdown
+            </button>
+          </div>
         )}
 
-        {activeTab === 'weekly' && metric && (
-          <WeeklyVolumeChart data={weeklyData} metric={metric} />
+        {/* Dynamic Rendering of Timeframe-specific Graph */}
+        {cardActivities.length > 0 && (activeTab === 'main' || types.length <= 1) && (
+          <div className="ActivityStatsCard__Chart" style={{ marginTop: '1.5rem' }}>
+            {timeFrame === 'week' && metric && (
+              <WeeklyVolumeChart data={weeklyData} metric={metric} />
+            )}
+            {timeFrame === 'month' && (
+              <ConsistencyHeatmap data={heatmapData} metric="count" />
+            )}
+            {(timeFrame === 'year' || timeFrame === 'ytd') && metric && goal && (
+              <BurnUpChart data={burnUpData} metric={metric} goal={displayGoal} />
+            )}
+          </div>
         )}
 
-        {activeTab === 'heatmap' && <ConsistencyHeatmap data={heatmapData} metric="count" />}
-
-        {activeTab === 'breakdown' && metric && (
-          <ActivityContributionChart data={contributionData} metric={metric} />
+        {/* Render Breakdown Chart for Cards with Multiple Activity Types */}
+        {types.length > 1 && filteredActivities.length > 0 && metric && activeTab === 'breakdown' && (
+          <div className="ActivityStatsCard__Chart" style={{ marginTop: '1.5rem' }}>
+            <ActivityContributionChart data={contributionData} metric={metric} />
+          </div>
         )}
       </CardContent>
 

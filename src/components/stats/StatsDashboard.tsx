@@ -128,7 +128,7 @@ export function StatsDashboard() {
     <Stack gap="large">
       {/* Dashboard Grid */}
       {cards.length > 0 ? (
-        <Grid columns="3" gap="large">
+        <Grid columns="2" gap="large">
           {cards.map((card) => (
             <DashboardCard
               key={card.id}
