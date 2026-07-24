@@ -3,6 +3,7 @@ import * as React from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { disconnectStrava, exchangeCodeForTokens, saveStravaConnection } from '@/lib/server/oauth'
+import { startStravaOAuth } from '@/lib/strava/oauth'
 import { updateProfile } from '@/lib/server/auth'
 import { getUserDashboards, updateDashboard } from '@/lib/server/dashboards'
 import { Button, buttonVariants } from '@/components/custom/Button/Button'
@@ -140,17 +141,7 @@ function SettingsPageContent({
   }, [user, navigate, refreshStravaConnection])
 
   const handleConnectStrava = () => {
-    const clientId = import.meta.env.VITE_STRAVA_CLIENT_ID
-    const redirectUri = `${window.location.origin}/settings`
-    const scope = 'activity:read_all'
-
-    const authUrl = new URL('https://www.strava.com/oauth/authorize')
-    authUrl.searchParams.set('client_id', clientId)
-    authUrl.searchParams.set('redirect_uri', redirectUri)
-    authUrl.searchParams.set('response_type', 'code')
-    authUrl.searchParams.set('scope', scope)
-
-    window.location.href = authUrl.toString()
+    startStravaOAuth()
   }
 
   const handleDisconnectStrava = async () => {

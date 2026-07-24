@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth/AuthContext'
 import { fetchAthleteActivities, fetchAthleteStats } from '@/lib/server/strava'
+import { hasRequiredStravaScopes, startStravaOAuth } from '@/lib/strava/oauth'
 import { getVisibleCardsForUser } from '@/lib/server/dashboardConfig'
 import { DashboardCard } from '@/components/dashboard/DashboardCard'
 import { CardConfigDialog } from '@/components/dashboard/CardConfigDialog'
@@ -91,17 +92,40 @@ export function StatsDashboard() {
     )
   }
 
+  const errorMessage =
+    statsError instanceof Error
+      ? statsError.message
+      : activitiesError instanceof Error
+        ? activitiesError.message
+        : null
+  const needsScopeUpgrade =
+    !hasRequiredStravaScopes(stravaDataSource.scope) ||
+    errorMessage === 'SCOPE_UPGRADE_REQUIRED'
+
+  if (needsScopeUpgrade) {
+    return (
+      <Card state="error">
+        <CardHeader>
+          <CardTitle>Reconnect Strava</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription>
+            Your Strava connection is missing the permissions needed to load athlete stats.
+            Reconnect to grant access — your existing data stays intact.
+          </CardDescription>
+          <Button onClick={startStravaOAuth} variant="secondary">
+            Reconnect Strava
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (isLoading) {
     return <DashboardSkeleton />
   }
 
-  if (statsError || activitiesError) {
-    const errorMessage =
-      statsError instanceof Error
-        ? statsError.message
-        : activitiesError instanceof Error
-          ? activitiesError.message
-          : 'Failed to load statistics'
+  if (errorMessage) {
     const isAuthError =
       errorMessage.includes('UNAUTHORIZED') || errorMessage.includes('Not authenticated')
 
