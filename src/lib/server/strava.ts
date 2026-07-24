@@ -132,6 +132,13 @@ export async function fetchStats(athleteId: bigint, accessToken: string): Promis
     throw new Error('UNAUTHORIZED')
   }
 
+  // Strava returns 403 from /athletes/{id}/stats when the token is missing
+  // the profile:read_all scope. Signal a distinct error so the client can
+  // prompt the user to reconnect and upgrade scopes.
+  if (response.status === 403) {
+    throw new Error('SCOPE_UPGRADE_REQUIRED')
+  }
+
   if (response.status === 429) {
     throw new Error('RATE_LIMITED')
   }

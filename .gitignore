@@ -17,3 +17,4 @@ todos.json
 # Vitest browser mode screenshots
 **/__screenshots__/
 .claude/
+.worktrees
