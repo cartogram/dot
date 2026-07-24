@@ -16,6 +16,8 @@ jobs:
       # Dummy environment variables for testing (Supabase is mocked in tests)
       VITE_SUPABASE_URL: https://example.supabase.co
       VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MTc2OTIwMCwiZXhwIjoxOTU3MzQ1MjAwfQ.fake-key-for-testing
+      # Required so prisma.config.ts can resolve env('DATABASE_URL') during `prisma generate`
+      DATABASE_URL: postgresql://user:pass@localhost:5432/db
 
     steps:
       - name: Checkout code
