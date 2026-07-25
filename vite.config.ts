@@ -31,6 +31,12 @@ const config = defineConfig({
     devtools(),
     nitro({
       serverDir: 'server',
+      // decimal.js-light (a recharts transitive dep) has `main: "decimal"`
+      // (extensionless), which Node's ESM loader can't resolve when the
+      // package is externalized. Force it to be inlined into the server bundle.
+      externals: {
+        inline: ['decimal.js-light'],
+      },
     }),
     // this is the plugin that enables path aliases
     viteTsConfigPaths({
