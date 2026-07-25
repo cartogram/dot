@@ -108,6 +108,12 @@ export async function fetchActivities(
     throw new Error('UNAUTHORIZED')
   }
 
+  // 403 means the token is missing activity:read_all. Signal a reconnect so the
+  // client prompts a scope upgrade rather than showing a raw "Forbidden".
+  if (response.status === 403) {
+    throw new Error('SCOPE_UPGRADE_REQUIRED')
+  }
+
   if (response.status === 429) {
     throw new Error('RATE_LIMITED')
   }

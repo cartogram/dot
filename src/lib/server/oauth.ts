@@ -51,6 +51,7 @@ const SaveStravaConnectionSchema = z.object({
       profile: z.string().optional(),
     }),
   }),
+  scope: z.string().nullable().optional(),
 })
 
 export const saveStravaConnection = createServerFn({ method: 'POST' })
@@ -62,7 +63,7 @@ export const saveStravaConnection = createServerFn({ method: 'POST' })
       throw new Error('Not authenticated')
     }
 
-    const { tokens } = data
+    const { tokens, scope } = data
 
     // Check if connection already exists
     const existing = await prisma.dataSource.findFirst({
@@ -80,6 +81,7 @@ export const saveStravaConnection = createServerFn({ method: 'POST' })
       expiresAt: new Date(tokens.expires_at * 1000),
       tokenType: tokens.token_type,
       athleteData: tokens.athlete,
+      scope: scope ?? undefined,
       isActive: true,
       lastSyncedAt: new Date(),
     }

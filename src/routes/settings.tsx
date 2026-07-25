@@ -98,6 +98,7 @@ function SettingsPageContent({
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
+    const scope = params.get('scope')
     const oauthError = params.get('error')
 
     if (oauthError) {
@@ -120,8 +121,9 @@ function SettingsPageContent({
         // Exchange code for tokens
         const tokens = await exchangeCodeForTokens({ data: { code } })
 
-        // Save connection via server function
-        await saveStravaConnection({ data: { tokens } })
+        // Save connection via server function. Strava returns the granted
+        // scope as a query param on the redirect, not in the token response.
+        await saveStravaConnection({ data: { tokens, scope } })
 
         // Refresh the auth context
         await refreshStravaConnection()

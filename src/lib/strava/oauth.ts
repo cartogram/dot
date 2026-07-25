@@ -15,6 +15,10 @@ export function startStravaOAuth(): void {
   authUrl.searchParams.set('redirect_uri', redirectUri)
   authUrl.searchParams.set('response_type', 'code')
   authUrl.searchParams.set('scope', STRAVA_OAUTH_SCOPES)
+  // Force the consent screen so previously-authorized users are re-prompted and
+  // actually grant newly-requested scopes. Without this, Strava's default
+  // (approval_prompt=auto) silently returns a token with the OLD scope set.
+  authUrl.searchParams.set('approval_prompt', 'force')
 
   window.location.href = authUrl.toString()
 }
