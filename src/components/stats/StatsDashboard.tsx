@@ -64,8 +64,7 @@ export function StatsDashboard() {
 
       return fetchAthleteActivities({
         data: {
-          perPage: 200, // Fetch up to 200 activities
-          after: unixYearStart, // Only YTD activities
+          after: unixYearStart, // All YTD activities (paginated server-side)
         },
       })
     },

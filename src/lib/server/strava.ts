@@ -107,45 +107,65 @@ async function classify403(response: Response): Promise<'STRAVA_APP_INACTIVE' | 
   return 'SCOPE_UPGRADE_REQUIRED'
 }
 
+// Strava caps per_page at 200. When `after` is set, Strava returns activities
+// in ascending order, so a single capped page yields only the OLDEST activities
+// in the range and silently drops the most recent ones. Page through until a
+// short page is returned to get the full range.
+const STRAVA_MAX_PER_PAGE = 200
+const MAX_ACTIVITY_PAGES = 20
+
 /**
- * Centralized helper to fetch activities directly from Strava API
+ * Centralized helper to fetch activities directly from Strava API.
+ * Pages through all results so the full range is returned, not just one page.
  */
 export async function fetchActivities(
   accessToken: string,
   after?: number,
-  perPage = 200,
+  perPage = STRAVA_MAX_PER_PAGE,
 ): Promise<Array<StravaActivity>> {
-  const params = new URLSearchParams({
-    per_page: perPage.toString(),
-    page: '1',
-  })
+  const activities: Array<StravaActivity> = []
 
-  if (after) {
-    params.append('after', after.toString())
+  for (let page = 1; page <= MAX_ACTIVITY_PAGES; page++) {
+    const params = new URLSearchParams({
+      per_page: perPage.toString(),
+      page: page.toString(),
+    })
+
+    if (after) {
+      params.append('after', after.toString())
+    }
+
+    const response = await fetch(
+      `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    )
+
+    if (response.status === 401) {
+      throw new Error('UNAUTHORIZED')
+    }
+
+    if (response.status === 403) {
+      throw new Error(await classify403(response))
+    }
+
+    if (response.status === 429) {
+      throw new Error('RATE_LIMITED')
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch activities: ${response.statusText}`)
+    }
+
+    const batch = (await response.json()) as Array<StravaActivity>
+    activities.push(...batch)
+
+    // Last page reached when Strava returns fewer than a full page.
+    if (batch.length < perPage) {
+      break
+    }
   }
 
-  const response = await fetch(
-    `https://www.strava.com/api/v3/athlete/activities?${params.toString()}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  )
-
-  if (response.status === 401) {
-    throw new Error('UNAUTHORIZED')
-  }
-
-  if (response.status === 403) {
-    throw new Error(await classify403(response))
-  }
-
-  if (response.status === 429) {
-    throw new Error('RATE_LIMITED')
-  }
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch activities: ${response.statusText}`)
-  }
-
-  return response.json()
+  return activities
 }
 
 /**
