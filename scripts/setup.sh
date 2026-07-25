@@ -5,18 +5,24 @@
 #
 #   ./scripts/setup.sh
 #
-# .env.local is gitignored. In super.engineering, enable the "symlink env files"
-# settings toggle so it is linked into each new worktree automatically. Outside
-# that flow, create .env.local manually (see CLAUDE.md for required variables).
+# .env.local is gitignored, so fresh worktrees start without it. When run inside
+# super.engineering, this links it from the main checkout ($SUPERCONDUCTOR_ROOT_PATH);
+# outside that flow, create .env.local manually (see CLAUDE.md for required vars).
 #
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-if [ ! -f .env.local ]; then
-  echo "WARNING: .env.local is missing." >&2
-  echo "         Enable super.engineering's env-symlink toggle in settings, or" >&2
-  echo "         create .env.local manually (see CLAUDE.md for required vars)." >&2
+ENV_FILE=".env.local"
+if [ ! -e "$ENV_FILE" ]; then
+  ROOT="${SUPERCONDUCTOR_ROOT_PATH:-}"
+  if [ -n "$ROOT" ] && [ "$ROOT" != "$PWD" ] && [ -f "$ROOT/$ENV_FILE" ]; then
+    ln -sf "$ROOT/$ENV_FILE" "$ENV_FILE"
+    echo "→ Linked $ENV_FILE from $ROOT"
+  else
+    echo "WARNING: $ENV_FILE is missing and no source to link from." >&2
+    echo "         Create it manually (see CLAUDE.md for required variables)." >&2
+  fi
 fi
 
 echo "→ Installing dependencies (pnpm install)"
