@@ -98,6 +98,22 @@ export function StatsDashboard() {
       : activitiesError instanceof Error
         ? activitiesError.message
         : null
+  if (errorMessage === 'STRAVA_APP_INACTIVE') {
+    return (
+      <Card state="error">
+        <CardHeader>
+          <CardTitle>Strava integration unavailable</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription>
+            The Strava connection is temporarily unavailable while we resolve an issue with the
+            Strava API. Your account and data are fine — please check back shortly.
+          </CardDescription>
+        </CardContent>
+      </Card>
+    )
+  }
+
   const needsScopeUpgrade =
     !hasRequiredStravaScopes(stravaDataSource.scope) ||
     errorMessage === 'SCOPE_UPGRADE_REQUIRED'

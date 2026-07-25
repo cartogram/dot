@@ -83,6 +83,31 @@ export async function refreshTokenIfNeeded(dataSource: DataSource): Promise<stri
 }
 
 /**
+ * Classify a Strava 403 response. Strava returns 403 both when the token is
+ * missing a scope and when the API application itself is deactivated. These
+ * need different UX: a scope issue is fixed by reconnecting, an inactive app
+ * is an owner-side problem that reconnecting cannot fix.
+ */
+async function classify403(response: Response): Promise<'STRAVA_APP_INACTIVE' | 'SCOPE_UPGRADE_REQUIRED'> {
+  const body = await response.text().catch(() => '')
+  try {
+    const parsed = JSON.parse(body) as {
+      errors?: Array<{ resource?: string; field?: string; code?: string }>
+    }
+    const isInactiveApp = parsed.errors?.some(
+      (e) => e.resource === 'Application' && e.code === 'Inactive',
+    )
+    if (isInactiveApp) {
+      console.error('[strava] API application is Inactive — check strava.com/settings/api')
+      return 'STRAVA_APP_INACTIVE'
+    }
+  } catch {
+    // Non-JSON body; fall through to scope handling.
+  }
+  return 'SCOPE_UPGRADE_REQUIRED'
+}
+
+/**
  * Centralized helper to fetch activities directly from Strava API
  */
 export async function fetchActivities(
@@ -108,12 +133,8 @@ export async function fetchActivities(
     throw new Error('UNAUTHORIZED')
   }
 
-  // 403 means the token is missing activity:read_all. Signal a reconnect so the
-  // client prompts a scope upgrade rather than showing a raw "Forbidden".
   if (response.status === 403) {
-    const body = await response.text().catch(() => '<no body>')
-    console.error('[strava] 403 on /athlete/activities — Strava body:', body)
-    throw new Error('SCOPE_UPGRADE_REQUIRED')
+    throw new Error(await classify403(response))
   }
 
   if (response.status === 429) {
@@ -140,16 +161,8 @@ export async function fetchStats(athleteId: bigint, accessToken: string): Promis
     throw new Error('UNAUTHORIZED')
   }
 
-  // Strava returns 403 from /athletes/{id}/stats when the token is missing
-  // the profile:read_all scope. Signal a distinct error so the client can
-  // prompt the user to reconnect and upgrade scopes.
   if (response.status === 403) {
-    const body = await response.text().catch(() => '<no body>')
-    console.error(
-      `[strava] 403 on /athletes/${athleteId.toString()}/stats — Strava body:`,
-      body,
-    )
-    throw new Error('SCOPE_UPGRADE_REQUIRED')
+    throw new Error(await classify403(response))
   }
 
   if (response.status === 429) {
@@ -185,7 +198,6 @@ export const fetchAthleteStats = createServerFn({ method: 'GET' }).handler(async
     throw new Error('Strava not connected')
   }
 
-  console.error('[strava] fetchAthleteStats — stored scope:', dataSource.scope)
   const accessToken = await refreshTokenIfNeeded(dataSource)
   return fetchStats(dataSource.athleteId, accessToken)
 })
@@ -220,7 +232,6 @@ export const fetchAthleteActivities = createServerFn({ method: 'GET' })
       throw new Error('Strava not connected')
     }
 
-    console.error('[strava] fetchAthleteActivities — stored scope:', dataSource.scope)
     const accessToken = await refreshTokenIfNeeded(dataSource)
     return fetchActivities(accessToken, data?.after, data?.perPage)
   })
