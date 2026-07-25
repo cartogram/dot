@@ -111,6 +111,8 @@ export async function fetchActivities(
   // 403 means the token is missing activity:read_all. Signal a reconnect so the
   // client prompts a scope upgrade rather than showing a raw "Forbidden".
   if (response.status === 403) {
+    const body = await response.text().catch(() => '<no body>')
+    console.error('[strava] 403 on /athlete/activities — Strava body:', body)
     throw new Error('SCOPE_UPGRADE_REQUIRED')
   }
 
@@ -142,6 +144,11 @@ export async function fetchStats(athleteId: bigint, accessToken: string): Promis
   // the profile:read_all scope. Signal a distinct error so the client can
   // prompt the user to reconnect and upgrade scopes.
   if (response.status === 403) {
+    const body = await response.text().catch(() => '<no body>')
+    console.error(
+      `[strava] 403 on /athletes/${athleteId.toString()}/stats — Strava body:`,
+      body,
+    )
     throw new Error('SCOPE_UPGRADE_REQUIRED')
   }
 
@@ -178,6 +185,7 @@ export const fetchAthleteStats = createServerFn({ method: 'GET' }).handler(async
     throw new Error('Strava not connected')
   }
 
+  console.error('[strava] fetchAthleteStats — stored scope:', dataSource.scope)
   const accessToken = await refreshTokenIfNeeded(dataSource)
   return fetchStats(dataSource.athleteId, accessToken)
 })
@@ -212,6 +220,7 @@ export const fetchAthleteActivities = createServerFn({ method: 'GET' })
       throw new Error('Strava not connected')
     }
 
+    console.error('[strava] fetchAthleteActivities — stored scope:', dataSource.scope)
     const accessToken = await refreshTokenIfNeeded(dataSource)
     return fetchActivities(accessToken, data?.after, data?.perPage)
   })
