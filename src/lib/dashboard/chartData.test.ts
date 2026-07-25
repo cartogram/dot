@@ -4,7 +4,7 @@ import type { StravaActivity } from '@/types/strava'
 
 describe('getBurnUpData', () => {
   it('should generate cumulative progress and target pace correctly', () => {
-    const activities: StravaActivity[] = [
+    const activities: Array<StravaActivity> = [
       {
         id: 1,
         name: 'Run 1',
@@ -27,7 +27,7 @@ describe('getBurnUpData', () => {
 
   it('should generate cumulative progress for year correctly', () => {
     const currentYear = new Date().getFullYear()
-    const activities: StravaActivity[] = [
+    const activities: Array<StravaActivity> = [
       {
         id: 1,
         name: 'Run 1',
